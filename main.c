@@ -11,7 +11,7 @@ int32_t main(int32_t argc, char **argv) {
 
     initRandom();
 
-    char operation[0x400];
+    char operation[MAX_CHAR];
     uint8_t flags = 0;
 
     bool mathlib = false;
@@ -87,6 +87,26 @@ int32_t main(int32_t argc, char **argv) {
     char *result = NULL;
     bool appear = false;
 
+    if (!isatty(STDIN_FILENO)) {
+        char line[MAX_CHAR];
+
+        while (fgets(line, sizeof(line), stdin)) {
+            line[strcspn(line, "\n")] = '\0';
+
+            if (!*line) continue;
+
+            char *result = eval(line, mathlib);
+
+            if (!result)
+                return 1;
+
+            puts(result);
+            SAFE_FREE(result);
+        }
+
+        return 0;
+    }
+
     while (true) {
         if (!appear) {
             if (show_init)
@@ -104,9 +124,6 @@ int32_t main(int32_t argc, char **argv) {
         printc(">>> ", BC_PROMPT_COLOR, WHITE);
         fgets(operation, sizeof(operation), stdin);
         operation[strcspn(operation, "\n")] = '\0';
-
-        trim(operation);
-        trimEnd(operation);
 
         if (!*operation) {
             putchar('\n');

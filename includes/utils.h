@@ -16,6 +16,8 @@
 
 #ifdef _WIN64
     #include <windows.h>
+#else
+    #include <unistd.h>
 #endif
 
 #define E_VAR "E"

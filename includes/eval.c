@@ -9,6 +9,7 @@ char *eval(char *operation, bool mathlib) {
         return NULL;
 
     const FuncEntry math_table[] = {
+        {.returnType = BC_NONE,    .name = "man",       .fn.v = bc_man},
         {.returnType = BC_BOOL,    .name = "isprime",   .fn.i = s_isprime},
         {.returnType = BC_INT,     .name = "scale",     .fn.i = s_scale},
         {.returnType = BC_INT,     .name = "floor",     .fn.i = s_floor},
@@ -887,6 +888,10 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
                         return (var){ .type = functions[i].returnType, .data.s = result};
                     }
 
+                    case BC_NONE:
+                        functions[i].fn.v(operation);
+                        return (var){ .type = functions[i].returnType };
+
                     default: {
                         char type[0x14] = {0};
 
@@ -894,7 +899,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
 
                         printc("eval", BC_PROMPT_COLOR, WHITE);
                         printf(": ");
-                        printc("invalid function with '%s' unknown type: '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type, name);
+                        printc("invalid function with '%s' unknown type: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type, name);
 
                         return (var){ .type = BC_NONE} ;
                     }

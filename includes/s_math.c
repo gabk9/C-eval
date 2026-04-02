@@ -703,6 +703,27 @@ static uint16_t countCommaOutsideParenthesis(const char *str) {
     return count;
 }
 
+void bc_man(char *operation) {
+    char *p = strchr(operation, '(');
+    if (!p)
+        return;
+    operation = p;
+
+    extractParenthesis(operation);
+
+    if (*operation) {
+        printc("eval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("man() does not take arguments\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return;
+    }
+
+    print_manual();
+
+    return;
+}
+
 char *bc_parse_str(char *operation) {
     char *p = strchr(operation, '(');
     if (!p)
@@ -867,28 +888,7 @@ char *bc_typeof(char *operation) {
 
         type = tmp.type;
 
-        size_t len = strlen(operation);
-
-        if (len == 0)
-            return NULL;
-
-        size_t start = 0;
-        size_t end = len - 1;
-
-        while (start < end && operation[start] == '(' && operation[end] == ')') {
-            start++;
-            end--;
-
-            while (start <= end && operation[start] == ' ')
-                start++;
-
-            while (end >= start && operation[end] == ' ')
-                end--;
-        }
-
-        size_t new_len = end - start + 1;
-        memmove(operation, operation + start, new_len);
-        operation[new_len] = '\0';
+        extractParenthesis(operation);
 
         if (isBetweenQuotes(operation, 0))
             type = BC_CHR;

@@ -5,6 +5,7 @@
 #endif
 
 #define BC_MATHLIB 0x0001
+#define BC_QUIET   0x0002
 
 int32_t main(int32_t argc, char **argv) {
 
@@ -12,7 +13,9 @@ int32_t main(int32_t argc, char **argv) {
 
     char operation[0x400];
     uint8_t flags = 0;
+
     bool mathlib = false;
+    bool show_init = true;
 
     if (Ans.type == BC_STR && Ans.data.s)
         SAFE_FREE(Ans.data.s);
@@ -27,8 +30,10 @@ int32_t main(int32_t argc, char **argv) {
 
             if (*opt == '-') {
                 if (opt[1] == '-') {
-                    if (strcasecmp(opt, "--mathlib") == 0)
+                    if (strcmp(opt, "--mathlib") == 0)
                         flags |= BC_MATHLIB;
+                    else if (strcmp(opt, "--quiet") == 0)
+                        flags |= BC_QUIET;
                     else {
                         printc("eval", BC_PROMPT_COLOR, WHITE);
                         printf(": ");
@@ -37,9 +42,10 @@ int32_t main(int32_t argc, char **argv) {
                     }
                 } else {
                     for (uint16_t j = 1; opt[j]; j++) {
-                        char chr = tolower((unsigned char)opt[j]);
+                        unsigned char chr = (unsigned char)opt[j];
                         switch (chr) {
                             case 'l': flags |= BC_MATHLIB; break;
+                            case 'q': flags |= BC_QUIET; break;
                             default:
                                 printc("eval", BC_PROMPT_COLOR, WHITE);
                                 printf(": ");
@@ -54,7 +60,10 @@ int32_t main(int32_t argc, char **argv) {
         }
 
         if (flags & BC_MATHLIB)
-            mathlib = true;
+            mathlib = true;     
+
+        if (flags & BC_QUIET)
+            show_init = false;
 
         if (has_expr) {
             for (uint16_t i = 1; i < argc; i++) {
@@ -80,6 +89,10 @@ int32_t main(int32_t argc, char **argv) {
 
     while (true) {
         if (!appear) {
+            if (show_init)
+                printf("'ceval' a simple eval function implemented in C, operand precedence does not work unless if you use parenthesis, it support various types of operands.\n"
+                        "type 'mathlib' if you're insite ceval to turn on the math library.\n"
+                );
             if (mathlib)
                 printc("on\n\n", GREEN, WHITE);
             else 
@@ -104,20 +117,25 @@ int32_t main(int32_t argc, char **argv) {
             isValidBcCommand(operation, "exit")) {
             break;
 
-        } else if (isValidBcCommand(operation, "clear")) {
-            clear();
-            appear = false;
-            continue;
         } else if (isValidBcCommand(operation, "mathlib")) {
             clear();
             mathlib = !mathlib;
+            appear = false;
+            continue;
+        } else if (isValidBcCommand(operation, "quiet")) {
+            clear();
+            show_init = !show_init;
             appear = false;
             continue;
         } else if (isValidBcCommand(operation, "cls")) {
             clear();
             appear = false;
             continue;
-        }
+        } else if (isValidBcCommand(operation, "clear")) {
+            clear();
+            appear = false;
+            continue;
+        } 
 
         result = eval(operation, mathlib);
 

@@ -31,6 +31,7 @@ float64 tetration(float64 base, int32_t height);
 char *s_chr(char *operation)__attribute__((nonnull));
 char *s_oct(char *operation)__attribute__((nonnull));
 char *s_hex(char *operation)__attribute__((nonnull));
+void bc_man(char *operation)__attribute__((nonnull));
 char *s_bin(char *operation)__attribute__((nonnull));
 float64 s_ln(char *operation)__attribute__((nonnull));
 float64 s_km(char *operation)__attribute__((nonnull));

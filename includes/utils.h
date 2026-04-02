@@ -55,6 +55,7 @@
 void trim(char *str);
 void initRandom(void);
 void trimEnd(char *str);
+void print_manual(void);
 bool isBin(const char *str);
 void setColor(color4 color);
 bool isHex(const char *str);
@@ -62,6 +63,7 @@ bool isOct(const char *str);
 int64_t hex_to_long(char *str);
 bool isalldigit(const char *s);
 void removeComments(char *str);
+void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);
 bool isIn(char needle, char *haystack);
 bool isValidBcFuncName(const char *str);

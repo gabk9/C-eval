@@ -3,7 +3,7 @@
 <h3>ceval in action</h3>
 
 <p>
-    <img src="docs/ceval-example" style="border-radius:20px;" width="95%" alt="ceval CLI example"><br><br>
+    <img src="docs/ceval-example.png" style="border-radius:20px;" width="95%" alt="ceval CLI example"><br><br>
 </p>
 
 <p><em>Note: Images may be outdated as the project is under continuous development.</em></p>

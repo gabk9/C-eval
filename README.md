@@ -124,7 +124,7 @@ winget install --id MSYS2.MSYS2 -e
 
 ## Build & Run
 
-### Linux (bash)
+### Linux
 
 ```bash
 git clone https://github.com/gabk9/C-eval.git
@@ -156,7 +156,8 @@ cmake ..
 cmake --build .
 
 # add to PATH (permanent)
-setx PATH "$env:Path;$PWD\Debug"
+$exePath = Get-ChildItem -Recurse -Filter ceval.exe | Select-Object -First 1 -ExpandProperty DirectoryName
+setx PATH "$env:Path;$exePath"
 
 ceval
 ```

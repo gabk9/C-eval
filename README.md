@@ -128,7 +128,7 @@ winget install --id MSYS2.MSYS2 -e
 
 ```bash
 git clone https://github.com/gabk9/C-eval.git
-cd ceval
+cd C-eval
 
 mkdir build
 cd build
@@ -147,7 +147,7 @@ ceval
 
 ```powershell
 git clone https://github.com/gabk9/C-eval.git
-cd ceval
+cd C-eval
 
 mkdir build
 cd build

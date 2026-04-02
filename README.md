@@ -124,10 +124,10 @@ winget install --id MSYS2.MSYS2 -e
 
 ## Build & Run
 
-### Linux
+### Linux (bash)
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/gabk9/C-eval.git
 cd ceval
 
 mkdir build
@@ -146,7 +146,7 @@ ceval
 ### Windows (PowerShell - MSVC)
 
 ```powershell
-git clone <your-repo-url>
+git clone https://github.com/gabk9/C-eval.git
 cd ceval
 
 mkdir build
@@ -159,26 +159,6 @@ cmake --build .
 setx PATH "$env:Path;$PWD\Debug"
 
 ceval
-```
-
----
-
-### Windows (MSYS2 / MinGW)
-
-```bash
-pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake make
-
-git clone <your-repo-url>
-cd ceval
-
-mkdir build
-cd build
-
-cmake .. -G "MinGW Makefiles"
-mingw32-make
-
-# add to PATH
-export PATH="$PWD:$PATH"
 ```
 
 ---

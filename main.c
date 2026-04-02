@@ -9,6 +9,7 @@
 #define BC_MATHLIB 0x0001
 #define BC_QUIET   0x0002
 #define BC_VERSION 0x0004
+#define BC_HELP    0x0008
 
 int32_t main(int32_t argc, char **argv) {
 
@@ -16,6 +17,7 @@ int32_t main(int32_t argc, char **argv) {
 
     char operation[MAX_CHAR];
     uint8_t flags = 0;
+    uint32_t objCount = 0;
 
     bool mathlib = false;
     bool show_init = true;
@@ -25,10 +27,8 @@ int32_t main(int32_t argc, char **argv) {
     else
         Ans.type = BC_NONE;
 
-    bool has_expr = false;
-
     if (argc > 1) {
-        for (uint16_t i = 1; i < argc; i++) {
+        for (int32_t i = 1; i < argc; i++) {
             char *opt = argv[i];
 
             if (*opt == '-') {
@@ -39,6 +39,8 @@ int32_t main(int32_t argc, char **argv) {
                         flags |= BC_QUIET;
                     else if (strcmp(opt, "--version") == 0)
                         flags |= BC_VERSION;
+                    else if (strcmp(opt, "--help") == 0)
+                        flags |= BC_HELP;
                     else {
                         printc("eval", BC_PROMPT_COLOR, WHITE);
                         printf(": ");
@@ -52,6 +54,7 @@ int32_t main(int32_t argc, char **argv) {
                             case 'v': flags |= BC_VERSION; break;
                             case 'q': flags |= BC_QUIET; break;
                             case 'l': flags |= BC_MATHLIB; break;
+                            case 'h': flags |= BC_HELP; break;
                             default:
                                 printc("eval", BC_PROMPT_COLOR, WHITE);
                                 printf(": ");
@@ -61,23 +64,32 @@ int32_t main(int32_t argc, char **argv) {
                     }
                 }
             } else
-                has_expr = true;
+                argv[objCount++] = opt;
         }
+
+        bool did_special = false;
 
         if (flags & BC_MATHLIB)
             mathlib = true;     
 
-        if (flags & BC_QUIET)
+        if (flags & BC_QUIET) {
             show_init = false;
+            did_special = true;
+        }
 
-        if (flags & BC_VERSION)
+        if (flags & BC_VERSION) {
             puts(VERSION);
+            did_special = true;
+        }
 
-        if (has_expr) {
-            for (uint16_t i = 1; i < argc; i++) {
+        if (flags & BC_HELP) {
+            print_manual();
+            did_special = true;
+        }
+
+        if (objCount > 0) {
+            for (uint16_t i = 0; i < objCount; i++) {
                 char *opt = argv[i];
-
-                if (*opt == '-') continue;
 
                 char *buff = eval(opt, mathlib);
 
@@ -91,7 +103,7 @@ int32_t main(int32_t argc, char **argv) {
             return 0;
         }
 
-        if ((flags & BC_VERSION) && !has_expr)
+        if (did_special)
             return 0;
     }
 

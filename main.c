@@ -4,8 +4,11 @@
     HANDLE hConsole;
 #endif
 
+#define VERSION "r0.0.67"
+
 #define BC_MATHLIB 0x0001
 #define BC_QUIET   0x0002
+#define BC_VERSION 0x0004
 
 int32_t main(int32_t argc, char **argv) {
 
@@ -34,6 +37,8 @@ int32_t main(int32_t argc, char **argv) {
                         flags |= BC_MATHLIB;
                     else if (strcmp(opt, "--quiet") == 0)
                         flags |= BC_QUIET;
+                    else if (strcmp(opt, "--version") == 0)
+                        flags |= BC_VERSION;
                     else {
                         printc("eval", BC_PROMPT_COLOR, WHITE);
                         printf(": ");
@@ -44,8 +49,9 @@ int32_t main(int32_t argc, char **argv) {
                     for (uint16_t j = 1; opt[j]; j++) {
                         unsigned char chr = (unsigned char)opt[j];
                         switch (chr) {
-                            case 'l': flags |= BC_MATHLIB; break;
+                            case 'v': flags |= BC_VERSION; break;
                             case 'q': flags |= BC_QUIET; break;
+                            case 'l': flags |= BC_MATHLIB; break;
                             default:
                                 printc("eval", BC_PROMPT_COLOR, WHITE);
                                 printf(": ");
@@ -54,9 +60,8 @@ int32_t main(int32_t argc, char **argv) {
                         }
                     }
                 }
-            } else {
+            } else
                 has_expr = true;
-            }
         }
 
         if (flags & BC_MATHLIB)
@@ -64,6 +69,9 @@ int32_t main(int32_t argc, char **argv) {
 
         if (flags & BC_QUIET)
             show_init = false;
+
+        if (flags & BC_VERSION)
+            puts(VERSION);
 
         if (has_expr) {
             for (uint16_t i = 1; i < argc; i++) {
@@ -82,6 +90,9 @@ int32_t main(int32_t argc, char **argv) {
 
             return 0;
         }
+
+        if ((flags & BC_VERSION) && !has_expr)
+            return 0;
     }
 
     char *result = NULL;

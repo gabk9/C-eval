@@ -921,6 +921,7 @@ void print_manual(void) {
             "type 'mathlib' if you're insite ceval to turn on the math library.\n"
     );
     printf("\nUsage:\n\tbc [OPTION...]\n\nOptions:\n");
+    printf("\t'-v', '--version'   displays the version\n");
     printf("\t'-q', '--quiet'     makes it not print the initial message\n");
     printf("\t'-l', '--mathlib'   includes the mathlib header\n");
     printf("\nOperations:\n"

@@ -75,21 +75,21 @@ char *eval(char *operation, bool mathlib) {
 
         switch (status) {
             case PAREN_MISSING_CLOSE:
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("expected ')'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
                 break;
 
             case PAREN_MISSING_OPEN:
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("unexpected ')'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
                 break;
 
             case PAREN_UNCLOSED_QUOTE:
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("unclosed quote\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
@@ -113,7 +113,7 @@ char *eval(char *operation, bool mathlib) {
     if (!*tmp)
         return NULL;
 
-    if (!getInvalidEscape(tmp, "eval"))
+    if (!getInvalidEscape(tmp, "ceval"))
         return NULL;
 
     eval_depth++;
@@ -186,7 +186,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     out.type = BC_NONE;
 
     if (left.type == BC_NONE || right.type == BC_NONE) {
-        printc("eval", BC_PROMPT_COLOR, WHITE);
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("invalid data type: '"NONE_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
         return out;
@@ -202,7 +202,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
                 getItemTypeStr(type, sizeof(type), wrong);
 
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("cannot concatenate strings with '%s' type\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type);
 
@@ -210,7 +210,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             }
 
             if (strlen(left.data.s) < 2 || strlen(right.data.s) < 2) {
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("invalid string format\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
                 return out;
@@ -243,7 +243,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
                 getItemTypeStr(type, sizeof(type), notStr);
 
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("cannot multiply strings with type '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type);
 
@@ -254,14 +254,14 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             char *multiplied_str = Str.data.s;
 
             if (multiplier <= 0) {
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("to multiply strings the multiplier must be at least greater than 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
                 return out;
             }
 
             if (((ssize_t)strlen(multiplied_str) - 2) * (size_t)multiplier > MAX_CHAR) {
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("the resultant string must be less than %d characters long\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, MAX_CHAR);
                 return out;
@@ -350,7 +350,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.data.b = bc_strcmp(left.data.s, right.data.s) <= 0;
                 return out;
             } else {
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("unsupported operand for 'str' type: '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, operation);
                 return out;
@@ -403,7 +403,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
         if (num2 == 0.0) {
 
             if (!mathLib) {
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("cannot divide by 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
                 return out;
@@ -419,7 +419,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     else if (strcmp(operation, "%") == 0) {
 
         if (num2 == 0) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("cannot divide by 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
@@ -431,7 +431,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     else if (strcmp(operation, "^") == 0) {
 
         if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("'^' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
@@ -443,7 +443,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     else if (strcmp(operation, "&") == 0) {
 
         if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("'&' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
@@ -455,7 +455,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     else if (strcmp(operation, "|") == 0) {
 
         if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("'|' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
@@ -518,7 +518,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     else if (strcmp(operation, "**") == 0) {
 
         if (num1 < 0 && right.type == BC_INT) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("negative base with non-integer exponent\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
@@ -531,17 +531,17 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     else if (strcmp(operation, "^^") == 0) {
 
         if (right.type != BC_INT) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("tetration height must be of type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
         } else if (num2 < 0) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("tetration height must be non-negative\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
         } else if (num1 == 0.0 && num2 == 0.0) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("0^^0 is undefined\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);            
             return out;
@@ -550,7 +550,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             result = tetration(num1, (int32_t)num2);
 
             if (isnan(result)) {
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("invalid input for tetration\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             }
@@ -560,7 +560,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     else if (strcmp(operation, "<<") == 0) {
 
         if (num2 < 0 || num2 >= sizeof(uint64_t) * 8) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("invalid shift\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
@@ -572,7 +572,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     else if (strcmp(operation, ">>") == 0) {
 
         if (num2 < 0 || num2 >= sizeof(int64_t) * 8) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("invalid shift\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
             return out;
@@ -596,7 +596,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     }
 
     else {
-        printc("eval", BC_PROMPT_COLOR, WHITE);
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("Unknown operator '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, operation);
         return out;
@@ -647,7 +647,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
             char *expr = operation + count;
 
             if (!*expr) {
-                printc("eval", BC_PROMPT_COLOR, WHITE);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("syntax error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
@@ -751,7 +751,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
                     }
 
                     if (*p != '"') {
-                        printc("eval", BC_PROMPT_COLOR, WHITE);
+                        printc("ceval", BC_PROMPT_COLOR, WHITE);
                         printf(": ");
                         printc("unclosed quote\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
@@ -765,7 +765,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
 
                     char *final = malloc(res_len + 3);
                     if (!final) {
-                        printc("eval", BC_PROMPT_COLOR, WHITE);
+                        printc("ceval", BC_PROMPT_COLOR, WHITE);
                         printf(": ");
                         printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
                         return (var){ .type = BC_NONE };
@@ -836,7 +836,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
         }
 
         if (close_index == -1 || operation[close_index + 1] != '\0') {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("invalid syntax\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
@@ -844,7 +844,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
         }
 
         if (!isValidBcFuncName(name)) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("invalid function name: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, name);
 
@@ -897,7 +897,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
 
                         getItemTypeStr(type, sizeof(type), (var){.type = functions[i].returnType});
 
-                        printc("eval", BC_PROMPT_COLOR, WHITE);
+                        printc("ceval", BC_PROMPT_COLOR, WHITE);
                         printf(": ");
                         printc("invalid function with '%s' unknown type: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type, name);
 
@@ -907,7 +907,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
             }
         }
 
-        printc("eval", BC_PROMPT_COLOR, WHITE);
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("undefined function: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, name);
 
@@ -927,7 +927,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
     trim(num2); trimEnd(num2);
 
     if (!*num1 || !*num2) {
-        printc("eval", BC_PROMPT_COLOR, WHITE);
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("invalid syntax\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 

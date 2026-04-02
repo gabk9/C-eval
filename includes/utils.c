@@ -147,7 +147,7 @@ int8_t getInvalidEscape(const char *str, const char *error_str) {
         if (str[i] == '\\') {
 
             if (i == len - 1) {
-                color4 color1 = (strcasecmp(error_str, "eval") == 0) ? BC_PROMPT_COLOR : WHITE;
+                color4 color1 = (strcasecmp(error_str, "ceval") == 0) ? BC_PROMPT_COLOR : WHITE;
                 color4 color2 = (color1 == BC_PROMPT_COLOR) ? GET_BASE_COLOR(color1) : WHITE;
 
                 printc("%s", color1, WHITE, error_str);
@@ -160,7 +160,7 @@ int8_t getInvalidEscape(const char *str, const char *error_str) {
             char chr = str[i+1];
 
             if (!isIn(chr, "ntbra'\"?fv0\\")) {
-                color4 color1 = (strcasecmp(error_str, "eval") == 0) ? BC_PROMPT_COLOR : WHITE;
+                color4 color1 = (strcasecmp(error_str, "ceval") == 0) ? BC_PROMPT_COLOR : WHITE;
                 color4 color2 = (color1 == BC_PROMPT_COLOR) ? GET_BASE_COLOR(color1) : WHITE;
 
                 printc("%s", color1, WHITE, error_str);
@@ -598,7 +598,7 @@ double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
         mult = E;
     else if (strcmp(cpy + pos, ANS_VAR) == 0) {
         if (Ans.type == BC_NONE) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("'ans' is undefined\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
@@ -606,7 +606,7 @@ double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
         }
 
         if (Ans.type == BC_STR) {
-            printc("eval", BC_PROMPT_COLOR, WHITE);
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("cannot make juxtapositions operations with strings\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 

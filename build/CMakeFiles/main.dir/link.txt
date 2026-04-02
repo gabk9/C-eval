@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/includes/utils.c.o CMakeFiles/main.dir/includes/s_math.c.o CMakeFiles/main.dir/includes/eval.c.o -o main  -lm 

@@ -179,7 +179,7 @@ int8_t getInvalidEscape(const char *str, const char *error_str) {
 
             char chr = str[i+1];
 
-            if (!isIn(chr, "ntbra'\"?fv0\\")) {
+            if (!strchr("ntbra'\"?fv0\\", chr)) {
                 color4 color1 = (strcasecmp(error_str, "ceval") == 0) ? BC_PROMPT_COLOR : WHITE;
                 color4 color2 = (color1 == BC_PROMPT_COLOR) ? GET_BASE_COLOR(color1) : WHITE;
 
@@ -476,14 +476,6 @@ paren_status parenthesis_check(const char *str) {
     return PAREN_OK;
 }
 
-bool isIn(char needle, char *haystack) {
-    for (size_t i = 0; haystack[i]; i++)
-        if (needle == haystack[i])
-            return true;
-
-    return false;
-}
-
 void trimEnd(char *str) {
     uint16_t len = strlen(str);
 
@@ -778,7 +770,7 @@ bool isBin(const char *str) {
     if (!str || !*str) return false;
 
     size_t end = strlen(str) - 1;
-    while (isIn(str[end], "kmbt") || isIn(str[end], "KMBT")) end --;
+    while (strchr("kmbtKMBT", str[end])) end --;
 
     const size_t bin_index = strlen(BIN_PREF);
 
@@ -816,7 +808,7 @@ bool isOct(const char *str) {
     if (!str || !*str) return false;
 
     size_t end = strlen(str) - 1;
-    while (isIn(str[end], "kmbt") || isIn(str[end], "KMBT")) end --;
+    while (strchr("kmbtKMBT", str[end])) end --;
 
     const size_t oct_index = strlen(OCT_PREF);
 

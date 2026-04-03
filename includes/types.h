@@ -28,7 +28,7 @@ typedef struct Functions {
     eval_ty returnType;
     const char *name;
     union func {
-        V_Func v;
+        V_Func n;
         I_Func i;
         F_Func f;
         S_Func s;

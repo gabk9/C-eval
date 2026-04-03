@@ -9,7 +9,7 @@ var eval(char *operation, bool mathlib) {
         return (var){.type = BC_NONE};
 
     const FuncEntry math_table[] = {
-        {.returnType = BC_NONE,    .name = "man",       .fn.v = bc_man},
+        {.returnType = BC_NONE,    .name = "man",       .fn.n = bc_man},
         {.returnType = BC_BOOL,    .name = "isprime",   .fn.i = s_isprime},
         {.returnType = BC_INT,     .name = "scale",     .fn.i = s_scale},
         {.returnType = BC_INT,     .name = "floor",     .fn.i = s_floor},
@@ -763,7 +763,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
                 }
 
                 case BC_NONE:
-                    functions[i].fn.v(operation);
+                    functions[i].fn.n(operation);
                     return (var){ .type = functions[i].returnType };
 
                 default: {

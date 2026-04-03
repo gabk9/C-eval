@@ -67,7 +67,7 @@ static var numericDebug(const char *buf) {
         }
 
         size_t end = len - 1;
-        while (isIn(buf[end], "kmbtKMBT")) end --;
+        while (strchr("kmbtKMBT", buf[end])) end --;
 
         for (size_t i = pref_len; i <= end; i++) {
             if (buf[i] != '0' && buf[i] != '1') {
@@ -94,8 +94,7 @@ static var numericDebug(const char *buf) {
         }
 
         for (size_t i = pref_len; buf[i]; i++) {
-
-            if (isIn(buf[i], "kmbt") || isIn(buf[i], "KMBT")) {
+            if (strchr("kmbtKMBT", buf[i])) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("hexadecimal literal does not support suffixes\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
@@ -127,7 +126,7 @@ static var numericDebug(const char *buf) {
         }
 
         size_t end = len - 1;
-        while (isIn(buf[end], "kmbt") || isIn(buf[end], "KMBT")) end --;
+        while (strchr("kmbtKMBT", buf[end])) end --;
 
         for (size_t i = pref_len; i <= end; i++) {
             if (buf[i] < '0' || buf[i] > '7') {
@@ -528,7 +527,7 @@ var h_atof(const char *str, bool mathlib) {
 
         if (!isValid && shouldError) {
             for (size_t i = 0; buf[i]; i++) {
-                if (isIn(buf[i], "()\"'!. _+-/*^%%&|<>"))
+                if (strchr("()\"'!. _+-/*^%&|<>", buf[i]))
                     continue;
 
                 if (!isalnum((unsigned char)buf[i])) {
@@ -1427,7 +1426,7 @@ char *s_upper(char *operation) {
 
         bool escaped = backslashes & 1;
 
-        if (escaped && isIn(chr, "ntbra'\"?fv0\\")) {
+        if (escaped && strchr("ntbra'\"?fv0\\", chr)) {
             buff.data.s[i] = chr;
             continue;
         }

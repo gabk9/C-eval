@@ -75,7 +75,6 @@ void removeComments(char *str);
 void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);
 eval_ty eval_typeof(const char *str);
-bool isIn(char needle, char *haystack);
 bool isValidBcFuncName(const char *str);
 void shiftLeft_at(char *str, size_t pos);
 int32_t bc_strcmp(char *str1, char *str2);

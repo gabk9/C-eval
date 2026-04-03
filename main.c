@@ -5,7 +5,7 @@
     HANDLE hConsole;
 #endif
 
-#define VERSION "r0.1.29"
+#define VERSION "r0.1.40"
 
 #define BC_MATHLIB 0x0001
 #define BC_QUIET   0x0002

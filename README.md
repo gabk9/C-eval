@@ -35,7 +35,7 @@ user-select: none;
 **ceval** is a lightweight expression evaluator written in C.  
 It works both as an interactive REPL, supporting multiple data types, a lot of functions, operators and optional math features.
 
-Although simple, it is powerful enough for quick calculations and experimentation.(even helping with math homework)
+Although simple, it is powerful enough for quick calculations and experimentation. (even helping with math homework)
 
 ---
 

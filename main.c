@@ -1,10 +1,11 @@
 #include "includes/eval.h"
 
+
 #ifdef _WIN64
     HANDLE hConsole;
 #endif
 
-#define VERSION "r0.0.90"
+#define VERSION "r0.1.29"
 
 #define BC_MATHLIB 0x0001
 #define BC_QUIET   0x0002
@@ -94,7 +95,7 @@ int32_t main(int32_t argc, char **argv) {
             for (uint16_t i = 0; i < objCount; i++) {
                 char *opt = argv[i];
 
-                char *buff = eval(opt, mathlib);
+                char *buff = var2str(eval(opt, mathlib));
 
                 if (!buff)
                     return 1;
@@ -121,7 +122,7 @@ int32_t main(int32_t argc, char **argv) {
 
             if (!*line) continue;
 
-            char *result = eval(line, mathlib);
+            char *result = var2str(eval(line, mathlib));
 
             if (!result)
                 return 1;
@@ -180,7 +181,7 @@ int32_t main(int32_t argc, char **argv) {
             continue;
         } 
 
-        result = eval(operation, mathlib);
+        result = var2str(eval(operation, mathlib));
 
         if (!result) {
             putchar('\n');

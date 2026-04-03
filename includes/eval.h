@@ -12,7 +12,7 @@
 #endif
 
 char *var2str(var buff);
-char *eval(char *operation, bool mathlib);
+var eval(char *operation, bool mathlib);
 var calc(var left, const char *operation, var right, bool mathLib);
 var parse_operation(char *operation, const FuncEntry *functions, size_t funcCount, const char *uniOps, const char **multiOps, bool mathlib);
 

@@ -37,6 +37,10 @@
 #define FALSE_VAR "false"
 #define RAND_MAX_VAR "rand_max"
 
+#define SINGLE_QUOTES 0
+#define DOUBLE_QUOTES 1
+#define BOTH_QUOTES 2
+
 #define HEX_PREF "0x"
 #define OCT_PREF "0o"
 #define BIN_PREF "0b"
@@ -70,6 +74,7 @@ bool isalldigit(const char *s);
 void removeComments(char *str);
 void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);
+eval_ty eval_typeof(const char *str);
 bool isIn(char needle, char *haystack);
 bool isValidBcFuncName(const char *str);
 void shiftLeft_at(char *str, size_t pos);
@@ -79,12 +84,12 @@ bool is_wrapped_by_parentheses(const char *s);
 paren_status parenthesis_check(const char *str);
 bool isValidBcCommand(char *str, char *command);
 char *bc_strcat(const char *dest, const char *src);
+void num_snprintf(char *buff, size_t size, var num);
 bool isBcVariable(const char *str, bool *shouldError);
 void getItemTypeStr(char *buff, size_t size, var item);
 int16_t injectEscape(char *str, const char *error_str);
 double parse_base_fraction(const char *s, int8_t base);
 void getItemTypeStr(char *buff, size_t size, var item);
-void num_snprintf(char *buff, size_t size, double num);
 void int64_to_hex_min(int64_t v, char *out, size_t size);
 bool isBetweenQuotes(const char *action, int16_t quoteMode);
 double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok);

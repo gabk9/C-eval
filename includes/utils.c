@@ -1,5 +1,22 @@
 #include "utils.h"
 
+eval_ty eval_typeof(const char *str) {
+    if (isBetweenQuotes(str, BOTH_QUOTES))
+        return BC_STR;
+    else if (isBetweenQuotes(str, SINGLE_QUOTES))
+        return BC_CHR;
+
+    if (strcmp(str, FALSE_VAR) == 0 || strcmp(str, TRUE_VAR) == 0)
+        return BC_BOOL;
+
+    if (strchr(str, '.'))
+        return BC_FLOAT;
+    else
+        return BC_INT;
+
+    return BC_NONE;
+}
+
 void extractParenthesis(char *str) {
     size_t len = strlen(str);
 
@@ -41,15 +58,22 @@ void initRandom(void) {
 #endif
 }
 
-void num_snprintf(char *buff, size_t size, double num) {
-    if (T_CMP(num, (int64_t)num)) {
-        snprintf(buff, size, "%" PRId64, (int64_t)num);
-    } else {
-        snprintf(buff, size, "%lf", num);
+void num_snprintf(char *buff, size_t size, var num) {
+    if (num.type !=  BC_INT && num.type != BC_FLOAT) {
+        fprintf(stderr, "ceval: invalid num.type: '%d'\n", num.type);
+        exit(EXIT_FAILURE);
+    }
+
+    if (num.type == BC_INT)
+        snprintf(buff, size, "%" PRId64, num.data.i);
+    else {
+        snprintf(buff, size, "%lf", num.data.f);
 
         size_t end = strlen(buff) - 1;
 
         while (end > 0 && buff[end] == '0') {
+            if (buff[end] == '0' && buff[end-1] == '.')
+                return;
             buff[end--] = '\0';
         }
 
@@ -75,14 +99,14 @@ void getItemTypeStr(char *buff, size_t size, var item) {
 int32_t bc_strcmp(char *str1, char *str2) {
     char buff1[0x100], buff2[0x100];
 
-    if (isBetweenQuotes(str1, 1)) {
+    if (isBetweenQuotes(str1, DOUBLE_QUOTES)) {
         size_t len = strlen(str1) - 2;
         strncpy(buff1, str1+1, len);
         buff1[len] = '\0';
     } else
         strncpy(buff1, str1, sizeof(buff1)-1), buff1[sizeof(buff1)-1] = '\0';
 
-    if (isBetweenQuotes(str2, 1)) {
+    if (isBetweenQuotes(str2, DOUBLE_QUOTES)) {
         size_t len = strlen(str2) - 2;
         strncpy(buff2, str2+1, len);
         buff2[len] = '\0';
@@ -655,7 +679,7 @@ double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
 bool isBcVariable(const char *str, bool *shouldError) {
     *shouldError = true;
 
-    if (isBetweenQuotes(str, 2)) {
+    if (isBetweenQuotes(str, BOTH_QUOTES)) {
         *shouldError = false;
         return false;
     }

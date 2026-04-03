@@ -3,10 +3,10 @@
 static int32_t eval_depth = 0;
 var Ans = { .type = BC_NONE };
 
-char *eval(char *operation, bool mathlib) {
+var eval(char *operation, bool mathlib) {
 
     if (!operation)
-        return NULL;
+        return (var){.type = BC_NONE};
 
     const FuncEntry math_table[] = {
         {.returnType = BC_NONE,    .name = "man",       .fn.v = bc_man},
@@ -99,7 +99,7 @@ char *eval(char *operation, bool mathlib) {
                 break;
         }
 
-        return NULL;
+        return (var){.type = BC_NONE};
     }
 
     char tmp[MAX_CHAR] = {0};
@@ -111,28 +111,26 @@ char *eval(char *operation, bool mathlib) {
     trimEnd(tmp);
 
     if (!*tmp)
-        return NULL;
+        return (var){.type = BC_NONE};
 
     if (!getInvalidEscape(tmp, "ceval"))
-        return NULL;
+        return (var){.type = BC_NONE};
 
     eval_depth++;
 
     var buff = parse_operation(tmp, math_table, funcCount, uniOps, multiOps, mathlib);
 
-    char *result = NULL;
     switch (buff.type) {
         case BC_NONE:
             break;
 
         case BC_STR:
-            result = buff.data.s;
             if (eval_depth == 1) {
                 if (Ans.type == BC_STR && Ans.data.s)
                     SAFE_FREE(Ans.data.s);
 
                 Ans.type = BC_STR;
-                Ans.data.s = strdup(result);
+                Ans.data.s = strdup(buff.data.s);
             }
 
             break;
@@ -140,12 +138,10 @@ char *eval(char *operation, bool mathlib) {
         default:
             if (eval_depth == 1)
                 Ans = buff;
-
-            result = var2str(buff);
     }
 
     eval_depth--;
-    return result;
+    return buff;
 }
 
 char *var2str(var buff) {
@@ -164,16 +160,13 @@ char *var2str(var buff) {
         case BC_CHR:
         case BC_INT:
         case BC_FLOAT: {
-            const size_t max = 0x40;
+            const size_t max = 0x80;
             char *tmp = malloc(max);
             if (!tmp) return NULL;
 
-            num_snprintf(tmp, max, (buff.type == BC_FLOAT) ? buff.data.f : (double)buff.data.i);
+            num_snprintf(tmp, max, buff);
             return tmp;
         }
-
-        case BC_NONE:
-            return strdup(NONE_VAR);
 
         default:
             return NULL;
@@ -654,7 +647,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
                 return (var){ .type = BC_NONE };
             }
 
-            if (isBetweenQuotes(expr, 1)) {
+            if (isBetweenQuotes(expr, DOUBLE_QUOTES)) {
                 if (count & 1)
                     return (var){ .type = BC_BOOL, .data.b = false };
                 else
@@ -673,12 +666,10 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
                 }
             }
 
-            char *buff = eval(expr, mathlib);
-            if (!buff)
-                return (var){ .type = BC_NONE };
+            var tmp = eval(expr, mathlib);
 
-            var tmp = h_atof(buff, mathlib);
-            SAFE_FREE(buff);
+            if (tmp.type == BC_NONE)
+                return (var){.type = BC_NONE};
 
             float64 num = (tmp.type == BC_BOOL) ? (float64)tmp.data.b : tmp.data.f;
             if (tmp.type == BC_INT) {
@@ -934,26 +925,10 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
         return (var){ .type = BC_NONE };
     }
 
-    char *left = eval(num1, mathlib);
-    if (!left)
-        return (var){ .type = BC_NONE };
-
-    char *right = eval(num2, mathlib);
-    if (!right) {
-        SAFE_FREE(left);
-        return (var){ .type = BC_NONE };
-    }
-
-    var val1 = parse_operation(left, functions, funcCount, uniOps, multiOps, mathlib);
-    var val2 = parse_operation(right, functions, funcCount, uniOps, multiOps, mathlib);
-
-    if (val1.type == BC_NONE || val2.type == BC_NONE)
-        return (var){ .type = BC_NONE };
+    var val1 = eval(num1, mathlib);
+    var val2 = eval(num2, mathlib);
 
     var result = calc(val1, op, val2, mathlib);
-
-    SAFE_FREE(left);
-    SAFE_FREE(right);
 
     return result;
 }

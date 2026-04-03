@@ -609,6 +609,290 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     return out;
 }
 
+static var lNot_section(char *operation, bool mathlib) {
+    size_t count = 0;
+    while (operation[count] == '!')
+        count++;
+
+    char *expr = operation + count;
+
+    if (!*expr) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("syntax error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return (var){ .type = BC_NONE };
+    }
+
+    if (isBetweenQuotes(expr, DOUBLE_QUOTES)) {
+        if (count & 1)
+            return (var){ .type = BC_BOOL, .data.b = false };
+        else
+            return (var){ .type = BC_BOOL, .data.b = true };
+    }
+
+    if (mathlib) {
+        if (Ans.type == BC_STR && strcmp(expr, ANS_VAR) == 0) {
+            if (!Ans.data.s)
+                return (var){ .type = BC_BOOL, .data.b = false };
+
+            if (count & 1)
+                return (var){ .type = BC_BOOL, .data.b = false };
+            else
+                return (var){ .type = BC_BOOL, .data.b = true };
+        }
+    }
+
+    var tmp = eval(expr, mathlib);
+
+    if (tmp.type == BC_NONE)
+        return (var){.type = BC_NONE};
+
+    float64 num = (tmp.type == BC_BOOL) ? (float64)tmp.data.b : tmp.data.f;
+    if (tmp.type == BC_INT) {
+        int64_t val = tmp.data.i;
+        bool value = (val != 0.0);
+
+        if (count & 1)
+            value = !value;
+
+        return (var){ .type = BC_BOOL, .data.b = value };
+    }
+
+    if (isnan(num))
+        return (var){ .type = BC_NONE };
+
+    bool value = (num != 0.0);
+
+    if (count & 1)
+        value = !value;
+
+    return (var){ .type = BC_BOOL, .data.b = value };
+}
+
+static var func_section(char *operation, size_t funcCount, const FuncEntry *functions, bool mathlib) {
+    char name[0x100] = {0};
+
+    ssize_t parenthesis_index = strchar(operation, '(');
+    if (parenthesis_index == -1)
+        return h_atof(operation, mathlib);
+
+    memcpy(name, operation, parenthesis_index);
+    name[parenthesis_index] = '\0';
+
+    trimEnd(name);
+
+    if (!*name)
+        return (var){ .type = BC_NONE };
+
+    if (*operation == '~' || *operation == '-') {
+        var tmp = h_atof(operation, mathlib);
+
+        if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
+            return (var){ .type = BC_NONE };
+
+        return tmp;
+    }
+
+    int32_t depth = 0;
+    int32_t close_index = -1;
+
+    for (int32_t i = parenthesis_index; operation[i]; i++) {
+        if (operation[i] == '(')
+            depth++;
+        else if (operation[i] == ')') {
+            depth--;
+            if (depth == 0) {
+                close_index = i;
+                break;
+            }
+        }
+    }
+
+    if (close_index == -1 || operation[close_index + 1] != '\0') {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("invalid syntax\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return (var){ .type = BC_NONE };
+    }
+
+    if (!isValidBcFuncName(name)) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("invalid function name: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, name);
+
+        return (var){ .type = BC_NONE };
+    }
+
+    if (mathlib) {
+        for (size_t i = 0; i < funcCount; i++) {
+            if (strcmp(name, functions[i].name) != 0)
+                continue;
+
+            switch (functions[i].returnType) {
+                case BC_BOOL:
+                case BC_INT: {
+                    int64_t num = functions[i].fn.i(operation);
+
+                    if (num == I64_NAN)
+                        return (var){ .type = BC_NONE };
+
+                    if (functions[i].returnType == BC_BOOL)
+                        return (var){ .type = BC_BOOL, .data.b = (bool)num };
+
+                    return (var){ .type = functions[i].returnType, .data.i = num };
+                }
+
+                case BC_FLOAT: {
+                    float64 num = functions[i].fn.f(operation);
+
+                    if (isnan(num))
+                        return (var){ .type = BC_NONE };
+
+                    return (var){ .type = functions[i].returnType, .data.f = num };
+                }
+
+                case BC_STR: {
+                    char *result = functions[i].fn.s(operation);
+
+                    if (!result)
+                        return (var){ .type = BC_NONE };
+
+                    return (var){ .type = functions[i].returnType, .data.s = result};
+                }
+
+                case BC_NONE:
+                    functions[i].fn.v(operation);
+                    return (var){ .type = functions[i].returnType };
+
+                default: {
+                    char type[0x14] = {0};
+
+                    getItemTypeStr(type, sizeof(type), (var){.type = functions[i].returnType});
+
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("invalid function with '%s' unknown type: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type, name);
+
+                    return (var){ .type = BC_NONE} ;
+                }
+            }
+        }
+    }
+
+    printc("ceval", BC_PROMPT_COLOR, WHITE);
+    printf(": ");
+    printc("undefined function: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, name);
+
+    return (var){ .type = BC_NONE };
+}
+
+static var parse_single(char *operation, const FuncEntry *functions, size_t funcCount, bool mathlib) {
+    if (mathlib && Ans.type == BC_STR && strcmp(operation, ANS_VAR) == 0)
+        return (var){ .type = BC_STR, .data.s = strdup(Ans.data.s)};
+
+    if (*operation == '!')
+        return lNot_section(operation, mathlib);
+
+    char *paren = strchr(operation, '(');
+
+    if (!paren) {
+
+        if (strcmp(operation, TRUE_VAR) == 0)
+            return (var){ .type = BC_BOOL, .data.b = true };
+        else if (strcmp(operation, FALSE_VAR) == 0)
+            return (var){ .type = BC_BOOL, .data.b = false };
+
+        size_t len = strlen(operation);
+
+        if (len > 1 && operation[0] == '"') {
+
+            char result[0x400] = {0};
+            size_t res_len = 0;
+
+            const char *p = operation;
+
+            while (*p) {
+
+                while (isspace((unsigned char)*p))
+                    p++;
+
+                if (*p != '"')
+                    break;
+
+                p++;
+
+                while (*p) {
+
+                    if (*p == '"') {
+
+                        uint16_t backslashes = 0;
+                        const char *q = p - 1;
+
+                        while (q >= operation && *q == '\\') {
+                            backslashes++;
+                            q--;
+                        }
+
+                        if ((backslashes & 1) == 0)
+                            break;
+                    }
+
+                    result[res_len++] = *p;
+                    p++;
+                }
+
+                if (*p != '"') {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("unclosed quote\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+                    return (var){ .type = BC_NONE };
+                }
+
+                p++;
+            }
+
+            if (res_len > 0) {
+
+                char *final = malloc(res_len + 3);
+                if (!final) {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                    return (var){ .type = BC_NONE };
+                }
+
+                final[0] = '"';
+                memcpy(final + 1, result, res_len);
+                final[res_len + 1] = '"';
+                final[res_len + 2] = '\0';
+
+                return (var){ .type = BC_STR, .data.s = final };
+            }
+        }
+
+        var tmp = h_atof(operation, mathlib);
+
+        if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
+            return (var){ .type = BC_NONE };
+
+        return tmp;
+    }
+
+    if (operation[strlen(operation)-1] == '!') {
+        int64_t result = s_fact(operation);
+
+        if (result == I64_NAN)
+            return (var){ .type = BC_NONE };
+
+        return (var){ .type = BC_INT, .data.i = result };
+    }
+
+    return func_section(operation, funcCount, functions, mathlib);
+}
+
 var parse_operation(char *operation, const FuncEntry *functions, size_t funcCount, const char *uniOps, const char **multiOps, bool mathlib) {
     char op[0x4] = {0};
 
@@ -626,284 +910,8 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
 
     int16_t op_pos = find_main_operator_full(operation, multiOps, uniOps, op);
 
-    if (op_pos == -1) {
-
-        if (mathlib && Ans.type == BC_STR && strcmp(operation, ANS_VAR) == 0)
-            return (var){ .type = BC_STR, .data.s = strdup(Ans.data.s)};
-
-        if (*operation == '!') {
-
-            size_t count = 0;
-            while (operation[count] == '!')
-                count++;
-
-            char *expr = operation + count;
-
-            if (!*expr) {
-                printc("ceval", BC_PROMPT_COLOR, WHITE);
-                printf(": ");
-                printc("syntax error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-                return (var){ .type = BC_NONE };
-            }
-
-            if (isBetweenQuotes(expr, DOUBLE_QUOTES)) {
-                if (count & 1)
-                    return (var){ .type = BC_BOOL, .data.b = false };
-                else
-                    return (var){ .type = BC_BOOL, .data.b = true };
-            }
-
-            if (mathlib) {
-                if (Ans.type == BC_STR && strcmp(expr, ANS_VAR) == 0) {
-                    if (!Ans.data.s)
-                        return (var){ .type = BC_BOOL, .data.b = false };
-
-                    if (count & 1)
-                        return (var){ .type = BC_BOOL, .data.b = false };
-                    else
-                        return (var){ .type = BC_BOOL, .data.b = true };
-                }
-            }
-
-            var tmp = eval(expr, mathlib);
-
-            if (tmp.type == BC_NONE)
-                return (var){.type = BC_NONE};
-
-            float64 num = (tmp.type == BC_BOOL) ? (float64)tmp.data.b : tmp.data.f;
-            if (tmp.type == BC_INT) {
-                int64_t val = tmp.data.i;
-                bool value = (val != 0.0);
-
-                if (count & 1)
-                    value = !value;
-
-                return (var){ .type = BC_BOOL, .data.b = value };
-            }
-
-            if (isnan(num))
-                return (var){ .type = BC_NONE };
-
-            bool value = (num != 0.0);
-
-            if (count & 1)
-                value = !value;
-
-            return (var){ .type = BC_BOOL, .data.b = value };
-        }
-
-        char *paren = strchr(operation, '(');
-
-        if (!paren) {
-
-            if (strcmp(operation, TRUE_VAR) == 0)
-                return (var){ .type = BC_BOOL, .data.b = true };
-            else if (strcmp(operation, FALSE_VAR) == 0)
-                return (var){ .type = BC_BOOL, .data.b = false };
-
-            size_t len = strlen(operation);
-
-            if (len > 1 && operation[0] == '"') {
-
-                char result[0x400] = {0};
-                size_t res_len = 0;
-
-                const char *p = operation;
-
-                while (*p) {
-
-                    while (isspace((unsigned char)*p))
-                        p++;
-
-                    if (*p != '"')
-                        break;
-
-                    p++;
-
-                    while (*p) {
-
-                        if (*p == '"') {
-
-                            uint16_t backslashes = 0;
-                            const char *q = p - 1;
-
-                            while (q >= operation && *q == '\\') {
-                                backslashes++;
-                                q--;
-                            }
-
-                            if ((backslashes & 1) == 0)
-                                break;
-                        }
-
-                        result[res_len++] = *p;
-                        p++;
-                    }
-
-                    if (*p != '"') {
-                        printc("ceval", BC_PROMPT_COLOR, WHITE);
-                        printf(": ");
-                        printc("unclosed quote\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-                        return (var){ .type = BC_NONE };
-                    }
-
-                    p++;
-                }
-
-                if (res_len > 0) {
-
-                    char *final = malloc(res_len + 3);
-                    if (!final) {
-                        printc("ceval", BC_PROMPT_COLOR, WHITE);
-                        printf(": ");
-                        printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                        return (var){ .type = BC_NONE };
-                    }
-
-                    final[0] = '"';
-                    memcpy(final + 1, result, res_len);
-                    final[res_len + 1] = '"';
-                    final[res_len + 2] = '\0';
-
-                    return (var){ .type = BC_STR, .data.s = final };
-                }
-            }
-
-            var tmp = h_atof(operation, mathlib);
-
-            if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
-                return (var){ .type = BC_NONE };
-
-            return tmp;
-        }
-
-        if (operation[strlen(operation)-1] == '!') {
-            int64_t result = s_fact(operation);
-
-            if (result == I64_NAN)
-                return (var){ .type = BC_NONE };
-
-            return (var){ .type = BC_INT, .data.i = result };
-        }
-
-        char name[0x100] = {0};
-
-        ssize_t parenthesis_index = strchar(operation, '(');
-        if (parenthesis_index == -1)
-            return h_atof(operation, mathlib);
-
-        memcpy(name, operation, parenthesis_index);
-        name[parenthesis_index] = '\0';
-
-        trimEnd(name);
-
-        if (!*name)
-            return (var){ .type = BC_NONE };
-
-        if (*operation == '~' || *operation == '-') {
-            var tmp = h_atof(operation, mathlib);
-
-            if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
-                return (var){ .type = BC_NONE };
-
-            return tmp;
-        }
-
-        int32_t depth = 0;
-        int32_t close_index = -1;
-
-        for (int32_t i = parenthesis_index; operation[i]; i++) {
-            if (operation[i] == '(')
-                depth++;
-            else if (operation[i] == ')') {
-                depth--;
-                if (depth == 0) {
-                    close_index = i;
-                    break;
-                }
-            }
-        }
-
-        if (close_index == -1 || operation[close_index + 1] != '\0') {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("invalid syntax\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-            return (var){ .type = BC_NONE };
-        }
-
-        if (!isValidBcFuncName(name)) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("invalid function name: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, name);
-
-            return (var){ .type = BC_NONE };
-        }
-
-        if (mathlib) {
-            for (size_t i = 0; i < funcCount; i++) {
-                if (strcmp(name, functions[i].name) != 0)
-                    continue;
-
-                switch (functions[i].returnType) {
-                    case BC_BOOL:
-                    case BC_INT: {
-                        int64_t num = functions[i].fn.i(operation);
-
-                        if (num == I64_NAN)
-                            return (var){ .type = BC_NONE };
-
-                        if (functions[i].returnType == BC_BOOL)
-                            return (var){ .type = BC_BOOL, .data.b = (bool)num };
-
-                        return (var){ .type = functions[i].returnType, .data.i = num };
-                    }
-
-                    case BC_FLOAT: {
-                        float64 num = functions[i].fn.f(operation);
-
-                        if (isnan(num))
-                            return (var){ .type = BC_NONE };
-
-                        return (var){ .type = functions[i].returnType, .data.f = num };
-                    }
-
-                    case BC_STR: {
-                        char *result = functions[i].fn.s(operation);
-
-                        if (!result)
-                            return (var){ .type = BC_NONE };
-
-                        return (var){ .type = functions[i].returnType, .data.s = result};
-                    }
-
-                    case BC_NONE:
-                        functions[i].fn.v(operation);
-                        return (var){ .type = functions[i].returnType };
-
-                    default: {
-                        char type[0x14] = {0};
-
-                        getItemTypeStr(type, sizeof(type), (var){.type = functions[i].returnType});
-
-                        printc("ceval", BC_PROMPT_COLOR, WHITE);
-                        printf(": ");
-                        printc("invalid function with '%s' unknown type: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type, name);
-
-                        return (var){ .type = BC_NONE} ;
-                    }
-                }
-            }
-        }
-
-        printc("ceval", BC_PROMPT_COLOR, WHITE);
-        printf(": ");
-        printc("undefined function: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, name);
-
-        return (var){ .type = BC_NONE };
-    }
+    if (op_pos == -1)
+        return parse_single(operation, functions, funcCount, mathlib);
 
     char buffer[0x100];
     strncpy(buffer, operation, sizeof(buffer)-1);

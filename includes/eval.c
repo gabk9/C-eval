@@ -160,7 +160,7 @@ char *var2str(var buff) {
         case BC_CHR:
         case BC_INT:
         case BC_FLOAT: {
-            const size_t max = 0x80;
+            const size_t max = 0x60;
             char *tmp = malloc(max);
             if (!tmp) return NULL;
 

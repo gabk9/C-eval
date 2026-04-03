@@ -1,4 +1,5 @@
 *.txt
+*.exe
 main
 main.exe
 ceval

@@ -1,9 +1,5 @@
 #include "utils.h"
 
-#ifdef _WIN64
-    extern HANDLE hConsole;
-#endif
-
 void extractParenthesis(char *str) {
     size_t len = strlen(str);
 

@@ -12,6 +12,9 @@
 #define BC_HELP    0x0008
 
 int32_t main(int32_t argc, char **argv) {
+#ifdef _WIN64
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
 
     initRandom();
 
@@ -114,7 +117,7 @@ int32_t main(int32_t argc, char **argv) {
         char line[MAX_CHAR];
 
         while (fgets(line, sizeof(line), stdin)) {
-            line[strcspn(line, "\n")] = '\0';
+            line[strcspn(line, "\r\n")] = '\0';
 
             if (!*line) continue;
 
@@ -146,7 +149,7 @@ int32_t main(int32_t argc, char **argv) {
 
         printc(">>> ", BC_PROMPT_COLOR, WHITE);
         fgets(operation, sizeof(operation), stdin);
-        operation[strcspn(operation, "\n")] = '\0';
+        operation[strcspn(operation, "\r\n")] = '\0';
 
         if (!*operation) {
             putchar('\n');

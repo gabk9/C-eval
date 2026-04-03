@@ -15,7 +15,10 @@
 #include <inttypes.h>
 
 #ifdef _WIN64
+    #include <io.h>
     #include <windows.h>
+    #define _isatty isatty
+    extern HANDLE hConsole;
 #else
     #include <unistd.h>
 #endif

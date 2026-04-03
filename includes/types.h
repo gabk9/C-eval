@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#if !defined(__x86_64__) && !defined(__amd64__) && !defined(__aarch64__)
+#if !defined(__x86_64__) && !defined(__amd64__) && !defined(__aarch64__) && !defined(_M_X64) && !defined(_M_ARM64)
     #error "System architecture not recognized, terminating program!!"
 #endif
 

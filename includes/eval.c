@@ -358,7 +358,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
         case BC_CHR:
         case BC_BOOL:
         case BC_INT:
-            num1 = (double)left.data.i;
+            num1 = (float64)left.data.i;
             break;
         case BC_FLOAT:
             num1 = left.data.f;
@@ -371,7 +371,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
         case BC_CHR:
         case BC_BOOL:
         case BC_INT:
-            num2 = (double)right.data.i;
+            num2 = (float64)right.data.i;
             break;
         case BC_FLOAT:
             num2 = right.data.f;

@@ -88,12 +88,12 @@ void num_snprintf(char *buff, size_t size, var num);
 bool isBcVariable(const char *str, bool *shouldError);
 void getItemTypeStr(char *buff, size_t size, var item);
 int16_t injectEscape(char *str, const char *error_str);
-double parse_base_fraction(const char *s, int8_t base);
 void getItemTypeStr(char *buff, size_t size, var item);
+float64 parse_base_fraction(const char *s, int8_t base);
 void int64_to_hex_min(int64_t v, char *out, size_t size);
 bool isBetweenQuotes(const char *action, int16_t quoteMode);
-double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok);
 int8_t getInvalidEscape(const char *str, const char *error_str);
+float64 parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok);
 void printc(const char *str, color4 initColor, color4 resetColor, ...);
 int16_t find_main_operator_full(const char *s, const char **multiOps, const char *uniOps, char *foundOp);
 

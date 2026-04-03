@@ -512,10 +512,10 @@ void trim(char *str) {
     str[i] = '\0';
 }
 
-double parse_base_fraction(const char *s, int8_t base) {
-    double result = 0.0;
-    double frac = 0.0;
-    double div = base;
+float64 parse_base_fraction(const char *s, int8_t base) {
+    float64 result = 0.0;
+    float64 frac = 0.0;
+    float64 div = base;
     int8_t seen_dot = 0;
 
     for (; *s; s++) {
@@ -544,7 +544,7 @@ double parse_base_fraction(const char *s, int8_t base) {
     return result + frac;
 }
 
-double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
+float64 parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
     *ok = 0;
 
     if (!str || !*str)
@@ -610,7 +610,7 @@ double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
         return 0.0;
     }
 
-    double mult = 0.0;
+    float64 mult = 0.0;
 
     if (strcmp(cpy + pos, PI_VAR) == 0)
         mult = PI;
@@ -635,11 +635,11 @@ double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
 
         switch (Ans.type) {
             case BC_BOOL:
-                mult = (double)Ans.data.b;
+                mult = (float64)Ans.data.b;
                 break;
             case BC_CHR:
             case BC_INT:
-                mult = (double)Ans.data.i;
+                mult = (float64)Ans.data.i;
                 break;
             case BC_FLOAT:
                 mult = Ans.data.f;
@@ -663,7 +663,7 @@ double parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
     strncpy(buf, cpy + num_start, len);
     buf[len] = '\0';
 
-    double value;
+    float64 value;
 
     if (!isBinary)
         value = parse_base_fraction(buf, base);

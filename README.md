@@ -33,9 +33,9 @@ user-select: none;
 </div>
 
 **ceval** is a lightweight expression evaluator written in C.  
-It works both as a command-line tool and an interactive REPL, supporting multiple data types, operators and optional math features.
+It works both as an interactive REPL, supporting multiple data types, a lot of functions, operators and optional math features.
 
-Although simple, it is powerful enough for scripting, quick calculations and experimentation.
+Although simple, it is powerful enough for quick calculations and experimentation.(even helping with math homework)
 
 ---
 
@@ -58,10 +58,10 @@ The focus is simplicity, flexibility and educational value.
 - Multiple expressions via CLI
 - Pipe and file input support
 - Optional math library
-- String and numeric operations
+- String, numeric and boolean operations
 - Bitwise and logical operators
 - Built-in functions (math, conversion, random, etc.)
-- Multiple numeric systems (binary, octal, hexadecimal, decimal)
+- Multiple numeric systems (ascii, binary, decimal, hexadecimal, octal)
 - Cross-platform support (Linux / Windows)
 
 ---
@@ -75,11 +75,12 @@ The focus is simplicity, flexibility and educational value.
 
 ## Supported Platforms
 
-| Platform | Architecture | Status |
-|----------|-------------|--------|
+| Platform |  Architecture  |    Status    |
+|----------|----------------|--------------|
 | Windows  | x86_64 / arm64 | ✅ Supported |
 | Linux    | x86_64 / arm64 | ✅ Supported |
-| macOS    | x86_64 / arm64 | ⚠️ Untested |
+| Android  | arm64          | ✅ Supported |
+| macOS    | x86_64 / arm64 | ⚠️ Untested  |
 
 ---
 

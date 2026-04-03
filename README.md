@@ -125,6 +125,25 @@ winget install --id MSYS2.MSYS2 -e
 
 ## Build & Run
 
+
+### Android (Termux)
+
+```bash 
+git clone https://github.com/gabk9/C-eval.git
+cd C-eval
+
+mkdir build
+cd build
+
+cmake ..
+cmake --build .
+
+cp ceval /data/data/com.termux/files/usr/bin
+
+ceval
+```
+---
+
 ### Linux
 
 ```bash

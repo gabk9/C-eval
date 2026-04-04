@@ -14,6 +14,17 @@
     #error "Operational system not recognized, terminating program!!"
 #endif
 
+typedef enum op_code {
+    ADD, SUB, DIV, MUL, XOR, MOD, AND, OR, LS, GR,
+    LAND, LOR, SHL, SHR, LSE, EQ, GRE, NE, UNKNOWN
+} opcode;
+
+typedef struct operators {
+    const char *op;
+    int32_t precedence;
+    int32_t right_assoc;
+} ops;
+
 typedef enum types {
     BC_STR, BC_FLOAT, BC_INT,
     BC_BOOL, BC_CHR, BC_NONE

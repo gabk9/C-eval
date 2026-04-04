@@ -72,6 +72,7 @@ bool isOct(const char *str);
 int64_t hex_to_long(char *str);
 bool isalldigit(const char *s);
 void removeComments(char *str);
+opcode get_opcode(const char *op);
 void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);
 eval_ty eval_typeof(const char *str);
@@ -94,7 +95,7 @@ bool isBetweenQuotes(const char *action, int16_t quoteMode);
 int8_t getInvalidEscape(const char *str, const char *error_str);
 float64 parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok);
 void printc(const char *str, color4 initColor, color4 resetColor, ...);
-int16_t find_main_operator_full(const char *s, const char **multiOps, const char *uniOps, char *foundOp);
+int16_t find_main_operator_full(const char *s, ops *operator, char *foundOp);
 
 #define SAFE_FREE(ptr) do { \
     if (ptr) { \

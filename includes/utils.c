@@ -1,5 +1,46 @@
 #include "utils.h"
 
+opcode get_opcode(const char *op) {
+    if (strcmp(op, "+") == 0)
+        return ADD;
+    else if (strcmp(op, "-") == 0)
+        return SUB;
+    else if (strcmp(op, "/") == 0)
+        return DIV;
+    else if (strcmp(op, "*") == 0)
+        return MUL;
+    else if (strcmp(op, "^") == 0)
+        return XOR;
+    else if (strcmp(op, "%") == 0)
+        return MOD;
+    else if (strcmp(op, "&") == 0)
+        return AND;
+    else if (strcmp(op, "|") == 0)
+        return OR;
+    else if (strcmp(op, "<") == 0)
+        return LS;
+    else if (strcmp(op, ">") == 0)
+        return GR;
+    else if (strcmp(op, "&&") == 0)
+        return LAND;
+    else if (strcmp(op, "||") == 0)
+        return LOR;
+    else if (strcmp(op, "<<") == 0)
+        return SHL;
+    else if (strcmp(op, ">>") == 0)
+        return SHR;
+    else if (strcmp(op, "<=") == 0)
+        return LSE;
+    else if (strcmp(op, "==") == 0)
+        return EQ;
+    else if (strcmp(op, ">=") == 0)
+        return GRE;
+    else if (strcmp(op, "!=") == 0)
+        return NE;
+
+    return UNKNOWN;
+}
+
 eval_ty eval_typeof(const char *str) {
     if (isBetweenQuotes(str, BOTH_QUOTES))
         return BC_STR;
@@ -59,12 +100,12 @@ void initRandom(void) {
 }
 
 void num_snprintf(char *buff, size_t size, var num) {
-    if (num.type !=  BC_INT && num.type != BC_FLOAT) {
+    if (num.type !=  BC_INT && num.type != BC_FLOAT && num.type != BC_CHR) {
         fprintf(stderr, "ceval: invalid num.type: '%d'\n", num.type);
         exit(EXIT_FAILURE);
     }
 
-    if (num.type == BC_INT)
+    if (num.type == BC_INT || num.type == BC_CHR)
         snprintf(buff, size, "%" PRId64, num.data.i);
     else {
         snprintf(buff, size, "%lf", num.data.f);
@@ -282,12 +323,17 @@ bool isalldigit(const char *s) {
     return false;
 }
 
-int16_t find_main_operator_full(const char *s, const char **multiOps, const char *uniOps, char *foundOp) {
+int16_t find_main_operator_full(const char *s, ops *operators, char *foundOp) {
     int32_t len = strlen(s);
 
     int32_t depth = 0;
     bool in_single = false;
     bool in_double = false;
+
+    int32_t best_pos = -1;
+    int32_t best_prec = 9999;
+    int32_t best_assoc = 0;
+    (void)best_assoc;
 
     for (int32_t i = len - 1; i >= 0; i--) {
 
@@ -305,11 +351,11 @@ int16_t find_main_operator_full(const char *s, const char **multiOps, const char
         if (in_single || in_double)
             continue;
 
-        if (c == ')') {
+        if (c == '(') {
             depth++;
             continue;
         }
-        else if (c == '(') {
+        else if (c == ')') {
             depth--;
             continue;
         }
@@ -317,56 +363,87 @@ int16_t find_main_operator_full(const char *s, const char **multiOps, const char
         if (depth != 0)
             continue;
 
-        for (int32_t j = 0; multiOps[j]; j++) {
+        for (int32_t j = 0; operators[j].op; j++) {
 
-            int32_t oplen = strlen(multiOps[j]);
+            int32_t oplen = strlen(operators[j].op);
+
             int32_t start = i - oplen + 1;
 
             if (start < 0)
                 continue;
 
-            if (strncmp(&s[start], multiOps[j], oplen) == 0) {
+            if (strncmp(&s[start], operators[j].op, oplen) == 0) {
 
-                strcpy(foundOp, multiOps[j]);
-                return start;
-            }
-        }
+                if (oplen == 1) {
+                    if (start + 1 < len) {
+                        char next = s[start + 1];
 
-        if (strchr(uniOps, c)) {
-
-            int32_t k = i - 1;
-
-            while (k >= 0 && isspace((unsigned char)s[k]))
-                k--;
-
-            if (k < 0)
-                continue;
-
-            bool is_prev_operator = false;
-
-            if (strchr(uniOps, s[k]) || s[k] == '(') {
-                is_prev_operator = true;
-            } else {
-                for (int16_t m = 0; multiOps[m]; m++) {
-                    int16_t len = strlen(multiOps[m]);
-                    if (k - len + 1 >= 0 &&
-                        strncmp(&s[k - len + 1], multiOps[m], len) == 0) {
-                        is_prev_operator = true;
-                        break;
+                        if ((s[start] == '<' && next == '<') ||
+                            (s[start] == '>' && next == '>') ||
+                            (s[start] == '&' && next == '&') ||
+                            (s[start] == '|' && next == '|')) {
+                            continue;
+                        }
                     }
                 }
+
+                if (strcmp(operators[j].op, "-") == 0) {
+                    int32_t k = i - 1;
+
+                    while (k >= 0 && isspace((unsigned char)s[k]))
+                        k--;
+
+                    if (k < 0)
+                        continue;
+
+                    bool is_prev_operator = false;
+
+                    if (strchr("+-/*^%&|<>", s[k]) || s[k] == '(' || s[k] == ',') {
+                        is_prev_operator = true;
+                    } else {
+                        for (int32_t m = 0; operators[m].op; m++) {
+                            int32_t len2 = strlen(operators[m].op);
+
+                            if (k - len2 + 1 >= 0 &&
+                                strncmp(&s[k - len2 + 1], operators[m].op, len2) == 0) {
+                                is_prev_operator = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (is_prev_operator)
+                        continue;
+                }
+
+                int32_t prec = operators[j].precedence;
+                int32_t assoc = operators[j].right_assoc;
+
+                bool should_replace = false;
+
+                if (best_pos == -1)
+                    should_replace = true;
+                else if (prec < best_prec)
+                    should_replace = true;
+                else if (prec == best_prec) {
+                    if (assoc == 0 && start > best_pos)
+                        should_replace = true;
+                    else if (assoc == 1 && start < best_pos)
+                        should_replace = true;
+                }
+
+                if (should_replace) {
+                    best_pos = start;
+                    best_prec = prec;
+                    best_assoc = assoc;
+                    strcpy(foundOp, operators[j].op);
+                    i -= (oplen - 1);
+                }
             }
-
-            if (is_prev_operator)
-                continue;
-
-            foundOp[0] = c;
-            foundOp[1] = '\0';
-            return i;
         }
     }
 
-    return -1;
+    return best_pos;
 }
 
 int16_t injectEscape(char *str, const char *error_str) {
@@ -954,13 +1031,6 @@ void print_manual(void) {
         "\t         Example: 10 %% 3 = 1\n"
         "\t         Note: it also works with single point precision numbers\n"
         "\n"
-        "\t'**'   : Power (num1 raised to num2)\n"
-        "\t         Example: 2 ** 5 = 32\n"
-        "\n"
-        "\t'^^'   : Tetration (num1 raised to itself num2 times)\n"
-        "\t         Example: 2 ^^ 3 = 16\n"
-        "\t         Explanation: 2^(2^2) = 16\n"
-        "\n"
         "\t'^'    : Bitwise XOR\n"
         "\t         Example: 5 ^ 3 = 6\n"
         "\t         Explanation: Operates on individual bits\n"
@@ -1187,6 +1257,12 @@ void print_manual(void) {
         "\n"
         "\ttypeof(X)      : Returns the type of the argument as a string\n"
         "\t                 Example: typeof(\"string\") = \""STR_VAR"\" / typeof(2) = \""INT_VAR"\"\n"
+        "\n"
+        "\ttet(X, Y)      : Tetration (X raised to itself Y times)\n"
+        "\t                 Example: tet(2, 3) = 16\n"
+        "\n"
+        "\tpow(X, Y)      : Power (X multiplied to itself Y times)\n"
+        "\t                 Example: pow(2, 3) = 8\n"
 
         "\nBuiltin Variables: (mathlib must be on to grant access)\n"
         "\tAns   : stores the result of the last operation\n"

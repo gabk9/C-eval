@@ -1,11 +1,10 @@
 #include "includes/eval.h"
 
-
 #ifdef _WIN64
     HANDLE hConsole;
 #endif
 
-#define VERSION "r0.1.40"
+#define VERSION "r0.1.70"
 
 #define BC_MATHLIB 0x0001
 #define BC_QUIET   0x0002
@@ -138,7 +137,7 @@ int32_t main(int32_t argc, char **argv) {
         if (!appear) {
             if (show_init)
                 printf("'ceval' a simple eval function implemented in C, operand precedence does not work unless if you use parenthesis, it support various types of operands.\n"
-                        "type 'mathlib' if you're insite ceval to turn on the math library.\n"
+                        "type 'mathlib' if you're insite ceval to turn on the math library, and call man() to see the manual.\n"
                 );
             if (mathlib)
                 printc("on\n\n", GREEN, WHITE);

@@ -36,6 +36,8 @@ char *s_bin(char *operation)__attribute__((nonnull));
 float64 s_ln(char *operation)__attribute__((nonnull));
 float64 s_km(char *operation)__attribute__((nonnull));
 float64 s_kg(char *operation)__attribute__((nonnull));
+float64 s_tet(char *operation)__attribute__((nonnull));
+float64 s_pow(char *operation)__attribute__((nonnull));
 float64 s_fah(char *operation)__attribute__((nonnull));
 float64 s_cel(char *operation)__attribute__((nonnull));
 float64 s_log(char *operation)__attribute__((nonnull));

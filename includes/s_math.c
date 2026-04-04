@@ -2354,6 +2354,238 @@ float64 s_log2(char *operation) {
     return log2(num);
 }
 
+float64 s_tet(char *operation) {
+    char *p = strchr(operation, '(');
+    if (!p)
+        return NAN;
+    operation = p+1;
+    operation[strlen(operation)-1] = '\0';
+
+    char *comma = find_top_level_comma(operation);
+    
+    if (!comma) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("tet() requires exactly 2 arguments\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return NAN;
+    }
+
+    *comma = '\0';
+    char *baseStr = operation;
+    char *tetStr = comma + 1;
+    
+    uint8_t nullCount = isnull(2, baseStr, tetStr);
+    if (nullCount) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("tet() requires exactly 2 arguments (missing %"PRIu8")\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, nullCount);
+
+        return NAN;
+    }
+
+    trim(baseStr);
+    trim(tetStr);
+
+    var debug1 = eval(baseStr, true);
+
+    float64 base = 0;
+
+    switch (debug1.type) {
+        case BC_BOOL:
+            base = (float64)debug1.data.b;
+            break;
+        case BC_CHR:
+        case BC_INT:
+            base = debug1.data.i;
+            break;
+        case BC_FLOAT:
+            base = debug1.data.f;
+            break;
+        case BC_STR:
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("the 1st argument of tet() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            SAFE_FREE(debug1.data.s);
+
+            return NAN;
+        default:
+            return NAN;
+    }
+
+    if (debug1.type == BC_FLOAT && isnan(debug1.data.f))
+        return NAN;
+
+    var debug2 = eval(tetStr, true);
+
+    int64_t tet = 0;
+
+    switch (debug2.type) {
+        case BC_BOOL:
+            tet = (int64_t)debug2.data.b;
+            break;
+        case BC_CHR:
+        case BC_INT:
+            tet = debug2.data.i;
+            break;
+        case BC_FLOAT:
+        case BC_STR:
+            if (debug2.type == BC_FLOAT && isnan(debug2.data.f))
+                return NAN;
+
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("the 2nd argument of tet() must be of type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            if (debug2.type == BC_STR)
+                SAFE_FREE(debug2.data.s);
+
+            return NAN;
+        default:
+            return NAN;
+    }
+
+    if (tet < 0) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("tet() requires a non negative height\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return NAN;
+    }
+
+    if (base == 0 && tet == 0) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("tet(0, 0) is undefined\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);            
+
+        return NAN;
+    }
+
+    float64 result = tetration(base, tet);
+
+    if (isnan(result)) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("invalid input for tet()\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+    }
+
+    return result;
+}
+
+float64 s_pow(char *operation) {
+    char *p = strchr(operation, '(');
+    if (!p)
+        return NAN;
+    operation = p+1;
+    operation[strlen(operation)-1] = '\0';
+
+    char *comma = find_top_level_comma(operation);
+    
+    if (!comma) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("pow() requires exactly 2 arguments\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return NAN;
+    }
+
+    *comma = '\0';
+    char *baseStr = operation;
+    char *powerStr = comma + 1;
+    
+    uint8_t nullCount = isnull(2, baseStr, powerStr);
+    if (nullCount) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("pow() requires exactly 2 arguments (missing %"PRIu8")\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, nullCount);
+
+        return NAN;
+    }
+
+    trim(baseStr);
+    trim(powerStr);
+
+    var debug1 = eval(baseStr, true);
+
+    float64 base = 0;
+
+    switch (debug1.type) {
+        case BC_BOOL:
+            base = (float64)debug1.data.b;
+            break;
+        case BC_CHR:
+        case BC_INT:
+            base = debug1.data.i;
+            break;
+        case BC_FLOAT:
+            base = debug1.data.f;
+            break;
+        case BC_STR:
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("the 1st argument of pow() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            SAFE_FREE(debug1.data.s);
+
+            return NAN;
+        default:
+            return NAN;
+    }
+
+    if (debug1.type == BC_FLOAT && isnan(debug1.data.f))
+        return NAN;
+
+    var debug2 = eval(powerStr, true);
+
+    float64 power = 0;
+
+    switch (debug2.type) {
+        case BC_BOOL:
+            power = (float64)debug2.data.b;
+            break;
+        case BC_CHR:
+        case BC_INT:
+            power = debug2.data.i;
+            break;
+        case BC_FLOAT:
+            power = debug2.data.f;
+
+            if (isnan(power))
+                return NAN;
+
+            if (trunc(power) != power && T_CMP(base, (int64_t)base)) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("to use negative bases the power must not be of type '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+                return NAN;
+            }
+
+            break;
+        case BC_STR:
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("the 2nd argument of pow() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            SAFE_FREE(debug2.data.s);
+
+            return NAN;
+        default:
+            return NAN;
+    }
+
+    float64 result = pow(base, power);
+
+    if (isnan(result)) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("invalid input for pow()\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+    }
+
+    return result;
+}
+
 float64 s_root(char *operation) {
     char *p = strchr(operation, '(');
     if (!p)
@@ -2366,7 +2598,7 @@ float64 s_root(char *operation) {
     if (!comma) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
-        printc("root requires exactly 2 arguments\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+        printc("root() requires exactly 2 arguments\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
         return NAN;
     }

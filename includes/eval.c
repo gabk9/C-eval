@@ -20,6 +20,8 @@ var eval(char *operation, bool mathlib) {
         {.returnType = BC_INT,     .name = "len",       .fn.i = bc_len},
         {.returnType = BC_INT,     .name = INT_VAR,     .fn.i = bc_int},
         {.returnType = BC_FLOAT,   .name = "sqrt",      .fn.f = s_sqrt},
+        {.returnType = BC_FLOAT,   .name = "tet",       .fn.f = s_tet},
+        {.returnType = BC_FLOAT,   .name = "pow",       .fn.f = s_pow},
         {.returnType = BC_FLOAT,   .name = "root",      .fn.f = s_root},
         {.returnType = BC_FLOAT,   .name = "sin",       .fn.f = s_sin},
         {.returnType = BC_FLOAT,   .name = "asin",      .fn.f = s_asin},
@@ -62,11 +64,29 @@ var eval(char *operation, bool mathlib) {
 
     size_t funcCount = sizeof(math_table) / sizeof(*math_table);
 
-    const char uniOps[] = "+-/*^%%&|<>";
-    const char *multiOps[] = {
-        "**", "&&", "||", "<<", ">>",
-        "<=", "==", ">=", "!=", "^^", 
-        NULL
+    ops operators[] = {
+        {.op = "**",  .precedence = 7,  .right_assoc = 1},
+        {.op = "<<",  .precedence = 4,  .right_assoc = 0},
+        {.op = ">>",  .precedence = 4,  .right_assoc = 0},
+        {.op = "<=",  .precedence = 3,  .right_assoc = 0},
+        {.op = ">=",  .precedence = 3,  .right_assoc = 0},
+        {.op = "==",  .precedence = 2,  .right_assoc = 0},
+        {.op = "!=",  .precedence = 2,  .right_assoc = 0},
+        {.op = "&&",  .precedence = -2, .right_assoc = 0},
+
+        {.op = "*",   .precedence = 6,  .right_assoc = 0}, 
+        {.op = "/",   .precedence = 6,  .right_assoc = 0},
+        {.op = "%",   .precedence = 6,  .right_assoc = 0},
+        {.op = "+",   .precedence = 5,  .right_assoc = 0},
+        {.op = "-",   .precedence = 5,  .right_assoc = 0},
+        {.op = "<",   .precedence = 3,  .right_assoc = 0},
+        {.op = ">",   .precedence = 3,  .right_assoc = 0},
+        {.op = "&",   .precedence = 1,  .right_assoc = 0},
+        {.op = "^",   .precedence = 0,  .right_assoc = 0},
+        {.op = "|",   .precedence = -1, .right_assoc = 0},
+        {.op = "||",  .precedence = -3, .right_assoc = 0},
+
+        {.op = NULL,  .precedence = 0,  .right_assoc = 0}
     };
 
     paren_status status = parenthesis_check(operation);
@@ -118,7 +138,7 @@ var eval(char *operation, bool mathlib) {
 
     eval_depth++;
 
-    var buff = parse_operation(tmp, math_table, funcCount, uniOps, multiOps, mathlib);
+    var buff = parse_operation(tmp, math_table, funcCount, operators, mathlib);
 
     switch (buff.type) {
         case BC_NONE:
@@ -185,104 +205,107 @@ var calc(var left, const char *operation, var right, bool mathLib) {
         return out;
     }
 
+    opcode code = get_opcode(operation);
+
     if (left.type == BC_STR || right.type == BC_STR) {
 
-        if (strcmp(operation, "+") == 0) {
+        switch (code) {
+            case ADD: {
+                if (left.type != right.type) {
+                    char type[0x20] = {0};
+                    var wrong = (left.type != BC_STR) ? left : right;
 
-            if (left.type != right.type) {
-                char type[0x20] = {0};
-                var wrong = (left.type != BC_STR) ? left : right;
+                    getItemTypeStr(type, sizeof(type), wrong);
 
-                getItemTypeStr(type, sizeof(type), wrong);
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("cannot concatenate strings with '%s' type\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type);
 
-                printc("ceval", BC_PROMPT_COLOR, WHITE);
-                printf(": ");
-                printc("cannot concatenate strings with '%s' type\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type);
+                    return out;
+                }
 
-                return out;
-            }
+                if (strlen(left.data.s) < 2 || strlen(right.data.s) < 2) {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("invalid string format\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                    return out;
+                }
 
-            if (strlen(left.data.s) < 2 || strlen(right.data.s) < 2) {
-                printc("ceval", BC_PROMPT_COLOR, WHITE);
-                printf(": ");
-                printc("invalid string format\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                return out;
-            }
+                out.type = BC_STR;
+                out.data.s = bc_strcat(left.data.s, right.data.s);
 
-            out.type = BC_STR;
-            out.data.s = bc_strcat(left.data.s, right.data.s);
-
-            if (!out.data.s) {
-                out.type = BC_NONE;
-                return out;
-            }
-
-            return out;
-        } else if (strcmp(operation, "*") == 0) {
-
-            var notStr;
-            var Str;
-
-            if (left.type != BC_STR) {
-                notStr = left;
-                Str = right;
-            } else {
-                notStr = right;
-                Str = left;
-            }
-
-            if (notStr.type != BC_INT && notStr.type != BC_CHR) {
-                char type[0x20] = {0};
-
-                getItemTypeStr(type, sizeof(type), notStr);
-
-                printc("ceval", BC_PROMPT_COLOR, WHITE);
-                printf(": ");
-                printc("cannot multiply strings with type '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type);
-
-                return out;
-            }
-
-            int64_t multiplier = notStr.data.i; 
-            char *multiplied_str = Str.data.s;
-
-            if (multiplier <= 0) {
-                printc("ceval", BC_PROMPT_COLOR, WHITE);
-                printf(": ");
-                printc("to multiply strings the multiplier must be at least greater than 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                return out;
-            }
-
-            if (((ssize_t)strlen(multiplied_str) - 2) * (size_t)multiplier > MAX_CHAR) {
-                printc("ceval", BC_PROMPT_COLOR, WHITE);
-                printf(": ");
-                printc("the resultant string must be less than %d characters long\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, MAX_CHAR);
-                return out;
-            }
-
-            out.type = BC_STR;
-            char *result = strdup(multiplied_str);
-            if (!result) {
-                out.type = BC_NONE;
-                return out;
-            }
-
-            for (size_t i = 1; i < (size_t)multiplier; i++) {
-                char *old = result;
-                result = bc_strcat(result, multiplied_str);
-
-                SAFE_FREE(old);
-                if (!result) { 
+                if (!out.data.s) {
                     out.type = BC_NONE;
                     return out;
                 }
+
+                return out;
             }
 
-            out.data.s = result;
-            return out;
-        } else {
+            case MUL: {
+                var notStr;
+                var Str;
 
-            if (strcmp(operation, "==") == 0) {
+                if (left.type != BC_STR) {
+                    notStr = left;
+                    Str = right;
+                } else {
+                    notStr = right;
+                    Str = left;
+                }
+
+                if (notStr.type != BC_INT && notStr.type != BC_CHR) {
+                    char type[0x20] = {0};
+
+                    getItemTypeStr(type, sizeof(type), notStr);
+
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("cannot multiply strings with type '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type);
+
+                    return out;
+                }
+
+                int64_t multiplier = notStr.data.i; 
+                char *multiplied_str = Str.data.s;
+
+                if (multiplier <= 0) {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("to multiply strings the multiplier must be at least greater than 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                    return out;
+                }
+
+                if (((ssize_t)strlen(multiplied_str) - 2) * (size_t)multiplier > MAX_CHAR) {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("the resultant string must be less than %d characters long\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, MAX_CHAR);
+                    return out;
+                }
+
+                out.type = BC_STR;
+                char *result = strdup(multiplied_str);
+                if (!result) {
+                    out.type = BC_NONE;
+                    return out;
+                }
+
+                for (size_t i = 1; i < (size_t)multiplier; i++) {
+                    char *old = result;
+                    result = bc_strcat(result, multiplied_str);
+
+                    SAFE_FREE(old);
+                    if (!result) { 
+                        out.type = BC_NONE;
+                        return out;
+                    }
+                }
+
+                out.data.s = result;
+                return out;
+            }
+
+            case EQ: {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
@@ -292,17 +315,21 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
                 out.data.b = bc_strcmp(left.data.s, right.data.s) == 0;
                 return out;
-            } else if (strcmp(operation, "!=") == 0) {
+            }
+
+            case NE: {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
-                    out.data.b = false;
+                    out.data.b = true;
                     return out;
                 }
 
                 out.data.b = bc_strcmp(left.data.s, right.data.s) != 0;
                 return out;
-            } else if (strcmp(operation, ">") == 0) {
+            }
+
+            case GR: {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
@@ -312,7 +339,9 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
                 out.data.b = bc_strcmp(left.data.s, right.data.s) > 0;
                 return out;
-            } else if (strcmp(operation, ">=") == 0) {
+            }
+
+            case GRE: {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
@@ -322,7 +351,9 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
                 out.data.b = bc_strcmp(left.data.s, right.data.s) >= 0;
                 return out;
-            } else if (strcmp(operation, "<") == 0) {
+            }
+
+            case LS: {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
@@ -332,7 +363,9 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
                 out.data.b = bc_strcmp(left.data.s, right.data.s) < 0;
                 return out;
-            } else if (strcmp(operation, "<=") == 0) {
+            }
+
+            case LSE: {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
@@ -342,10 +375,13 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
                 out.data.b = bc_strcmp(left.data.s, right.data.s) <= 0;
                 return out;
-            } else {
+            }
+
+            default: {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("unsupported operand for 'str' type: '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, operation);
+
                 return out;
             }
         }
@@ -382,226 +418,180 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
     float64 result = 0;
 
-    if (strcmp(operation, "+") == 0)
-        result = num1 + num2;
+    if (left.type == BC_FLOAT || right.type == BC_FLOAT)
+        out.type = BC_FLOAT;
 
-    else if (strcmp(operation, "-") == 0)
-        result = num1 - num2;
+    switch (code) {
+        case ADD:
+            result = num1 + num2;
+            break;
+        case SUB:
+            result = num1 - num2;
+            break;
+        case DIV:
+            if (num2 == 0.0) {
 
-    else if (strcmp(operation, "*") == 0)
-        result = num1 * num2;
+                if (!mathLib) {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("cannot divide by 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                    out.type = BC_NONE;
+                    return out;
+                }
 
-    else if (strcmp(operation, "/") == 0) {
+                int32_t negative = signbit(num1) ^ signbit(num2);
+                result = negative ? -INFINITY : INFINITY;
 
-        if (num2 == 0.0) {
+            } else
+                result = num1 / num2;
 
-            if (!mathLib) {
+            break;
+
+        case MUL:
+            result = num1 * num2;
+            break;
+
+        case MOD:
+            if (num2 == 0) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("cannot divide by 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                out.type = BC_NONE;
                 return out;
             }
 
-            int32_t negative = signbit(num1) ^ signbit(num2);
-            result = negative ? -INFINITY : INFINITY;
+            result = fmod(num1, num2);
+            break;
 
-        } else
-            result = num1 / num2;
-    }
-
-    else if (strcmp(operation, "%") == 0) {
-
-        if (num2 == 0) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("cannot divide by 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return out;
-        }
-
-        result = fmod(num1, num2);
-    }
-
-    else if (strcmp(operation, "^") == 0) {
-
-        if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("'^' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return out;
-        }
-
-        result = (int64_t)num1 ^ (int64_t)num2;
-    }
-
-    else if (strcmp(operation, "&") == 0) {
-
-        if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("'&' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return out;
-        }
-
-        result = (int64_t)num1 & (int64_t)num2;
-    }
-
-    else if (strcmp(operation, "|") == 0) {
-
-        if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("'|' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return out;
-        }
-
-        result = (int64_t)num1 | (int64_t)num2;
-    }
-
-    else if (strcmp(operation, "<") == 0) {
-
-        out.type = BC_BOOL;
-        out.data.b = (num1 < num2) && !T_CMP(num1, num2);
-        return out;
-    }
-
-    else if (strcmp(operation, ">") == 0) {
-
-        out.type = BC_BOOL;
-        out.data.b = (num1 > num2) && !T_CMP(num1, num2);
-        return out;
-    }
-
-    else if (strcmp(operation, "<=") == 0) {
-
-        out.type = BC_BOOL;
-        out.data.b = (num1 < num2) || T_CMP(num1, num2);
-        return out;
-    }
-
-    else if (strcmp(operation, ">=") == 0) {
-
-        out.type = BC_BOOL;
-        out.data.b = (num1 > num2) || T_CMP(num1, num2);
-        return out;
-    }
-
-    else if (strcmp(operation, "!=") == 0) {
-
-        out.type = BC_BOOL;
-        out.data.b = T_CMP(num1, num2);
-        return out;
-    }
-
-    else if (strcmp(operation, "==") == 0) {
-
-        out.type = BC_BOOL;
-
-        if (isnan(num1) || isnan(num2))
-            out.data.b = false;
-
-        else if (isinf(num1) || isinf(num2))
-            out.data.b = (num1 == num2);
-
-        else
-            out.data.b = T_CMP(num1, num2);
-
-        return out;
-    }
-
-    else if (strcmp(operation, "**") == 0) {
-
-        if (num1 < 0 && right.type == BC_INT) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("negative base with non-integer exponent\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return out;
-        }
-
-        result = pow(num1, num2);
-    }
-
-
-    else if (strcmp(operation, "^^") == 0) {
-
-        if (right.type != BC_INT) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("tetration height must be of type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return out;
-        } else if (num2 < 0) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("tetration height must be non-negative\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return out;
-        } else if (num1 == 0.0 && num2 == 0.0) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("0^^0 is undefined\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);            
-            return out;
-        } else {
-
-            result = tetration(num1, (int32_t)num2);
-
-            if (isnan(result)) {
+        case XOR:
+            if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("invalid input for tetration\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                printc("'^' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                out.type = BC_NONE;
+                return out;
             }
-        }
-    }
 
-    else if (strcmp(operation, "<<") == 0) {
+            result = (int64_t)num1 ^ (int64_t)num2;
 
-        if (num2 < 0 || num2 >= sizeof(uint64_t) * 8) {
+            break;
+
+        case AND:
+            if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("'&' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                out.type = BC_NONE;
+                return out;
+            }
+
+            result = (int64_t)num1 & (int64_t)num2;
+            break;
+
+        case OR:
+            if (left.type == BC_FLOAT || right.type == BC_FLOAT) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("'|' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                out.type = BC_NONE;
+                return out;
+            }
+
+            result = (int64_t)num1 | (int64_t)num2;
+            break;
+
+        case LS:
+            out.type = BC_BOOL;
+            out.data.b = (num1 < num2) && !T_CMP(num1, num2);
+            break;
+
+        case LSE:
+            out.type = BC_BOOL;
+            out.data.b = (num1 <= num2) && !T_CMP(num1, num2);
+            break;
+
+        case GR:
+            out.type = BC_BOOL;
+            out.data.b = (num1 > num2) && !T_CMP(num1, num2);
+            break;
+
+        case GRE:
+            out.type = BC_BOOL;
+            out.data.b = (num1 >= num2) || T_CMP(num1, num2);
+            break;
+
+        case NE:
+            out.type = BC_BOOL;
+            out.data.b = !T_CMP(num1, num2);
+            break;
+
+        case EQ:
+            out.type = BC_BOOL;
+
+            if (isnan(num1) || isnan(num2))
+                out.data.b = false;
+
+            else if (isinf(num1) || isinf(num2))
+                out.data.b = (num1 == num2);
+
+            else
+                out.data.b = T_CMP(num1, num2);
+
+            break;
+
+        case SHL:
+            if (num2 < 0 || num2 >= sizeof(uint64_t) * 8) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("invalid shift amount\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                out.type = BC_NONE;
+                return out;
+            }
+
+            result = (uint64_t)num1 << (uint64_t)num2;
+            break;
+
+        case SHR:
+            if (num2 < 0 || num2 >= sizeof(int64_t) * 8) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("invalid shift amount\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                out.type = BC_NONE;
+                return out;
+            }
+
+            result = (int64_t)num1 >> (int64_t)num2;
+            break;
+
+        case LAND:
+            out.type = BC_BOOL;
+            out.data.b = (num1 != 0 && num2 != 0);
+            break;
+
+        case LOR:
+            out.type = BC_BOOL;
+            out.data.b = (num1 != 0 || num2 != 0);
+            break;
+
+        default:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
-            printc("invalid shift\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+            printc("Unknown operator '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, operation);
+            out.type = BC_NONE;
             return out;
-        }
-
-        result = (uint64_t)num1 << (uint64_t)num2;
     }
 
-    else if (strcmp(operation, ">>") == 0) {
-
-        if (num2 < 0 || num2 >= sizeof(int64_t) * 8) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("invalid shift\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return out;
-        }
-
-        result = (int64_t)num1 >> (int64_t)num2;
-    }
-
-    else if (strcmp(operation, "&&") == 0) {
-
-        out.type = BC_BOOL;
-        out.data.b = (num1 != 0 && num2 != 0);
+    if (out.type == BC_BOOL)
         return out;
-    }
-
-    else if (strcmp(operation, "||") == 0) {
-
-        out.type = BC_BOOL;
-        out.data.b = (num1 != 0 || num2 != 0);
-        return out;
-    }
-
-    else {
-        printc("ceval", BC_PROMPT_COLOR, WHITE);
-        printf(": ");
-        printc("Unknown operator '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, operation);
+    else if (out.type == BC_FLOAT) {
+        out.data.f = result;
         return out;
     }
 
     if (T_CMP(result, (int64_t)result)) {
-
         out.type = BC_INT;
         out.data.i = (int64_t)result;
-
     } else {
-
         out.type = BC_FLOAT;
         out.data.f = result;
     }
@@ -893,7 +883,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
     return func_section(operation, funcCount, functions, mathlib);
 }
 
-var parse_operation(char *operation, const FuncEntry *functions, size_t funcCount, const char *uniOps, const char **multiOps, bool mathlib) {
+var parse_operation(char *operation, const FuncEntry *functions, size_t funcCount, ops *operator, bool mathlib) {
     char op[0x4] = {0};
 
     while (is_wrapped_by_parentheses(operation)) {
@@ -908,7 +898,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
         trimEnd(operation);
     }
 
-    int16_t op_pos = find_main_operator_full(operation, multiOps, uniOps, op);
+    int16_t op_pos = find_main_operator_full(operation, operator, op);
 
     if (op_pos == -1)
         return parse_single(operation, functions, funcCount, mathlib);
@@ -933,8 +923,18 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
         return (var){ .type = BC_NONE };
     }
 
+    printf("num1: '%s'\n", num1);
+    printf("num2: '%s'\n", num2);
+
     var val1 = eval(num1, mathlib);
+
+    if (val1.type == BC_NONE)
+        return (var){.type = BC_NONE};
+
     var val2 = eval(num2, mathlib);
+
+    if (val2.type == BC_NONE)
+        return (var){.type = BC_NONE};
 
     var result = calc(val1, op, val2, mathlib);
 

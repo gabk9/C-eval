@@ -1006,8 +1006,9 @@ void setColor(color4 color) {
 }
 
 void print_manual(void) {
-    printf("'ceval' a simple eval function implemented in C, operand precedence does not work unless if you use parenthesis, it support various types of operands.\n"
-            "type 'mathlib' if you're insite ceval to turn on the math library.\n"
+    printf("'ceval' a simple eval function implemented in C, \n"
+            "type 'mathlib' if you're insite ceval to turn on the math library,"
+            "'cls' or 'clear' to clear the screen and scrollback buffer, call man() to display the manual.\n"
     );
     printf("\nUsage:\n\tbc [OPTION...]\n\nOptions:\n");
     printf("\t'-h', '--help'      displays manual\n");
@@ -1095,11 +1096,6 @@ void print_manual(void) {
 
 
         "\nFunctions: (mathlib must be on to grant access)\n"
-        "\tclear, cls     : Clears the calculator scrollback\n"
-        "\n"
-        "\tmathlib        : Toggles mathlib\n"
-        "\t                 Explanation: turns on/off functions and other numeric systems\n"
-        "\n"
         "\tscale(X)       : Sets decimal precision\n"
         "\t                 Example: scale(3.1415) = 4\n"
         "\t                 Explanation: Number of digits after decimal point\n"

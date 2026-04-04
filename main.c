@@ -136,8 +136,9 @@ int32_t main(int32_t argc, char **argv) {
     while (true) {
         if (!appear) {
             if (show_init)
-                printf("'ceval' a simple eval function implemented in C, operand precedence does not work unless if you use parenthesis, it support various types of operands.\n"
-                        "type 'mathlib' if you're insite ceval to turn on the math library, and call man() to see the manual.\n"
+                printf("'ceval' a simple eval function implemented in C, \n"
+                        "type 'mathlib' if you're insite ceval to turn on the math library,"
+                        "'cls' or 'clear' to clear the screen and scrollback buffer, call man() to display the manual.\n"
                 );
             if (mathlib)
                 printc("on\n\n", GREEN, WHITE);

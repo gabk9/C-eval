@@ -4,8 +4,6 @@
     HANDLE hConsole;
 #endif
 
-#define VERSION "r0.1.70"
-
 #define BC_MATHLIB 0x0001
 #define BC_QUIET   0x0002
 #define BC_VERSION 0x0004
@@ -136,7 +134,7 @@ int32_t main(int32_t argc, char **argv) {
     while (true) {
         if (!appear) {
             if (show_init)
-                printf("'ceval' a simple eval function implemented in C, \n"
+                printf("ceval "VERSION"\na simple eval function implemented in C, \n"
                         "type 'mathlib' if you're insite ceval to turn on the math library,"
                         "'cls' or 'clear' to clear the screen and scrollback buffer, call man() to display the manual.\n"
                 );

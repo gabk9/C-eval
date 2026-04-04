@@ -66,20 +66,17 @@ static var numericDebug(const char *buf) {
             return (var){.type = BC_FLOAT, .data.f = NAN};
         }
 
-        size_t end = len - 1;
-        while (strchr("kmbtKMBT", buf[end])) end --;
-
-        for (size_t i = pref_len; i <= end; i++) {
+        for (size_t i = pref_len; buf[i]; i++) {
             if (buf[i] != '0' && buf[i] != '1') {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("invalid binary digit: '%c\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, buf[i]);
+                printc("invalid binary digit: '%c'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, buf[i]);
 
                 break;
             }
         }
 
-            return (var){.type = BC_FLOAT, .data.f = NAN};
+        return (var){.type = BC_FLOAT, .data.f = NAN};
     } else if (strncasecmp(buf, HEX_PREF, strlen(HEX_PREF)) == 0) {
         size_t len = strlen(buf);
 
@@ -94,14 +91,6 @@ static var numericDebug(const char *buf) {
         }
 
         for (size_t i = pref_len; buf[i]; i++) {
-            if (strchr("kmbtKMBT", buf[i])) {
-                printc("ceval", BC_PROMPT_COLOR, WHITE);
-                printf(": ");
-                printc("hexadecimal literal does not support suffixes\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-                break;
-            }
-
             if (!isxdigit(buf[i])) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
@@ -125,10 +114,7 @@ static var numericDebug(const char *buf) {
             return (var){.type = BC_FLOAT, .data.f = NAN};
         }
 
-        size_t end = len - 1;
-        while (strchr("kmbtKMBT", buf[end])) end --;
-
-        for (size_t i = pref_len; i <= end; i++) {
+        for (size_t i = pref_len; buf[i]; i++) {
             if (buf[i] < '0' || buf[i] > '7') {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
@@ -149,43 +135,6 @@ static var numericDebug(const char *buf) {
 }
 
 static var mathlibPart(char *buf, bool mathlib) {
-    const struct {
-        char suffix;
-        float64 mult;
-    } suffix[] = {
-        {.suffix = 'k', .mult = 1e3},
-        {.suffix = 'm', .mult = 1e6},
-        {.suffix = 'b', .mult = 1e9},
-        {.suffix = 't', .mult = 1e12},
-    };
-
-    bool has_exp = strncasecmp(buf, HEX_PREF, strlen(HEX_PREF)) == 0;
-    bool allow_suffix = (!isHex(buf) && !has_exp);
-
-    size_t len = strlen(buf);
-    if (allow_suffix) {
-        for (size_t mi = 0; mi < sizeof(suffix) / sizeof(*suffix); mi++) {
-            if (len > 1 && (buf[len-1] == suffix[mi].suffix || buf[len-1] == toupper(suffix[mi].suffix))) {
-                buf[len-1] = '\0';
-                if (buf[len-2] == '!')
-                    return (var){.type = BC_INT, .data.i = 0};
-
-                var tmp = eval(buf, mathlib);
-
-                if (tmp.type == BC_STR)
-                    SAFE_FREE(tmp.data.s);
-
-                if (tmp.type == BC_NONE)
-                    return (var){.type = BC_FLOAT, .data.f = NAN};
-
-                if (tmp.type == BC_FLOAT)
-                    return (var){.type = BC_FLOAT, .data.f = tmp.data.f * suffix[mi].mult};
-
-                return (var){.type = BC_INT, .data.i = tmp.data.i * suffix[mi].mult};
-            }
-        }
-    }
-
     if (strcmp(buf, PI_VAR) == 0) return (var){.type = BC_FLOAT, .data.f = PI};
     else if (strcmp(buf, E_VAR) == 0) return (var){.type = BC_FLOAT, .data.f = E};
 

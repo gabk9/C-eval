@@ -846,20 +846,18 @@ void charRm(char *str, int8_t targ) {
 bool isBin(const char *str) {
     if (!str || !*str) return false;
 
-    size_t end = strlen(str) - 1;
-    while (strchr("kmbtKMBT", str[end])) end --;
-
     const size_t bin_index = strlen(BIN_PREF);
 
     if (strncasecmp(str, BIN_PREF, bin_index) != 0)
         return false;
 
-    for (uint16_t i = bin_index; i <= end; i++) {
+    uint16_t i = bin_index;
+    for (; str[i]; i++) {
         if (str[i] != '1' && str[i] != '0')
             return false;
     }
 
-    return end >= strlen(BIN_PREF);
+    return i > bin_index;
 }
 
 bool isHex(const char *str) {
@@ -873,31 +871,29 @@ bool isHex(const char *str) {
     if (!str[hex_index])
         return false;
 
-    for (size_t i = hex_index; str[i]; i++) {
+    size_t i  = hex_index;
+    for (; str[i]; i++) {
         if (!isxdigit((unsigned char)str[i]))
             return false;
     }
 
-    return true;
+    return i > hex_index;
 }
 
 bool isOct(const char *str) {
     if (!str || !*str) return false;
-
-    size_t end = strlen(str) - 1;
-    while (strchr("kmbtKMBT", str[end])) end --;
-
     const size_t oct_index = strlen(OCT_PREF);
 
     if (strncasecmp(str, OCT_PREF, oct_index) != 0)
         return false;
 
-    for (uint16_t i = oct_index; i <= end; i++) {
+    uint16_t i = oct_index;
+    for (; str[i]; i++) {
         if (str[i] < '0' || str[i] > '7')
             return false;
     }
 
-    return end >= strlen(OCT_PREF);
+    return i > oct_index;
 }
 
 int16_t strchar(const char *str, int8_t chr) {
@@ -1006,7 +1002,7 @@ void setColor(color4 color) {
 }
 
 void print_manual(void) {
-    printf("'ceval' a simple eval function implemented in C, \n"
+    printf("ceval "VERSION"\na simple eval function implemented in C, \n"
             "type 'mathlib' if you're insite ceval to turn on the math library,"
             "'cls' or 'clear' to clear the screen and scrollback buffer, call man() to display the manual.\n"
     );
@@ -1285,19 +1281,7 @@ void print_manual(void) {
         "\t             Explanation: stores the max value of a random function\n"
         "\n"
 
-        "\nSuffixes: (only works for non hexadecimals and mathlib must be on to grant access)\n"
-        "\tK   : 1.000               (1e+3)\n"
-        "\t      Example: 5K = 5.000\n"
-        "\n"
-        "\tM   : 1.000.000           (1e+6)\n"
-        "\t      Example: 3M = 3.000.000\n"
-        "\n"
-        "\tB   : 1.000.000.000       (1e+9)\n"
-        "\t      Example: 2B = 2.000.000.000\n"
-        "\n"
-        "\tT   : 1.000.000.000.000   (1e+12)\n"
-        "\t      Example: 1T = 1.000.000.000.000\n"
-        "\n"
+        "\nSuffixes:\n"
         "\t'!' : factorial\n"
         "\t      Example: 5! = 120 / 5!! = 15\n"
 

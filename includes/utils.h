@@ -23,6 +23,8 @@
     #include <unistd.h>
 #endif
 
+#define VERSION "r0.1.78"
+
 #define E_VAR "E"
 #define PI_VAR "PI"
 #define ANS_VAR "ans"

@@ -64,8 +64,7 @@ var eval(char *operation, bool mathlib) {
 
     size_t funcCount = sizeof(math_table) / sizeof(*math_table);
 
-    ops operators[] = {
-        {.op = "**",  .precedence = 7,  .right_assoc = 1},
+    const ops operators[] = {
         {.op = "<<",  .precedence = 4,  .right_assoc = 0},
         {.op = ">>",  .precedence = 4,  .right_assoc = 0},
         {.op = "<=",  .precedence = 3,  .right_assoc = 0},
@@ -883,7 +882,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
     return func_section(operation, funcCount, functions, mathlib);
 }
 
-var parse_operation(char *operation, const FuncEntry *functions, size_t funcCount, ops *operator, bool mathlib) {
+var parse_operation(char *operation, const FuncEntry *functions, size_t funcCount, const ops *operator, bool mathlib) {
     char op[0x4] = {0};
 
     while (is_wrapped_by_parentheses(operation)) {

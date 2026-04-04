@@ -108,7 +108,7 @@ void num_snprintf(char *buff, size_t size, var num) {
     if (num.type == BC_INT || num.type == BC_CHR)
         snprintf(buff, size, "%" PRId64, num.data.i);
     else {
-        snprintf(buff, size, "%lf", num.data.f);
+        snprintf(buff, size, "%.*lf", DBL_PRECISION, num.data.f);
 
         size_t end = strlen(buff) - 1;
 
@@ -323,7 +323,7 @@ bool isalldigit(const char *s) {
     return false;
 }
 
-int16_t find_main_operator_full(const char *s, ops *operators, char *foundOp) {
+int16_t find_main_operator_full(const char *s, const ops *operators, char *foundOp) {
     int32_t len = strlen(s);
 
     int32_t depth = 0;
@@ -579,170 +579,6 @@ void trim(char *str) {
         i++;
     }
     str[i] = '\0';
-}
-
-float64 parse_base_fraction(const char *s, int8_t base) {
-    float64 result = 0.0;
-    float64 frac = 0.0;
-    float64 div = base;
-    int8_t seen_dot = 0;
-
-    for (; *s; s++) {
-        if (*s == '.') {
-            if (seen_dot) break;
-            seen_dot = 1;
-            continue;
-        }
-
-        int32_t digit;
-        if (*s >= '0' && *s <= '9') digit = *s - '0';
-        else if (*s >= 'a' && *s <= 'f') digit = *s - 'a' + 10;
-        else if (*s >= 'A' && *s <= 'F') digit = *s - 'A' + 10;
-        else break;
-
-        if (digit >= base) break;
-
-        if (!seen_dot) {
-            result = result * base + digit;
-        } else {
-            frac += digit / div;
-            div *= base;
-        }
-    }
-
-    return result + frac;
-}
-
-float64 parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok) {
-    *ok = 0;
-
-    if (!str || !*str)
-        return 0.0;
-
-    char *cpy = strdup(str);
-    charRm(cpy, ' ');
-
-    int16_t sign = 1;
-    int16_t pos = 0;
-    int32_t base = 0;
-
-    if (cpy[pos] == '-') {
-        sign = -1;
-        pos++;
-    } else if (cpy[pos] == '+') {
-        pos++;
-    }
-
-    bool isBinary = false; 
-    if (strncasecmp(cpy + pos, HEX_PREF, strlen(HEX_PREF)) == 0) {
-        base = 16;
-        pos += 2;
-    } else if (strncasecmp(cpy + pos, BIN_PREF, strlen(BIN_PREF)) == 0) {
-        base = 2;
-        pos += 2;
-    } else if (strncasecmp(cpy + pos, OCT_PREF, strlen(OCT_PREF)) == 0) {
-        base = 8;
-        pos += 2;
-    } else
-        base = 10;
-
-    int16_t num_start = pos;
-
-    bool dot_seen = false;
-
-    while (cpy[pos]) {
-        if (cpy[pos] == '.') {
-            if (dot_seen) break;
-            dot_seen = true;
-            pos++;
-            continue;
-        }
-
-        int32_t digit;
-        if (cpy[pos] >= '0' && cpy[pos] <= '9')
-            digit = cpy[pos] - '0';
-        else if (cpy[pos] >= 'a' && cpy[pos] <= 'f')
-            digit = cpy[pos] - 'a' + 10;
-        else if (cpy[pos] >= 'A' && cpy[pos] <= 'F')
-            digit = cpy[pos] - 'A' + 10;
-        else
-            break;
-
-        if (digit >= base)
-            break;
-
-        pos++;
-    }
-
-    if (pos == num_start) {
-        SAFE_FREE(cpy);
-        return 0.0;
-    }
-
-    float64 mult = 0.0;
-
-    if (strcmp(cpy + pos, PI_VAR) == 0)
-        mult = PI;
-    else if (strcmp(cpy + pos, E_VAR) == 0)
-        mult = E;
-    else if (strcmp(cpy + pos, ANS_VAR) == 0) {
-        if (Ans.type == BC_NONE) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("'ans' is undefined\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-            return NAN;
-        }
-
-        if (Ans.type == BC_STR) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("cannot make juxtapositions operations with strings\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-            return NAN;
-        }
-
-        switch (Ans.type) {
-            case BC_BOOL:
-                mult = (float64)Ans.data.b;
-                break;
-            case BC_CHR:
-            case BC_INT:
-                mult = (float64)Ans.data.i;
-                break;
-            case BC_FLOAT:
-                mult = Ans.data.f;
-                break;
-            default:
-                return NAN;
-        }
-    } else {
-        SAFE_FREE(cpy);
-        return 0.0;
-    }
-
-    char buf[0x40];
-    size_t len = pos - num_start;
-
-    if (len >= sizeof(buf)) {   
-        SAFE_FREE(cpy);
-        return 0.0;
-    }
-
-    strncpy(buf, cpy + num_start, len);
-    buf[len] = '\0';
-
-    float64 value;
-
-    if (!isBinary)
-        value = parse_base_fraction(buf, base);
-    else
-        value = parse_base_fraction(buf, 2);
-
-    *ok = 1;
-    
-    SAFE_FREE(cpy);
-    return sign * value * mult;
 }
 
 bool isBcVariable(const char *str, bool *shouldError) {

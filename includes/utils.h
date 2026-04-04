@@ -23,7 +23,9 @@
     #include <unistd.h>
 #endif
 
-#define VERSION "r0.1.78"
+#define VERSION "r0.1.90"
+
+#define DBL_PRECISION 8
 
 #define E_VAR "E"
 #define PI_VAR "PI"
@@ -91,13 +93,11 @@ bool isBcVariable(const char *str, bool *shouldError);
 void getItemTypeStr(char *buff, size_t size, var item);
 int16_t injectEscape(char *str, const char *error_str);
 void getItemTypeStr(char *buff, size_t size, var item);
-float64 parse_base_fraction(const char *s, int8_t base);
 void int64_to_hex_min(int64_t v, char *out, size_t size);
 bool isBetweenQuotes(const char *action, int16_t quoteMode);
 int8_t getInvalidEscape(const char *str, const char *error_str);
-float64 parse_bin_hex_oct_ans_e_pi(const char *str, int16_t *ok);
 void printc(const char *str, color4 initColor, color4 resetColor, ...);
-int16_t find_main_operator_full(const char *s, ops *operator, char *foundOp);
+int16_t find_main_operator_full(const char *s, const ops *operators, char *foundOp);
 
 #define SAFE_FREE(ptr) do { \
     if (ptr) { \

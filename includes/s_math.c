@@ -428,17 +428,6 @@ var h_atof(const char *str, bool mathlib) {
         return (var){.type = BC_CHR, .data.i = (unsigned char)*buf};
     }
 
-    if (mathlib) {            
-        int16_t ok = 0;
-        float64 hex_pi_e = parse_bin_hex_oct_ans_e_pi(buf, &ok);
-
-        if (isnan(hex_pi_e))
-            return (var){.type = BC_FLOAT, .data.f = NAN};
-
-        if (ok)
-            return (var){.type = BC_FLOAT, .data.f = hex_pi_e};
-    }
-
     bool is_hex = isHex(buf);
 
     bool is_octal = isOct(buf);

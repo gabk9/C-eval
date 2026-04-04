@@ -507,7 +507,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
         case LSE:
             out.type = BC_BOOL;
-            out.data.b = (num1 <= num2) && !T_CMP(num1, num2);
+            out.data.b = (num1 < num2) || T_CMP(num1, num2);
             break;
 
         case GR:
@@ -517,7 +517,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
         case GRE:
             out.type = BC_BOOL;
-            out.data.b = (num1 >= num2) || T_CMP(num1, num2);
+            out.data.b = (num1 > num2) || T_CMP(num1, num2);
             break;
 
         case NE:
@@ -922,9 +922,6 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
 
         return (var){ .type = BC_NONE };
     }
-
-    printf("num1: '%s'\n", num1);
-    printf("num2: '%s'\n", num2);
 
     var val1 = eval(num1, mathlib);
 

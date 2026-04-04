@@ -121,6 +121,17 @@ var eval(char *operation, bool mathlib) {
         return (var){.type = BC_NONE};
     }
 
+    for (size_t i = 0; operation[i]; i++) {
+        if ((unsigned char)operation[i] > 0x80) {
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("cannot work with multi-byte characters\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+    
+            return (var){.type = BC_NONE};
+        }
+    }
+
+
     char tmp[MAX_CHAR] = {0};
     size_t len = strlen(operation);
     memcpy(tmp, operation, len + 1);
@@ -796,55 +807,63 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
         size_t len = strlen(operation);
 
         if (len > 1 && operation[0] == '"') {
-
             char result[0x400] = {0};
             size_t res_len = 0;
-
             const char *p = operation;
 
             while (*p) {
-
-                while (isspace((unsigned char)*p))
-                    p++;
+                while (isspace((unsigned char)*p)) p++;
 
                 if (*p != '"')
                     break;
 
                 p++;
 
-                while (*p) {
-
-                    if (*p == '"') {
-
-                        uint16_t backslashes = 0;
-                        const char *q = p - 1;
-
-                        while (q >= operation && *q == '\\') {
-                            backslashes++;
-                            q--;
-                        }
-
-                        if ((backslashes & 1) == 0)
-                            break;
-                    }
-
+                while (*p && *p != '"') {
                     result[res_len++] = *p;
                     p++;
                 }
 
-                if (*p != '"') {
-                    printc("ceval", BC_PROMPT_COLOR, WHITE);
-                    printf(": ");
-                    printc("unclosed quote\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                if (*p == '"')
+                    p++;
+            }
 
-                    return (var){ .type = BC_NONE };
+            while (isspace((unsigned char)*p)) p++;
+
+            bool dquote = false;
+            bool squote = false;
+
+            for (size_t i = 0; operation[i]; i++) {
+                unsigned char chr = (unsigned char)operation[i];
+
+                if (chr == '"' && !squote) {
+                    dquote = !dquote;
+                    continue;
                 }
 
-                p++;
+                if (chr == '\'' && !dquote) {
+                    squote = !squote;
+                    continue;
+                }
+
+                if (!dquote && !squote) {
+                    if (!isalnum(chr) && !strchr("+-/*^%&|=() ", chr)) {
+
+                        printc("ceval", BC_PROMPT_COLOR, WHITE);
+                        printc(": ", WHITE, GET_BASE_COLOR(BC_PROMPT_COLOR));
+
+                        if (chr < 0x80)
+                            printf("illegal character: '%c'\n", chr);
+                        else
+                            printf("illegal character: '"HEX_PREF"%X'\n", chr);
+
+                        setColor(WHITE);
+                        return (var){ .type = BC_NONE };
+                    }
+                }
             }
 
             if (res_len > 0) {
-
                 char *final = malloc(res_len + 3);
                 if (!final) {
                     printc("ceval", BC_PROMPT_COLOR, WHITE);

@@ -23,7 +23,7 @@
     #include <unistd.h>
 #endif
 
-#define VERSION "r0.1.90"
+#define VERSION "r0.2.04"
 
 #define DBL_PRECISION 8
 

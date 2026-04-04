@@ -411,6 +411,7 @@ var h_atof(const char *str, bool mathlib) {
             len--;
         }
 
+        unsigned char chr = (unsigned char)*buf;
         if (len > 1) {
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
@@ -423,9 +424,15 @@ var h_atof(const char *str, bool mathlib) {
             printc("missing the character inside quotes\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
             return (var){.type = BC_FLOAT, .data.f = NAN};
+        } else if (chr > 0x80) {
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("cannot work with multi-byte characters\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            return (var){.type = BC_FLOAT, .data.f = NAN};
         }
 
-        return (var){.type = BC_CHR, .data.i = (unsigned char)*buf};
+        return (var){.type = BC_CHR, .data.i = chr};
     }
 
     bool is_hex = isHex(buf);
@@ -465,7 +472,7 @@ var h_atof(const char *str, bool mathlib) {
 
         if (!isValid && shouldError) {
             for (size_t i = 0; buf[i]; i++) {
-                if (strchr("()\"'!. _+-/*^%&|<>", buf[i]))
+                if (strchr("()\"'!. _+-/~*^%&|<>", buf[i]))
                     continue;
 
                 if (!isalnum((unsigned char)buf[i])) {
@@ -475,22 +482,10 @@ var h_atof(const char *str, bool mathlib) {
 
                     if (chr < 0x80)
                         printf("illegal character: '%c'\n", chr);
-                    else {
-                        uint16_t len = 1;
+                    else
+                        printf("illegal character: '"HEX_PREF"%X'\n", chr);
 
-                        if ((chr & 0xE0) == 0xC0) len = 2;
-                        else if ((chr & 0xF0) == 0xE0) len = 3;
-                        else if ((chr & 0xF8) == 0xF0) len = 4;
-
-                        printf("illegal character: '");
-
-                        for (size_t j = 0; j < len && buf[i+j]; j++)
-                            putchar((unsigned char)buf[i+j]);
-
-                        printf("'\n");
-                    }
-
-                    setColor(GET_BASE_COLOR(WHITE));
+                    setColor(WHITE);
                     return (var){ .type = BC_FLOAT, .data.f = NAN };
                 }
             }

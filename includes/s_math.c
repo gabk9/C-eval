@@ -1276,7 +1276,7 @@ char *s_oct(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            val1 = (int64_t)tmp.data.i;
+            val1 = (int64_t)tmp.data.b;
             break;
         case BC_CHR:
         case BC_INT:
@@ -1301,6 +1301,9 @@ char *s_oct(char *operation) {
 
 
     bool isNeg = val1 < 0;
+
+    if (isNeg)
+        val1 = -val1;
 
     const size_t size = 0x80;
 
@@ -1490,7 +1493,7 @@ char *s_hex(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            val1 = (int64_t)tmp.data.i;
+            val1 = (int64_t)tmp.data.b;
             break;
         case BC_CHR:
         case BC_INT:
@@ -1538,7 +1541,7 @@ char *s_bin(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            val1 = (int64_t)tmp.data.i;
+            val1 = (int64_t)tmp.data.b;
             break;
         case BC_CHR:
         case BC_INT:

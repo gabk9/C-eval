@@ -1,5 +1,7 @@
-#include "utils.h"
 #include "eval.h"
+#include "utils.h"
+#include <ctype.h>
+#include "s_math.h"
 
 #if !defined(_WIN64) && !defined(__linux__) && !defined(__APPLE__) && !defined(__ANDROID__)
     #error "Operational system not recognized, terminating program!!"

@@ -1,26 +1,40 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <math.h>
+#ifndef _CRT_SECURE_NO_WARNINGS
+    #define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#ifndef _CRT_NONSTDC_NO_WARNINGS
+    #define _CRT_NONSTDC_NO_WARNINGS
+#endif
+
 #include <time.h>
 #include "types.h"
-#include <ctype.h>
-#include <float.h>
 #include <stdio.h>
+#include <float.h>
 #include <stdlib.h>
-#include "s_math.h"
 #include <string.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <inttypes.h>
 
+
 #ifdef _WIN64
     #include <io.h>
     #include <windows.h>
+
     #define _isatty isatty
+    #define STDIN_FILENO 0
+    #define strcasecmp _stricmp
+    #define strncasecmp _strnicmp
+    #define strdup _strdup
+
     extern HANDLE hConsole;
 #else
     #include <unistd.h>
+    #include <stddef.h>
+    #include <strings.h>
 #endif
 
 #define VERSION "r0.2.09"

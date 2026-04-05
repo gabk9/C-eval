@@ -2,6 +2,7 @@
 #define S_MATH_H 
 
 #define _USE_MATH_DEFINES
+#include "types.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>

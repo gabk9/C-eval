@@ -1,9 +1,12 @@
 #ifndef EVAL_H
 #define EVAL_H
 
+#include "types.h"
 #include <stdbool.h>
-#include "utils.h"
-#include "s_math.h"
+
+#ifndef _WIN64
+typedef unsigned long size_t;
+#endif
 
 #ifdef _WIN64
     #define clear(void) system("cls")

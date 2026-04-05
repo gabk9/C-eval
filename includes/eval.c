@@ -1,4 +1,7 @@
 #include "eval.h"
+#include "utils.h"
+#include <ctype.h>
+#include "s_math.h"
 
 static int32_t eval_depth = 0;
 var Ans = { .type = BC_NONE };
@@ -286,7 +289,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                     return out;
                 }
 
-                if (((ssize_t)strlen(multiplied_str) - 2) * (size_t)multiplier > EVAL_STR_MUL_MAX_LEN) {
+                if (((long)strlen(multiplied_str) - 2) * (size_t)multiplier > EVAL_STR_MUL_MAX_LEN) {
                     printc("ceval", BC_PROMPT_COLOR, WHITE);
                     printf(": ");
                     printc("the resultant string must be less than %d characters long\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, EVAL_STR_MUL_MAX_LEN);
@@ -673,7 +676,7 @@ static var lNot_section(char *operation, bool mathlib) {
 static var func_section(char *operation, size_t funcCount, const FuncEntry *functions, bool mathlib) {
     char name[0x100] = {0};
 
-    ssize_t parenthesis_index = strchar(operation, '(');
+    long parenthesis_index = strchar(operation, '(');
     if (parenthesis_index == -1)
         return h_atof(operation, mathlib);
 

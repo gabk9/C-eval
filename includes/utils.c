@@ -105,7 +105,7 @@ void num_snprintf(char *buff, size_t size, var num) {
         exit(EXIT_FAILURE);
     }
 
-    if (num.type == BC_INT || num.type == BC_CHR)
+    if (num.type == BC_INT)
         snprintf(buff, size, "%" PRId64, num.data.i);
     else {
         snprintf(buff, size, "%.*lf", DBL_PRECISION, num.data.f);

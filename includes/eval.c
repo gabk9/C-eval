@@ -286,10 +286,10 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                     return out;
                 }
 
-                if (((ssize_t)strlen(multiplied_str) - 2) * (size_t)multiplier > MAX_CHAR) {
+                if (((ssize_t)strlen(multiplied_str) - 2) * (size_t)multiplier > EVAL_STR_MUL_MAX_LEN) {
                     printc("ceval", BC_PROMPT_COLOR, WHITE);
                     printf(": ");
-                    printc("the resultant string must be less than %d characters long\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, MAX_CHAR);
+                    printc("the resultant string must be less than %d characters long\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, EVAL_STR_MUL_MAX_LEN);
                     return out;
                 }
 
@@ -863,22 +863,20 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                 }
             }
 
-            if (res_len > 0) {
-                char *final = malloc(res_len + 3);
-                if (!final) {
-                    printc("ceval", BC_PROMPT_COLOR, WHITE);
-                    printf(": ");
-                    printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                    return (var){ .type = BC_NONE };
-                }
-
-                final[0] = '"';
-                memcpy(final + 1, result, res_len);
-                final[res_len + 1] = '"';
-                final[res_len + 2] = '\0';
-
-                return (var){ .type = BC_STR, .data.s = final };
+            char *final = malloc(res_len + 3);
+            if (!final) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                return (var){ .type = BC_NONE };
             }
+
+            final[0] = '"';
+            memcpy(final + 1, result, res_len);
+            final[res_len + 1] = '"';
+            final[res_len + 2] = '\0';
+
+            return (var){ .type = BC_STR, .data.s = final };
         }
 
         var tmp = h_atof(operation, mathlib);

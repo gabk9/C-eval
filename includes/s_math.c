@@ -683,64 +683,69 @@ float64 bc_float(char *operation) {
     }
 
     var buff = eval(operation, true);
-    if (buff.type == BC_NONE)
-        return NAN;
-
-    if (buff.type == BC_STR) {
-        size_t len = strlen(buff.data.s);
-        memmove(buff.data.s, buff.data.s + 1, len - 2);
-        buff.data.s[len - 2] = '\0';
-
-        eval_ty type = eval_typeof(buff.data.s);
-
-        switch (type) {
-            case BC_FLOAT:
-                buff.data.f = atof(buff.data.s);
-
-                if (isnan(buff.data.f) || isinf(buff.data.f))
-                    return NAN;
-
-                break;
-            case BC_CHR:
-            case BC_INT:
-                buff.data.i = atoll(buff.data.s);
-                break;
-            case BC_BOOL:
-                buff.data.b = (bool)atoi(buff.data.s);
-                break;
-            default:
-                return NAN;
-        }
-
-        SAFE_FREE(buff.data.s);
-    } 
-
-    float64 num = 0;
-    int64_t num1 = 0;
 
     switch (buff.type) {
+        case BC_NONE:
+            return NAN;
         case BC_BOOL:
-            num1 = (int64_t)buff.data.b;
-            break;
+            return (float64)buff.data.b;
         case BC_CHR:
         case BC_INT:
-            num1 = buff.data.i;
-            break;
+            return (float64)buff.data.i;
         case BC_FLOAT:
-            num = buff.data.f;
+            return buff.data.f;
+        default:
             break;
+    }
+
+    size_t len = strlen(buff.data.s);
+
+    if (len >= 2) {
+        memmove(buff.data.s, buff.data.s + 1, len - 2);
+        buff.data.s[len - 2] = '\0';
+    }
+
+    len = strlen(buff.data.s);
+
+    if (!isalldigit(buff.data.s) || len < 1) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("invalid literal for "FLOAT_VAR"()\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        SAFE_FREE(buff.data.s);
+        return NAN;
+    }
+
+    float64 num = 0;
+
+    eval_ty type = eval_typeof(buff.data.s);
+
+    switch (type) {
+        case BC_FLOAT: {
+            num = h_atof(buff.data.s, true).data.f;
+
+            if (isnan(num) || isinf(num))
+                return NAN;
+
+            break;
+        }
+
+        case BC_BOOL:
+            num = (float64)h_atof(buff.data.s, true).data.b;
+            break;
+
+        case BC_CHR:
+        case BC_INT:
+            num = (float64)h_atof(buff.data.s, true).data.i;
+            break;
+
         default:
             return NAN;
     }
 
-    if (buff.type == BC_FLOAT) {
-        if (isnan(num))
-            return NAN;
+    SAFE_FREE(buff.data.s);
 
-        return num;
-    }
-
-    return (float64)num1;
+    return num;
 }
 
 int64_t bc_int(char *operation) {
@@ -760,56 +765,70 @@ int64_t bc_int(char *operation) {
     }
 
     var buff = eval(operation, true);
-    if (buff.type == BC_NONE)
-        return I64_NAN;
-
-    if (buff.type == BC_STR) {
-        size_t len = strlen(buff.data.s);
-        memmove(buff.data.s, buff.data.s + 1, len - 2);
-        buff.data.s[len - 2] = '\0';
-
-        eval_ty type = eval_typeof(buff.data.s);
-
-        switch (type) {
-            case BC_FLOAT:
-                buff.data.f = atof(buff.data.s);
-
-                if (isnan(buff.data.f) || isinf(buff.data.f))
-                    return I64_NAN;
-
-                break;
-            case BC_CHR:
-            case BC_INT:
-                buff.data.i = atoll(buff.data.s);
-                break;
-            case BC_BOOL:
-                buff.data.b = (bool)atoi(buff.data.s);
-                break;
-            default:
-                return I64_NAN;
-        }
-
-        SAFE_FREE(buff.data.s);
-    } 
-
-    float64 num = 0;
 
     switch (buff.type) {
+        case BC_NONE:
+            return I64_NAN;
         case BC_BOOL:
-            num = (float64)buff.data.b;
-            break;
+            return (int64_t)buff.data.b;
         case BC_CHR:
         case BC_INT:
-            num = (float64)buff.data.i;
-            break;
+            return buff.data.i;
         case BC_FLOAT:
-            num = buff.data.f;
+            return (int64_t)buff.data.f;
+        default:
             break;
+    }
+
+    size_t len = strlen(buff.data.s);
+
+    if (len >= 2) {
+        memmove(buff.data.s, buff.data.s + 1, len - 2);
+        buff.data.s[len - 2] = '\0';
+    }
+
+    len = strlen(buff.data.s);
+
+    if (!isalldigit(buff.data.s) || len < 1) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("invalid literal for " INT_VAR "()\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        SAFE_FREE(buff.data.s);
+        return I64_NAN;
+    }
+
+    int64_t num = 0;
+
+    eval_ty type = eval_typeof(buff.data.s);
+
+    switch (type) {
+        case BC_FLOAT: {
+            float64 dbl = h_atof(buff.data.s, true).data.f;
+
+            if (isnan(dbl) || isinf(dbl))
+                return I64_NAN;
+
+            num = (int64_t)dbl;
+            break;
+        }
+
+        case BC_BOOL:
+            num = (int64_t)h_atof(buff.data.s, true).data.b;
+            break;
+
+        case BC_CHR:
+        case BC_INT:
+            num = h_atof(buff.data.s, true).data.i;
+            break;
+
         default:
             return I64_NAN;
     }
 
-    return (int64_t)num;
+    SAFE_FREE(buff.data.s);
+
+    return num;
 }
 
 char *bc_typeof(char *operation) {
@@ -1423,8 +1442,6 @@ char *s_chr(char *operation) {
     if (!chr)
         return NULL;
 
-    *chr = '\'';
-
     switch (value) {
         case 0:  strcpy(chr + 1, "\\0"); break;
         case 7:  strcpy(chr + 1, "\\a"); break;
@@ -1453,7 +1470,9 @@ char *s_chr(char *operation) {
     }
 
     int32_t len = (chr[2] == '\0') ? 2 : 3;
-    chr[len] = '\'';
+
+    *chr = '"';
+    chr[len] = '"';
     chr[len + 1] = '\0';
 
     return chr;
@@ -1789,23 +1808,34 @@ int64_t s_scale(char *operation) {
         return I64_NAN;
     operation = p;
 
-    char *buff = var2str(eval(operation, true));
+    var tmp = eval(operation, true);
 
-    if (!buff)
-        return I64_NAN;
+    switch (tmp.type) {
+        case BC_NONE:
+            return I64_NAN;
+        case BC_STR:
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("scale() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-    char *dot = strchr(buff, '.');
+            SAFE_FREE(tmp.data.s);
 
-    if (!dot) {
-        SAFE_FREE(buff);
-        return 0;
+            return I64_NAN;
+        case BC_FLOAT:
+            break;
+        default:
+            return 0;
     }
 
-    int64_t num = (int64_t)strlen(dot+1);
+    char buff1[0x40] = {0};
+    num_snprintf(buff1, sizeof(buff1), tmp);
 
-    SAFE_FREE(buff);
+    char *buff2 = strchr(buff1, '.');
 
-    return num;
+    if (!buff2)
+        return 0;
+
+    return strlen(buff2 + 1);
 }
 
 float64 s_sin(char *operation) {

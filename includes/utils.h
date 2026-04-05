@@ -25,7 +25,9 @@
 
 #define VERSION "r0.2.04"
 
-#define DBL_PRECISION 8
+#define DBL_PRECISION 10
+
+#define EVAL_STR_MUL_MAX_LEN 0x1000
 
 #define E_VAR "E"
 #define PI_VAR "PI"

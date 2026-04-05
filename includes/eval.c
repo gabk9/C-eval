@@ -153,24 +153,26 @@ var eval(char *operation, bool mathlib) {
 
     var buff = parse_operation(tmp, math_table, funcCount, operators, mathlib);
 
-    switch (buff.type) {
-        case BC_NONE:
-            break;
-
-        case BC_STR:
-            if (eval_depth == 1) {
-                if (Ans.type == BC_STR && Ans.data.s)
-                    SAFE_FREE(Ans.data.s);
-
-                Ans.type = BC_STR;
-                Ans.data.s = strdup(buff.data.s);
-            }
-
-            break;
-
-        default:
-            if (eval_depth == 1)
-                Ans = buff;
+    if (mathlib) {
+        switch (buff.type) {
+            case BC_NONE:
+                break;
+    
+            case BC_STR:
+                if (eval_depth == 1) {
+                    if (Ans.type == BC_STR && Ans.data.s)
+                        SAFE_FREE(Ans.data.s);
+    
+                    Ans.type = BC_STR;
+                    Ans.data.s = strdup(buff.data.s);
+                }
+    
+                break;
+    
+            default:
+                if (eval_depth == 1)
+                    Ans = buff;
+        }
     }
 
     eval_depth--;

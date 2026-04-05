@@ -627,21 +627,21 @@ void removeComments(char *str) {
     }
 }
 
-bool isBetweenQuotes(const char *action, int16_t quoteMode) {
+bool isBetweenQuotes(const char *string, int16_t quoteMode) {
 
-    if (!action)
+    if (!string)
         return false;
 
     if (quoteMode < 0 || quoteMode > 2)
         return false;
 
-    size_t len = strlen(action);
+    size_t len = strlen(string);
 
     if (len < 2)
         return false;
 
-    char first = *action;
-    char last  = action[len-1];
+    char first = *string;
+    char last  = string[len-1];
 
     switch (quoteMode) {
         case 0:
@@ -801,12 +801,12 @@ int64_t hex_to_long(char *str) {
     return v;
 }
 
-void printc(const char *str, color4 initColor, color4 resetColor, ...) {
+void printc(const char *fmt, color4 initColor, color4 resetColor, ...) {
     setColor(initColor);
 
     va_list args;
     va_start(args, resetColor);
-    vprintf(str, args);
+    vprintf(fmt, args);
     va_end(args);
 
     setColor(resetColor);

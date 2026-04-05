@@ -110,9 +110,9 @@ void getItemTypeStr(char *buff, size_t size, var item);
 int16_t injectEscape(char *str, const char *error_str);
 void getItemTypeStr(char *buff, size_t size, var item);
 void int64_to_hex_min(int64_t v, char *out, size_t size);
-bool isBetweenQuotes(const char *action, int16_t quoteMode);
+bool isBetweenQuotes(const char *string, int16_t quoteMode);
 int8_t getInvalidEscape(const char *str, const char *error_str);
-void printc(const char *str, color4 initColor, color4 resetColor, ...);
+void printc(const char *fmt, color4 initColor, color4 resetColor, ...);
 int16_t find_main_operator_full(const char *s, const ops *operators, char *foundOp);
 
 #define SAFE_FREE(ptr) do { \

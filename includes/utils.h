@@ -37,7 +37,7 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.2.09"
+#define VERSION "r0.2.14"
 
 #define DBL_PRECISION 10
 

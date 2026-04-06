@@ -6,7 +6,7 @@
 #endif
 
 #define BC_MATHLIB 0x0001
-#define BC_QUIET   0x00b02
+#define BC_QUIET   0x0002
 #define BC_VERSION 0x0004
 #define BC_HELP    0x0008
 

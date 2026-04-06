@@ -42,6 +42,7 @@ opcode get_opcode(const char *op) {
     return UNKNOWN;
 }
 
+__attribute__((unused))
 eval_ty eval_typeof(const char *str) {
     if (isBetweenQuotes(str, BOTH_QUOTES))
         return BC_STR;

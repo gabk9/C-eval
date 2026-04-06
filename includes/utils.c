@@ -107,7 +107,7 @@ void num_snprintf(char *buff, size_t size, var num) {
         exit(EXIT_FAILURE);
     }
 
-    if (num.type == BC_INT)
+    if (num.type == BC_INT || num.type == BC_CHR)
         snprintf(buff, size, "%" PRId64, num.data.i);
     else {
         snprintf(buff, size, "%.*lf", DBL_PRECISION, num.data.f);
@@ -840,10 +840,7 @@ void setColor(color4 color) {
 }
 
 void print_manual(void) {
-    printf("ceval "VERSION"\na simple eval function implemented in C, \n"
-            "type 'mathlib' if you're insite ceval to turn on the math library,"
-            "'cls' or 'clear' to clear the screen and scrollback buffer, call man() to display the manual.\n"
-    );
+    printf(INIT_MESSAGE);
     printf("\nUsage:\n\tbc [OPTION...]\n\nOptions:\n");
     printf("\t'-h', '--help'      displays manual\n");
     printf("\t'-v', '--version'   displays the version\n");
@@ -1093,6 +1090,9 @@ void print_manual(void) {
         "\n"
         "\tpow(X, Y)      : Power (X multiplied to itself Y times)\n"
         "\t                 Example: pow(2, 3) = 8\n"
+        "\n"
+        "\tinput(X)       : Takes an input from the user and returns it as a string\n"
+        "\t                 Example: input(\"Type-in: \") Type-in: <input typed> = \"input typed\"\n"
 
         "\nBuiltin Variables: (mathlib must be on to grant access)\n"
         "\tAns   : stores the result of the last operation\n"

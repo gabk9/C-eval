@@ -37,7 +37,12 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.2.14"
+#define VERSION "r0.2.20"
+
+#define INIT_MESSAGE \
+    "ceval " VERSION"\na simple eval function implemented in C, \n" \
+    "type 'mathlib' if you're insite ceval to turn on the math library, " \
+    "'cls' or 'clear' to clear the screen and scrollback buffer and 'help' to display the manual.\n"
 
 #define DBL_PRECISION 10
 

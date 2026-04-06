@@ -612,27 +612,6 @@ static uint16_t countCommaOutsideParenthesis(const char *str) {
     return count;
 }
 
-void bc_man(char *operation) {
-    char *p = strchr(operation, '(');
-    if (!p)
-        return;
-    operation = p;
-
-    for (char *c = operation; *c; c++) {
-        if (*c != '(' && *c != ')' && *c != ' ') {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("man() does not take arguments\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-            return;
-        }
-    }
-
-    print_manual();
-
-    return;
-}
-
 char *bc_parse_str(char *operation) {
     char *p = strchr(operation, '(');
     if (!p)
@@ -826,6 +805,82 @@ char *bc_typeof(char *operation) {
 
     snprintf(result, extra, "\"%s\"", tmp);
 
+    return result;
+}
+
+char *s_input(char *operation) {
+    char *p = strchr(operation, '(');
+    if (!p)
+        return NULL;
+    operation = p+1;
+
+    size_t len = strlen(operation);
+    operation[len-1] = '\0';
+    len--;
+
+    bool hasContent = false;
+
+    for (char *c = operation; *c; c++) {
+        if (*c != '(' && *c != ')' && *c != ' ') {
+            hasContent = true;
+            break;
+        }
+    }
+
+    char *input = NULL;
+
+    if (!hasContent) {
+        input = strdup("");
+        if (!input)
+            return NULL;
+    }
+
+    var buff;
+
+    if (!hasContent)
+        buff = (var){ .type = BC_STR, .data.s = input };
+    else
+        buff = eval(operation, true);
+
+    char *str = var2str(buff);
+
+    if (!str)
+        return NULL;
+
+    if (isBetweenQuotes(str, DOUBLE_QUOTES)) {
+        if (!injectEscape(str, "ceval")) {
+            SAFE_FREE(str);
+            return NULL;
+        }
+
+        size_t s_len = strlen(str);
+        memmove(str, str+1, s_len+1);
+        str[s_len-2] = '\0';
+        s_len -= 2;
+    }
+
+    char tmp[MAX_CHAR] = {0};
+
+    printc("%s", BC_PROMPT_COLOR, WHITE, str);
+    if (!fgets(tmp, sizeof(tmp), stdin))
+        return strdup("\"\"");
+
+    tmp[strcspn(tmp, "\r\n")] = '\0';
+    if (!*tmp)
+        return strdup("\"\"");
+
+    size_t extra = strlen(tmp) + 3;
+    char *result = calloc(extra, sizeof(char));
+
+    if (!result) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return NULL;
+    }
+
+    snprintf(result, extra, "\"%s\"", tmp);
     return result;
 }
 

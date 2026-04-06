@@ -30,7 +30,6 @@ typedef enum types {
     BC_BOOL, BC_CHR, BC_NONE
 } eval_ty;
 
-typedef void (*V_Func)(char *operation);
 typedef char *(*S_Func)(char *operation);
 typedef float64 (*F_Func)(char *operation);
 typedef int64_t (*I_Func)(char *operation);
@@ -39,7 +38,6 @@ typedef struct Functions {
     eval_ty returnType;
     const char *name;
     union func {
-        V_Func n;
         I_Func i;
         F_Func f;
         S_Func s;

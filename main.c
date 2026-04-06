@@ -135,10 +135,7 @@ int32_t main(int32_t argc, char **argv) {
     while (true) {
         if (!appear) {
             if (show_init)
-                printf("ceval "VERSION"\na simple eval function implemented in C, \n"
-                        "type 'mathlib' if you're insite ceval to turn on the math library,"
-                        "'cls' or 'clear' to clear the screen and scrollback buffer, call man() to display the manual.\n"
-                );
+                printf(INIT_MESSAGE);
             if (mathlib)
                 printc("on\n\n", GREEN, WHITE);
             else 
@@ -178,7 +175,12 @@ int32_t main(int32_t argc, char **argv) {
             clear();
             appear = false;
             continue;
-        } 
+        } else if (isValidBcCommand(operation, "help")) {
+            print_manual();
+            putchar('\n');
+            appear = true;
+            continue;
+        }
 
         result = var2str(eval(operation, mathlib));
 

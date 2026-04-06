@@ -12,7 +12,6 @@ var eval(char *operation, bool mathlib) {
         return (var){.type = BC_NONE};
 
     const FuncEntry math_table[] = {
-        {.returnType = BC_NONE,    .name = "man",       .fn.n = bc_man},
         {.returnType = BC_BOOL,    .name = "isprime",   .fn.i = s_isprime},
         {.returnType = BC_INT,     .name = "scale",     .fn.i = s_scale},
         {.returnType = BC_INT,     .name = "floor",     .fn.i = s_floor},
@@ -63,6 +62,7 @@ var eval(char *operation, bool mathlib) {
         {.returnType = BC_STR,     .name = "lower",     .fn.s = s_lower},
         {.returnType = BC_STR,     .name = "upper",     .fn.s = s_upper},
         {.returnType = BC_STR,     .name = "typeof",    .fn.s = bc_typeof},
+        {.returnType = BC_STR,     .name = "input",     .fn.s = s_input},
     };
 
     size_t funcCount = sizeof(math_table) / sizeof(*math_table);
@@ -766,10 +766,6 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
 
                     return (var){ .type = functions[i].returnType, .data.s = result};
                 }
-
-                case BC_NONE:
-                    functions[i].fn.n(operation);
-                    return (var){ .type = functions[i].returnType };
 
                 default: {
                     char type[0x14] = {0};

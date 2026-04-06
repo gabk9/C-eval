@@ -186,7 +186,7 @@ char *var2str(var buff) {
             return buff.data.s;
 
         case BC_BOOL: {
-            if (buff.data.b == false)
+            if (buff.data.i == false)
                 return strdup(FALSE_VAR);
             else
                 return strdup(TRUE_VAR);
@@ -324,11 +324,11 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
-                    out.data.b = false;
+                    out.data.i = false;
                     return out;
                 }
 
-                out.data.b = bc_strcmp(left.data.s, right.data.s) == 0;
+                out.data.i = bc_strcmp(left.data.s, right.data.s) == 0;
                 return out;
             }
 
@@ -336,11 +336,11 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
-                    out.data.b = true;
+                    out.data.i = true;
                     return out;
                 }
 
-                out.data.b = bc_strcmp(left.data.s, right.data.s) != 0;
+                out.data.i = bc_strcmp(left.data.s, right.data.s) != 0;
                 return out;
             }
 
@@ -348,11 +348,11 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
-                    out.data.b = false;
+                    out.data.i = false;
                     return out;
                 }
 
-                out.data.b = bc_strcmp(left.data.s, right.data.s) > 0;
+                out.data.i = bc_strcmp(left.data.s, right.data.s) > 0;
                 return out;
             }
 
@@ -360,11 +360,11 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
-                    out.data.b = false;
+                    out.data.i = false;
                     return out;
                 }
 
-                out.data.b = bc_strcmp(left.data.s, right.data.s) >= 0;
+                out.data.i = bc_strcmp(left.data.s, right.data.s) >= 0;
                 return out;
             }
 
@@ -372,11 +372,11 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
-                    out.data.b = false;
+                    out.data.i = false;
                     return out;
                 }
 
-                out.data.b = bc_strcmp(left.data.s, right.data.s) < 0;
+                out.data.i = bc_strcmp(left.data.s, right.data.s) < 0;
                 return out;
             }
 
@@ -384,11 +384,11 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.type = BC_BOOL;
 
                 if (left.type != right.type) {
-                    out.data.b = false;
+                    out.data.i = false;
                     return out;
                 }
 
-                out.data.b = bc_strcmp(left.data.s, right.data.s) <= 0;
+                out.data.i = bc_strcmp(left.data.s, right.data.s) <= 0;
                 return out;
             }
 
@@ -517,40 +517,40 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
         case LS:
             out.type = BC_BOOL;
-            out.data.b = (num1 < num2) && !T_CMP(num1, num2);
+            out.data.i = (num1 < num2) && !T_CMP(num1, num2);
             break;
 
         case LSE:
             out.type = BC_BOOL;
-            out.data.b = (num1 < num2) || T_CMP(num1, num2);
+            out.data.i = (num1 < num2) || T_CMP(num1, num2);
             break;
 
         case GR:
             out.type = BC_BOOL;
-            out.data.b = (num1 > num2) && !T_CMP(num1, num2);
+            out.data.i = (num1 > num2) && !T_CMP(num1, num2);
             break;
 
         case GRE:
             out.type = BC_BOOL;
-            out.data.b = (num1 > num2) || T_CMP(num1, num2);
+            out.data.i = (num1 > num2) || T_CMP(num1, num2);
             break;
 
         case NE:
             out.type = BC_BOOL;
-            out.data.b = !T_CMP(num1, num2);
+            out.data.i = !T_CMP(num1, num2);
             break;
 
         case EQ:
             out.type = BC_BOOL;
 
             if (isnan(num1) || isnan(num2))
-                out.data.b = false;
+                out.data.i = false;
 
             else if (isinf(num1) || isinf(num2))
-                out.data.b = (num1 == num2);
+                out.data.i = (num1 == num2);
 
             else
-                out.data.b = T_CMP(num1, num2);
+                out.data.i = T_CMP(num1, num2);
 
             break;
 
@@ -580,12 +580,12 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
         case LAND:
             out.type = BC_BOOL;
-            out.data.b = (num1 != 0 && num2 != 0);
+            out.data.i = (num1 != 0 && num2 != 0);
             break;
 
         case LOR:
             out.type = BC_BOOL;
-            out.data.b = (num1 != 0 || num2 != 0);
+            out.data.i = (num1 != 0 || num2 != 0);
             break;
 
         default:
@@ -631,20 +631,20 @@ static var lNot_section(char *operation, bool mathlib) {
 
     if (isBetweenQuotes(expr, DOUBLE_QUOTES)) {
         if (count & 1)
-            return (var){ .type = BC_BOOL, .data.b = false };
+            return (var){ .type = BC_BOOL, .data.i = false };
         else
-            return (var){ .type = BC_BOOL, .data.b = true };
+            return (var){ .type = BC_BOOL, .data.i = true };
     }
 
     if (mathlib) {
         if (Ans.type == BC_STR && strcmp(expr, ANS_VAR) == 0) {
             if (!Ans.data.s)
-                return (var){ .type = BC_BOOL, .data.b = false };
+                return (var){ .type = BC_BOOL, .data.i = false };
 
             if (count & 1)
-                return (var){ .type = BC_BOOL, .data.b = false };
+                return (var){ .type = BC_BOOL, .data.i = false };
             else
-                return (var){ .type = BC_BOOL, .data.b = true };
+                return (var){ .type = BC_BOOL, .data.i = true };
         }
     }
 
@@ -653,7 +653,7 @@ static var lNot_section(char *operation, bool mathlib) {
     if (tmp.type == BC_NONE)
         return (var){.type = BC_NONE};
 
-    float64 num = (tmp.type == BC_BOOL) ? (float64)tmp.data.b : tmp.data.f;
+    float64 num = (tmp.type == BC_BOOL) ? (float64)tmp.data.i : tmp.data.f;
     if (tmp.type == BC_INT) {
         int64_t val = tmp.data.i;
         bool value = (val != 0.0);
@@ -661,7 +661,7 @@ static var lNot_section(char *operation, bool mathlib) {
         if (count & 1)
             value = !value;
 
-        return (var){ .type = BC_BOOL, .data.b = value };
+        return (var){ .type = BC_BOOL, .data.i = value };
     }
 
     if (isnan(num))
@@ -672,7 +672,7 @@ static var lNot_section(char *operation, bool mathlib) {
     if (count & 1)
         value = !value;
 
-    return (var){ .type = BC_BOOL, .data.b = value };
+    return (var){ .type = BC_BOOL, .data.i = value };
 }
 
 static var func_section(char *operation, size_t funcCount, const FuncEntry *functions, bool mathlib) {
@@ -744,7 +744,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
                         return (var){ .type = BC_NONE };
 
                     if (functions[i].returnType == BC_BOOL)
-                        return (var){ .type = BC_BOOL, .data.b = (bool)num };
+                        return (var){ .type = BC_BOOL, .data.i = (bool)num };
 
                     return (var){ .type = functions[i].returnType, .data.i = num };
                 }
@@ -801,9 +801,9 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
     if (!paren) {
 
         if (strcmp(operation, TRUE_VAR) == 0)
-            return (var){ .type = BC_BOOL, .data.b = true };
+            return (var){ .type = BC_BOOL, .data.i = true };
         else if (strcmp(operation, FALSE_VAR) == 0)
-            return (var){ .type = BC_BOOL, .data.b = false };
+            return (var){ .type = BC_BOOL, .data.i = false };
 
         size_t len = strlen(operation);
 

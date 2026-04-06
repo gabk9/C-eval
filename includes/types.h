@@ -50,7 +50,6 @@ typedef struct eval_var {
         int64_t i;
         float64 f;
         char *s;
-        bool b;
     } data;
 } var;
 

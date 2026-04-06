@@ -300,9 +300,6 @@ var h_atof(const char *str, bool mathlib) {
 
         switch (tmp.type) {
             case BC_BOOL:
-                num1 = (int64_t)tmp.data.b;
-                isInt = true;
-                break;
             case BC_CHR:
             case BC_INT:
                 num1 = tmp.data.i;
@@ -367,8 +364,6 @@ var h_atof(const char *str, bool mathlib) {
 
         switch (tmp.type) {
             case BC_BOOL:
-                num1 = (int64_t)tmp.data.b;
-                break;
             case BC_CHR:
             case BC_INT:
                 num1 = tmp.data.i;
@@ -388,9 +383,9 @@ var h_atof(const char *str, bool mathlib) {
     }
 
     if (strcmp(buf, TRUE_VAR) == 0)
-        return (var){.type = BC_BOOL, .data.b = true};
+        return (var){.type = BC_BOOL, .data.i = true};
     else if (strcmp(buf, FALSE_VAR) == 0)
-        return (var){.type = BC_BOOL, .data.b = false};
+        return (var){.type = BC_BOOL, .data.i = false};
     else if (mathlib && strcmp(buf, RAND_MAX_VAR) == 0)
         return (var){.type = BC_INT, .data.i = RAND_MAX};
 
@@ -669,7 +664,6 @@ float64 bc_float(char *operation) {
         case BC_NONE:
             return NAN;
         case BC_BOOL:
-            return (float64)buff.data.b;
         case BC_CHR:
         case BC_INT:
             return (float64)buff.data.i;
@@ -736,7 +730,6 @@ int64_t bc_int(char *operation) {
         case BC_NONE:
             return I64_NAN;
         case BC_BOOL:
-            return (int64_t)buff.data.b;
         case BC_CHR:
         case BC_INT:
             return buff.data.i;
@@ -953,11 +946,9 @@ float64 s_abs(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
-            num = tmp.data.i;
+            num = (float64)tmp.data.i;
             break;
         case BC_FLOAT:
             num = tmp.data.f;
@@ -990,8 +981,6 @@ float64 s_miles(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1029,8 +1018,6 @@ float64 s_km(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1068,8 +1055,6 @@ float64 s_pounds(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1107,8 +1092,6 @@ float64 s_kg(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1146,8 +1129,6 @@ float64 s_feet(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1185,8 +1166,6 @@ float64 s_meter(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1224,8 +1203,6 @@ float64 s_fah(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1263,8 +1240,6 @@ float64 s_cel(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1302,8 +1277,6 @@ char *s_oct(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            val1 = (int64_t)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             val1 = tmp.data.i;
@@ -1431,8 +1404,6 @@ char *s_chr(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1519,8 +1490,6 @@ char *s_hex(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            val1 = (int64_t)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             val1 = tmp.data.i;
@@ -1567,8 +1536,6 @@ char *s_bin(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            val1 = (int64_t)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             val1 = tmp.data.i;
@@ -1640,8 +1607,6 @@ int64_t s_trunc(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1679,8 +1644,6 @@ float64 s_rad(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1718,8 +1681,6 @@ float64 s_gon(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1757,7 +1718,6 @@ float64 s_deg(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
             break;
         case BC_CHR:
         case BC_INT:
@@ -1796,8 +1756,6 @@ float64 s_sqrt(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1879,8 +1837,6 @@ float64 s_sin(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1923,8 +1879,6 @@ float64 s_asin(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -1970,8 +1924,6 @@ float64 s_cot(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -2019,8 +1971,6 @@ float64 s_acot(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -2058,8 +2008,6 @@ float64 s_cos(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -2102,8 +2050,6 @@ float64 s_acos(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -2149,8 +2095,6 @@ float64 s_tan(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            angle = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             angle = tmp.data.i;
@@ -2202,8 +2146,6 @@ float64 s_atan(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -2241,8 +2183,6 @@ float64 s_ln(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -2280,8 +2220,6 @@ float64 s_log10(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -2319,8 +2257,6 @@ float64 s_log2(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -2385,8 +2321,6 @@ float64 s_tet(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-            base = (float64)debug1.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             base = debug1.data.i;
@@ -2415,8 +2349,6 @@ float64 s_tet(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-            tet = (int64_t)debug2.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             tet = debug2.data.i;
@@ -2504,8 +2436,6 @@ float64 s_pow(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-            base = (float64)debug1.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             base = debug1.data.i;
@@ -2534,8 +2464,6 @@ float64 s_pow(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-            power = (float64)debug2.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             power = debug2.data.i;
@@ -2617,8 +2545,6 @@ float64 s_root(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-            index = (float64)debug1.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             index = debug1.data.i;
@@ -2647,8 +2573,6 @@ float64 s_root(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-            rooting = (float64)debug2.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             rooting = debug2.data.i;
@@ -2754,8 +2678,6 @@ float64 s_bmi(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-            weight = (float64)debug1.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             weight = debug1.data.i;
@@ -2784,8 +2706,6 @@ float64 s_bmi(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-            height = (float64)debug2.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             height = debug2.data.i;
@@ -2850,8 +2770,6 @@ float64 s_log(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-            base = (float64)debug1.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             base = debug1.data.i;
@@ -2880,8 +2798,6 @@ float64 s_log(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-            num = (float64)debug2.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = debug2.data.i;
@@ -2959,8 +2875,6 @@ float64 s_randFloat(char *operation) {
 
     switch (tmp1.type) {
         case BC_BOOL:
-            maxLf = (float64)tmp1.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             maxLf = tmp1.data.i;
@@ -2989,8 +2903,6 @@ float64 s_randFloat(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            minLf = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             minLf = tmp.data.i;
@@ -3060,8 +2972,6 @@ int64_t s_randInt(char *operation) {
 
     switch (tmp1.type) {
         case BC_BOOL:
-            maxInt = (int64_t)tmp1.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             maxInt = tmp1.data.i;
@@ -3089,8 +2999,6 @@ int64_t s_randInt(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            minInt = (int64_t)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             minInt = tmp.data.i;
@@ -3127,8 +3035,6 @@ int64_t s_floor(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -3166,8 +3072,6 @@ int64_t s_ceil(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -3205,8 +3109,6 @@ int64_t s_round(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -3269,8 +3171,6 @@ int64_t s_isprime(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (int64_t)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -3389,7 +3289,7 @@ int64_t s_fact(char *operation) {
         return I64_NAN;
     }
 
-    int64_t num = (tmp.type == BC_BOOL) ? (int64_t)tmp.data.b : tmp.data.i;
+    int64_t num = tmp.data.i;
 
     if (num < 0) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
@@ -3424,8 +3324,6 @@ float64 s_sign(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-            num = (float64)tmp.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
@@ -3514,8 +3412,6 @@ float64 s_sum(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-            init = (float64)debug1.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             init = debug1.data.i;
@@ -3544,8 +3440,6 @@ float64 s_sum(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-            end = (float64)debug2.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             end = debug2.data.i;
@@ -3577,8 +3471,6 @@ float64 s_sum(char *operation) {
 
     switch (debug3.type) {
         case BC_BOOL:
-            diff = (float64)debug3.data.b;
-            break;
         case BC_CHR:
         case BC_INT:
             diff = debug3.data.i;

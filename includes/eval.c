@@ -409,6 +409,9 @@ var calc(var left, const char *operation, var right, bool mathLib) {
         case BC_CHR:
         case BC_BOOL:
         case BC_INT:
+            if (left.type == BC_BOOL)
+                left.type = BC_INT;
+
             num1 = (float64)left.data.i;
             break;
         case BC_FLOAT:
@@ -422,6 +425,9 @@ var calc(var left, const char *operation, var right, bool mathLib) {
         case BC_CHR:
         case BC_BOOL:
         case BC_INT:
+            if (right.type == BC_BOOL)
+                right.type = BC_INT;
+
             num2 = (float64)right.data.i;
             break;
         case BC_FLOAT:

@@ -12,10 +12,8 @@
 #include <time.h>
 #include "types.h"
 #include <stdio.h>
-#include <float.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <inttypes.h>
 
@@ -32,6 +30,11 @@
 
     extern HANDLE hConsole;
 #else
+
+    #ifndef CLOCK_REALTIME
+        #define CLOCK_REALTIME 0
+    #endif
+
     #include <unistd.h>
     #include <stddef.h>
     #include <strings.h>

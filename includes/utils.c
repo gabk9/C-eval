@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <ctype.h>
+#include <stdarg.h>
 
 opcode get_opcode(const char *op) {
     if (strcmp(op, "+") == 0)

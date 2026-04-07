@@ -74,10 +74,8 @@ int32_t main(int32_t argc, char **argv) {
         if (flags & BC_MATHLIB)
             mathlib = true;     
 
-        if (flags & BC_QUIET) {
+        if (flags & BC_QUIET) 
             show_init = false;
-            did_special = true;
-        }
 
         if (flags & BC_VERSION) {
             puts(VERSION);

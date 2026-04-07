@@ -295,7 +295,12 @@ var h_atof(const char *str, bool mathlib) {
         if (isAns && Ans.type != BC_STR)
             return Ans;
 
-        var tmp = eval(buf, mathlib);
+        var tmp;
+
+        if (strcmp(buf, "0") == 0)
+            tmp = (var){.type = BC_FLOAT, .data.f = 0.0};
+        else
+            tmp = eval(buf, mathlib);
 
         if (tmp.type == BC_NONE)
             return (var){.type = BC_FLOAT, .data.f = NAN};

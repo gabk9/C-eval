@@ -88,6 +88,12 @@
 #define MIN_SAFE_INT64_D -9223372036854775808.0
 #define U64_NAN ((uint64_t)(UINT64_MAX - 1ULL))
 
+#define SAFE_FREE(ptr) do { \
+    if (ptr) { \
+        free(ptr); \
+        ptr = NULL; \
+    } \
+} while (false)
 
 void trim(char *str);
 void initRandom(void);
@@ -122,12 +128,5 @@ void int64_to_hex_min(int64_t v, char *out, size_t size);
 int8_t getInvalidEscape(const char *str, const char *error_str);
 void printc(const char *fmt, color4 initColor, color4 resetColor, ...);
 int16_t find_main_operator_full(const char *s, const ops *operators, char *foundOp);
-
-#define SAFE_FREE(ptr) do { \
-    if (ptr) { \
-        free(ptr); \
-        ptr = NULL; \
-    } \
-} while (false)
 
 #endif

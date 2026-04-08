@@ -1,4 +1,5 @@
 #include "eval.h"
+#include "types.h"
 #include "utils.h"
 #include <ctype.h>
 #include "s_math.h"
@@ -12,63 +13,64 @@ var eval(char *operation, bool mathlib) {
         return (var){.type = BC_NONE};
 
     const FuncEntry math_table[] = {
-        {.returnType = BC_BOOL,    .name = "isprime",   .fn.i = s_isprime},
-        {.returnType = BC_BOOL,    .name = BOOL_VAR,    .fn.i = bc_bool},
-        {.returnType = BC_INT,     .name = "scale",     .fn.i = s_scale},
-        {.returnType = BC_INT,     .name = "floor",     .fn.i = s_floor},
-        {.returnType = BC_INT,     .name = "ceil",      .fn.i = s_ceil},
-        {.returnType = BC_INT,     .name = "round",     .fn.i = s_round},
-        {.returnType = BC_INT,     .name = "trunc",     .fn.i = s_trunc},
-        {.returnType = BC_INT,     .name = "rand",      .fn.i = s_randInt},
-        {.returnType = BC_INT,     .name = "len",       .fn.i = bc_len},
-        {.returnType = BC_INT,     .name = INT_VAR,     .fn.i = bc_int},
-        {.returnType = BC_FLOAT,   .name = "sqrt",      .fn.f = s_sqrt},
-        {.returnType = BC_FLOAT,   .name = "tet",       .fn.f = s_tet},
-        {.returnType = BC_FLOAT,   .name = "pow",       .fn.f = s_pow},
-        {.returnType = BC_FLOAT,   .name = "root",      .fn.f = s_root},
-        {.returnType = BC_FLOAT,   .name = "sin",       .fn.f = s_sin},
-        {.returnType = BC_FLOAT,   .name = "asin",      .fn.f = s_asin},
-        {.returnType = BC_FLOAT,   .name = "cos",       .fn.f = s_cos},
-        {.returnType = BC_FLOAT,   .name = "acos",      .fn.f = s_acos},
-        {.returnType = BC_FLOAT,   .name = "tan",       .fn.f = s_tan},
-        {.returnType = BC_FLOAT,   .name = "atan",      .fn.f = s_atan},
-        {.returnType = BC_FLOAT,   .name = "cot",       .fn.f = s_cot},
-        {.returnType = BC_FLOAT,   .name = "acot",      .fn.f = s_acot},
-        {.returnType = BC_FLOAT,   .name = "ln",        .fn.f = s_ln},
-        {.returnType = BC_FLOAT,   .name = "log10",     .fn.f = s_log10},
-        {.returnType = BC_FLOAT,   .name = "log2",      .fn.f = s_log2},
-        {.returnType = BC_FLOAT,   .name = "log",       .fn.f = s_log},
-        {.returnType = BC_FLOAT,   .name = "signbit",   .fn.f = s_sign},
-        {.returnType = BC_FLOAT,   .name = "sum",       .fn.f = s_sum},
-        {.returnType = BC_FLOAT,   .name = "deg2rad",   .fn.f = s_rad},
-        {.returnType = BC_FLOAT,   .name = "rad2gon",   .fn.f = s_gon},
-        {.returnType = BC_FLOAT,   .name = "rad2deg",   .fn.f = s_deg},
-        {.returnType = BC_FLOAT,   .name = "randf",     .fn.f = s_randFloat},
-        {.returnType = BC_FLOAT,   .name = "fah",       .fn.f = s_fah},
-        {.returnType = BC_FLOAT,   .name = "cel",       .fn.f = s_cel},
-        {.returnType = BC_FLOAT,   .name = "mi",        .fn.f = s_miles},
-        {.returnType = BC_FLOAT,   .name = "km",        .fn.f = s_km},
-        {.returnType = BC_FLOAT,   .name = "lb",        .fn.f = s_pounds},
-        {.returnType = BC_FLOAT,   .name = "kg",        .fn.f = s_kg},
-        {.returnType = BC_FLOAT,   .name = "bmi",       .fn.f = s_bmi},
-        {.returnType = BC_FLOAT,   .name = "feet",      .fn.f = s_feet},
-        {.returnType = BC_FLOAT,   .name = "meter",     .fn.f = s_meter},
-        {.returnType = BC_FLOAT,   .name = "abs",       .fn.f = s_abs},
-        {.returnType = BC_FLOAT,   .name = FLOAT_VAR,   .fn.f = bc_float},
-        {.returnType = BC_STR,     .name = STR_VAR,     .fn.s = bc_parse_str},
-        {.returnType = BC_STR,     .name = CHR_VAR,     .fn.s = s_chr},
-        {.returnType = BC_STR,     .name = "bin",       .fn.s = s_bin},
-        {.returnType = BC_STR,     .name = "oct",       .fn.s = s_oct},
-        {.returnType = BC_STR,     .name = "hex",       .fn.s = s_hex},
-        {.returnType = BC_STR,     .name = "lower",     .fn.s = s_lower},
-        {.returnType = BC_STR,     .name = "upper",     .fn.s = s_upper},
-        {.returnType = BC_STR,     .name = "typeof",    .fn.s = bc_typeof},
-        {.returnType = BC_STR,     .name = "input",     .fn.s = s_input},
+    {.returnType = BC_BOOL,   .name = "isprime",   .fn.i = s_isprime,     .builtin = false},
+    {.returnType = BC_BOOL,   .name = BOOL_VAR,    .fn.i = bc_bool,       .builtin = true},
+    {.returnType = BC_INT,    .name = "scale",     .fn.i = s_scale,       .builtin = false},
+    {.returnType = BC_INT,    .name = "floor",     .fn.i = s_floor,       .builtin = true},
+    {.returnType = BC_INT,    .name = "ceil",      .fn.i = s_ceil,        .builtin = true},
+    {.returnType = BC_INT,    .name = "round",     .fn.i = s_round,       .builtin = true},
+    {.returnType = BC_INT,    .name = "trunc",     .fn.i = s_trunc,       .builtin = false},
+    {.returnType = BC_INT,    .name = "rand",      .fn.i = s_randInt,     .builtin = false},
+    {.returnType = BC_INT,    .name = "len",       .fn.i = bc_len,        .builtin = true},
+    {.returnType = BC_INT,    .name = INT_VAR,     .fn.i = bc_int,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "sqrt",      .fn.f = s_sqrt,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "tet",       .fn.f = s_tet,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "pow",       .fn.f = s_pow,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "root",      .fn.f = s_root,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "sin",       .fn.f = s_sin,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "asin",      .fn.f = s_asin,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "cos",       .fn.f = s_cos,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "acos",      .fn.f = s_acos,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "tan",       .fn.f = s_tan,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "atan",      .fn.f = s_atan,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "cot",       .fn.f = s_cot,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "acot",      .fn.f = s_acot,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "ln",        .fn.f = s_ln,          .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "log10",     .fn.f = s_log10,       .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "log2",      .fn.f = s_log2,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "log",       .fn.f = s_log,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "sign",      .fn.f = s_sign,        .builtin = true},
+    {.returnType = BC_FLOAT,  .name = "sum",       .fn.f = s_sum,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "deg2rad",   .fn.f = s_rad,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "rad2gon",   .fn.f = s_gon,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "rad2deg",   .fn.f = s_deg,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "randf",     .fn.f = s_randFloat,   .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "fah",       .fn.f = s_fah,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "cel",       .fn.f = s_cel,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "mi",        .fn.f = s_miles,       .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "km",        .fn.f = s_km,          .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "lb",        .fn.f = s_pounds,      .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "kg",        .fn.f = s_kg,          .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "bmi",       .fn.f = s_bmi,         .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "feet",      .fn.f = s_feet,        .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "meter",     .fn.f = s_meter,       .builtin = false},
+    {.returnType = BC_FLOAT,  .name = "abs",       .fn.f = s_abs,         .builtin = true},
+    {.returnType = BC_FLOAT,  .name = FLOAT_VAR,   .fn.f = bc_float,      .builtin = true},
+    {.returnType = BC_STR,    .name = STR_VAR,     .fn.s = bc_parse_str,  .builtin = true},
+    {.returnType = BC_STR,    .name = CHR_VAR,     .fn.s = s_chr,         .builtin = true},
+    {.returnType = BC_STR,    .name = "bin",       .fn.s = s_bin,         .builtin = true},
+    {.returnType = BC_STR,    .name = "oct",       .fn.s = s_oct,         .builtin = true},
+    {.returnType = BC_STR,    .name = "hex",       .fn.s = s_hex,         .builtin = true},
+    {.returnType = BC_STR,    .name = "lower",     .fn.s = s_lower,       .builtin = false},
+    {.returnType = BC_STR,    .name = "upper",     .fn.s = s_upper,       .builtin = false},
+    {.returnType = BC_STR,    .name = "typeof",    .fn.s = bc_typeof,     .builtin = true},
+    {.returnType = BC_STR,    .name = "input",     .fn.s = s_input,       .builtin = true},
     };
 
     size_t funcCount = sizeof(math_table) / sizeof(*math_table);
 
     const ops operators[] = {
+        {.op = "**",  .precedence = 7,  .right_assoc = 1},
         {.op = "<<",  .precedence = 4,  .right_assoc = 0},
         {.op = ">>",  .precedence = 4,  .right_assoc = 0},
         {.op = "<=",  .precedence = 3,  .right_assoc = 0},
@@ -292,10 +294,10 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                     return out;
                 }
 
-                if (((long)strlen(multiplied_str) - 2) * (size_t)multiplier > EVAL_STR_MUL_MAX_LEN) {
+                if (((long)strlen(multiplied_str) - 2) * (size_t)multiplier > MAX_CHAR) {
                     printc("ceval", BC_PROMPT_COLOR, WHITE);
                     printf(": ");
-                    printc("the resultant string must be less than %d characters long\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, EVAL_STR_MUL_MAX_LEN);
+                    printc("the resultant string must be less than %d characters long\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, MAX_CHAR);
                     return out;
                 }
 
@@ -595,6 +597,19 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             out.data.i = (num1 != 0 || num2 != 0);
             break;
 
+        case POW:
+            if (num1 < 0 && right.type == BC_FLOAT) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("to use negative bases the power must not be of type '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+                out.type = BC_NONE;
+                return out;
+            }
+
+            result = pow(num1, num2);
+            break;
+
         default:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
@@ -737,54 +752,55 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
         return (var){ .type = BC_NONE };
     }
 
-    if (mathlib) {
-        for (size_t i = 0; i < funcCount; i++) {
-            if (strcmp(name, functions[i].name) != 0)
-                continue;
+    for (size_t i = 0; i < funcCount; i++) {
+        if (strcmp(name, functions[i].name) != 0)
+            continue;
 
-            switch (functions[i].returnType) {
-                case BC_BOOL:
-                case BC_INT: {
-                    int64_t num = functions[i].fn.i(operation);
+        if (!functions[i].builtin && !mathlib)
+            continue;
 
-                    if (num == I64_NAN)
-                        return (var){ .type = BC_NONE };
+        switch (functions[i].returnType) {
+            case BC_BOOL:
+            case BC_INT: {
+                int64_t num = functions[i].fn.i(operation);
 
-                    if (functions[i].returnType == BC_BOOL)
-                        return (var){ .type = BC_BOOL, .data.i = (bool)num };
+                if (num == I64_NAN)
+                    return (var){ .type = BC_NONE };
 
-                    return (var){ .type = functions[i].returnType, .data.i = num };
-                }
+                if (functions[i].returnType == BC_BOOL)
+                    return (var){ .type = BC_BOOL, .data.i = (bool)num };
 
-                case BC_FLOAT: {
-                    float64 num = functions[i].fn.f(operation);
+                return (var){ .type = functions[i].returnType, .data.i = num };
+            }
 
-                    if (isnan(num))
-                        return (var){ .type = BC_NONE };
+            case BC_FLOAT: {
+                float64 num = functions[i].fn.f(operation);
 
-                    return (var){ .type = functions[i].returnType, .data.f = num };
-                }
+                if (isnan(num))
+                    return (var){ .type = BC_NONE };
 
-                case BC_STR: {
-                    char *result = functions[i].fn.s(operation);
+                return (var){ .type = functions[i].returnType, .data.f = num };
+            }
 
-                    if (!result)
-                        return (var){ .type = BC_NONE };
+            case BC_STR: {
+                char *result = functions[i].fn.s(operation);
 
-                    return (var){ .type = functions[i].returnType, .data.s = result};
-                }
+                if (!result)
+                    return (var){ .type = BC_NONE };
 
-                default: {
-                    char type[0x14] = {0};
+                return (var){ .type = functions[i].returnType, .data.s = result};
+            }
 
-                    getItemTypeStr(type, sizeof(type), (var){.type = functions[i].returnType});
+            default: {
+                char type[0x14] = {0};
 
-                    printc("ceval", BC_PROMPT_COLOR, WHITE);
-                    printf(": ");
-                    printc("invalid function with '%s' unknown type: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type, name);
+                getItemTypeStr(type, sizeof(type), (var){.type = functions[i].returnType});
 
-                    return (var){ .type = BC_NONE} ;
-                }
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("invalid function with '%s' unknown type: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type, name);
+
+                return (var){ .type = BC_NONE} ;
             }
         }
     }

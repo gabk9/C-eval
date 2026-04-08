@@ -39,6 +39,8 @@ opcode get_opcode(const char *op) {
         return GRE;
     else if (strcmp(op, "!=") == 0)
         return NE;
+    else if (strcmp(op, "**") == 0)
+        return POW;
 
     return UNKNOWN;
 }
@@ -384,6 +386,7 @@ int16_t find_main_operator_full(const char *s, const ops *operators, char *found
                         if ((s[start] == '<' && next == '<') ||
                             (s[start] == '>' && next == '>') ||
                             (s[start] == '&' && next == '&') ||
+                            (s[start] == '*' && next == '*') ||
                             (s[start] == '|' && next == '|')) {
                             continue;
                         }

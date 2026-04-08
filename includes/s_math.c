@@ -2528,7 +2528,7 @@ float64 s_pow(char *operation) {
             if (isnan(power))
                 return NAN;
 
-            if (trunc(power) != power && T_CMP(base, (int64_t)base)) {
+            if (base < 0 && debug2.type == BC_FLOAT) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("to use negative bases the power must not be of type '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);

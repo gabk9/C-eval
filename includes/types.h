@@ -16,7 +16,7 @@
 
 typedef enum op_code {
     ADD, SUB, DIV, MUL, XOR, MOD, AND, OR, LS, GR,
-    LAND, LOR, SHL, SHR, LSE, EQ, GRE, NE, UNKNOWN
+    LAND, LOR, SHL, SHR, LSE, EQ, GRE, NE, POW, UNKNOWN
 } opcode;
 
 typedef struct operators {
@@ -35,13 +35,14 @@ typedef float64 (*F_Func)(char *operation);
 typedef int64_t (*I_Func)(char *operation);
 
 typedef struct Functions {
-    eval_ty returnType;
     const char *name;
     union func {
         I_Func i;
         F_Func f;
         S_Func s;
     } fn;
+    eval_ty returnType;
+    bool builtin;
 } FuncEntry;
 
 typedef struct eval_var {

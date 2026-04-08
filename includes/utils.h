@@ -40,7 +40,7 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.2.30"
+#define VERSION "r0.2.36"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -48,8 +48,6 @@
     "'cls' or 'clear' to clear the screen and scrollback buffer and 'help' to display the manual.\n"
 
 #define DBL_PRECISION 10
-
-#define EVAL_STR_MUL_MAX_LEN 0x1000
 
 #define E_VAR "E"
 #define PI_VAR "PI"
@@ -80,7 +78,7 @@
 
 #define T_CMP(num1, num2) (fabs((num1) - (num2)) < (EPS))
 
-#define MAX_CHAR 0x400
+#define MAX_CHAR 0x1000
 
 #define I64_NAN ((int64_t)(INT64_MAX - 1ULL))
 #define U32_NAN ((uint32_t)(UINT32_MAX - 1U))

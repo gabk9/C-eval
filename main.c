@@ -17,7 +17,7 @@ int32_t main(int32_t argc, char **argv) {
 
     initRandom();
 
-    char operation[MAX_CHAR];
+    char operation[MAX_CHAR+5];
     uint8_t flags = 0;
     uint32_t objCount = 0;
 
@@ -144,7 +144,19 @@ int32_t main(int32_t argc, char **argv) {
 
         printc(">>> ", BC_PROMPT_COLOR, WHITE);
         fgets(operation, sizeof(operation), stdin);
+
+        if (!strchr(operation, '\n')) {
+            int32_t c;
+            while ((c = getchar()) != '\n' && c != EOF);
+
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("input too large (max %d characters)\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, MAX_CHAR);
+            continue;
+        }
+
         operation[strcspn(operation, "\r\n")] = '\0';
+
 
         if (!*operation) {
             putchar('\n');

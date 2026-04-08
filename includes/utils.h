@@ -79,6 +79,7 @@
 #define T_CMP(num1, num2) (fabs((num1) - (num2)) < (EPS))
 
 #define MAX_CHAR 0x1000
+#define INPUT_SIZE MAX_CHAR+5
 
 #define I64_NAN ((int64_t)(INT64_MAX - 1ULL))
 #define U32_NAN ((uint32_t)(UINT32_MAX - 1U))

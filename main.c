@@ -17,7 +17,7 @@ int32_t main(int32_t argc, char **argv) {
 
     initRandom();
 
-    char operation[MAX_CHAR+5];
+    char operation[INPUT_SIZE];
     uint8_t flags = 0;
     uint32_t objCount = 0;
 
@@ -111,7 +111,7 @@ int32_t main(int32_t argc, char **argv) {
     bool appear = false;
 
     if (!isatty(STDIN_FILENO)) {
-        char line[MAX_CHAR];
+        char line[INPUT_SIZE];
 
         while (fgets(line, sizeof(line), stdin)) {
             line[strcspn(line, "\r\n")] = '\0';

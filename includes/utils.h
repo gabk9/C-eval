@@ -67,7 +67,7 @@
 
 #define SINGLE_QUOTES 0
 #define DOUBLE_QUOTES 1
-#define BOTH_QUOTES 2
+#define BOTH_QUOTES   2
 
 #define HEX_PREF "0x"
 #define OCT_PREF "0o"

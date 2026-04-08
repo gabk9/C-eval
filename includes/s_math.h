@@ -75,6 +75,7 @@ int64_t s_round(char *operation)__attribute__((nonnull));
 float64 s_log10(char *operation)__attribute__((nonnull));
 int64_t s_scale(char *operation)__attribute__((nonnull));
 char *bc_typeof(char *operation)__attribute__((nonnull));
+int64_t bc_bool(char *operation)__attribute__((nonnull));
 float64 bc_float(char *operation)__attribute__((nonnull));
 float64 s_pounds(char *operation)__attribute__((nonnull));
 int64_t s_randInt(char *operation)__attribute__((nonnull));

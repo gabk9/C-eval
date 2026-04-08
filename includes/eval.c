@@ -13,6 +13,7 @@ var eval(char *operation, bool mathlib) {
 
     const FuncEntry math_table[] = {
         {.returnType = BC_BOOL,    .name = "isprime",   .fn.i = s_isprime},
+        {.returnType = BC_BOOL,    .name = BOOL_VAR,    .fn.i = bc_bool},
         {.returnType = BC_INT,     .name = "scale",     .fn.i = s_scale},
         {.returnType = BC_INT,     .name = "floor",     .fn.i = s_floor},
         {.returnType = BC_INT,     .name = "ceil",      .fn.i = s_ceil},
@@ -637,9 +638,9 @@ static var lNot_section(char *operation, bool mathlib) {
 
     if (isBetweenQuotes(expr, DOUBLE_QUOTES)) {
         if (count & 1)
-            return (var){ .type = BC_BOOL, .data.i = false };
+            return (var){ .type = BC_BOOL, .data.i = (strlen(expr) > 2) ? false : true};
         else
-            return (var){ .type = BC_BOOL, .data.i = true };
+            return (var){ .type = BC_BOOL, .data.i = (strlen(expr) > 2) ? true : false};
     }
 
     if (mathlib) {

@@ -649,8 +649,56 @@ char *bc_parse_str(char *operation) {
     return buff;
 }
 
-float64 bc_float(char *operation) {
+int64_t bc_bool(char *operation) {
+    char *p = strchr(operation, '(');
+    if (!p)
+        return I64_NAN;
 
+    operation = p;
+
+    if (countCommaOutsideQuotesAndParenthesis(operation, '"') != 0) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc(""BOOL_VAR"() requires exactly 1 argument\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return I64_NAN;
+    }
+
+    bool content = false;
+
+    for (char *c = operation; *c; c++) {
+        if (*c != '(' && *c != ')' && *c != ' ') {
+            content = true;
+            break;
+        }
+    }
+
+    if (!content)
+        return false;
+
+    var buff = eval(operation, true);
+
+    switch (buff.type) {
+        case BC_FLOAT:
+            return (buff.data.f == 0.0) ? false : true;
+        case BC_CHR:
+        case BC_BOOL:
+        case BC_INT:
+            return (buff.data.i == 0) ? false: true;
+        case BC_STR:
+            if (strlen(buff.data.s) <= 2)
+                return false;
+
+            SAFE_FREE(buff.data.s);
+            return true;
+        default:
+            return I64_NAN;
+    }
+
+    return true;
+}
+
+float64 bc_float(char *operation) {
     char *p = strchr(operation, '(');
     if (!p)
         return NAN;
@@ -716,7 +764,6 @@ float64 bc_float(char *operation) {
 }
 
 int64_t bc_int(char *operation) {
-
     char *p = strchr(operation, '(');
     if (!p)
         return I64_NAN;

@@ -636,7 +636,7 @@ static var lNot_section(char *operation, bool mathlib) {
         return (var){ .type = BC_NONE };
     }
 
-    if (isBetweenQuotes(expr, DOUBLE_QUOTES)) {
+    if (isQuoted(expr, DOUBLE_QUOTES)) {
         if (count & 1)
             return (var){ .type = BC_BOOL, .data.i = (strlen(expr) > 2) ? false : true};
         else

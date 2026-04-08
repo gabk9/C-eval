@@ -398,7 +398,7 @@ var h_atof(const char *str, bool mathlib) {
 
     len = strlen(buf);
 
-    if (isBetweenQuotes(buf, SINGLE_QUOTES)) {
+    if (isQuoted(buf, SINGLE_QUOTES)) {
         if (!injectEscape(buf, "ceval"))
             return (var){.type = BC_FLOAT, .data.f = NAN};
 
@@ -894,7 +894,7 @@ char *s_input(char *operation) {
     if (!str)
         return NULL;
 
-    if (isBetweenQuotes(str, DOUBLE_QUOTES)) {
+    if (isQuoted(str, DOUBLE_QUOTES)) {
         if (!injectEscape(str, "ceval")) {
             SAFE_FREE(str);
             return NULL;

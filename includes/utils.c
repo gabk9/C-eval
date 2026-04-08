@@ -45,9 +45,9 @@ opcode get_opcode(const char *op) {
 
 __attribute__((unused))
 eval_ty eval_typeof(const char *str) {
-    if (isBetweenQuotes(str, BOTH_QUOTES))
+    if (isQuoted(str, BOTH_QUOTES))
         return BC_STR;
-    else if (isBetweenQuotes(str, SINGLE_QUOTES))
+    else if (isQuoted(str, SINGLE_QUOTES))
         return BC_CHR;
 
     if (strcmp(str, FALSE_VAR) == 0 || strcmp(str, TRUE_VAR) == 0)
@@ -143,14 +143,14 @@ void getItemTypeStr(char *buff, size_t size, var item) {
 int32_t bc_strcmp(char *str1, char *str2) {
     char buff1[0x100], buff2[0x100];
 
-    if (isBetweenQuotes(str1, DOUBLE_QUOTES)) {
+    if (isQuoted(str1, DOUBLE_QUOTES)) {
         size_t len = strlen(str1) - 2;
         strncpy(buff1, str1+1, len);
         buff1[len] = '\0';
     } else
         strncpy(buff1, str1, sizeof(buff1)-1), buff1[sizeof(buff1)-1] = '\0';
 
-    if (isBetweenQuotes(str2, DOUBLE_QUOTES)) {
+    if (isQuoted(str2, DOUBLE_QUOTES)) {
         size_t len = strlen(str2) - 2;
         strncpy(buff2, str2+1, len);
         buff2[len] = '\0';
@@ -587,7 +587,7 @@ void trim(char *str) {
 bool isBcVariable(const char *str, bool *shouldError) {
     *shouldError = true;
 
-    if (isBetweenQuotes(str, BOTH_QUOTES)) {
+    if (isQuoted(str, BOTH_QUOTES)) {
         *shouldError = false;
         return false;
     }
@@ -629,7 +629,7 @@ void removeComments(char *str) {
     }
 }
 
-bool isBetweenQuotes(const char *string, int16_t quoteMode) {
+bool isQuoted(const char *string, int16_t quoteMode) {
 
     if (!string)
         return false;

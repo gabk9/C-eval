@@ -8,11 +8,11 @@
     #error "System architecture not recognized, terminating program!!"
 #endif
 
-#if defined(__linux__) || defined(__ANDROID__) || defined(__APPLE__) || defined(_WIN64)
-    typedef double float64;
-#else
+#if !defined(__linux__) && !defined(__ANDROID__) && !defined(__APPLE__) && !defined(_WIN64)
     #error "Operational system not recognized, terminating program!!"
 #endif
+
+typedef double float64;
 
 typedef enum op_code {
     ADD, SUB, DIV, MUL, XOR, MOD, AND, OR, LS, GR,

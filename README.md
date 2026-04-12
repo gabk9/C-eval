@@ -104,6 +104,14 @@ To build ceval, you need:
 
 ## Install Instructions
 
+### Android (Termux)
+``` bash
+apt update
+apt install build-essential cmake git
+```
+
+---
+
 ### Linux (Debian / Ubuntu)
 
 ```bash

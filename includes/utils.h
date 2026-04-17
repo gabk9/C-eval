@@ -9,6 +9,10 @@
     #define _CRT_NONSTDC_NO_WARNINGS
 #endif
 
+#if !defined(_POSIX_C_SOURCE)
+    #define _POSIX_C_SOURCE 199309L
+#endif
+
 #include <time.h>
 #include "types.h"
 #include <stdio.h>
@@ -126,6 +130,7 @@ void getItemTypeStr(char *buff, size_t size, var item);
 void int64_to_hex_min(int64_t v, char *out, size_t size);
 int8_t getInvalidEscape(const char *str, const char *error_str);
 void printc(const char *fmt, color4 initColor, color4 resetColor, ...);
+void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE, const char *FUNC);
 int16_t find_main_operator_full(const char *s, const ops *operators, char *foundOp);
 
 #endif

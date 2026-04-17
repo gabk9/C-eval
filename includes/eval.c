@@ -1,8 +1,13 @@
+#if !defined(_POSIX_C_SOURCE)
+    #define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "eval.h"
 #include "types.h"
 #include "utils.h"
 #include <ctype.h>
 #include "s_math.h"
+
 
 static int32_t eval_depth = 0;
 var Ans = { .type = BC_NONE };
@@ -199,7 +204,7 @@ char *var2str(var buff) {
         case BC_INT:
         case BC_FLOAT: {
             const size_t max = 0x60;
-            char *tmp = malloc(max);
+            char *tmp = safe_malloc(max, __LINE__, __FILE__, __func__);
             if (!tmp) return NULL;
 
             num_snprintf(tmp, max, buff);
@@ -887,7 +892,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                 }
             }
 
-            char *final = malloc(res_len + 3);
+            char *final = safe_malloc(res_len + 3, __LINE__, __FILE__, __func__);
             if (!final) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");

@@ -1,6 +1,28 @@
 #include "utils.h"
 #include <ctype.h>
+#include <stdlib.h>
 #include <stdarg.h>
+
+void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE, const char *FUNC) {
+    void *ptr = malloc(bytes);
+
+    if (!ptr) {
+    #ifndef _WIN64
+        char *f = strrchr(FILE, '/');
+    #else
+        char *f = strrchr(FILE, '\\');
+    #endif
+
+        f = !f ? FILE : f + 1;
+
+        printc("%s:%" PRIu32": malloc() failed in function '%s'\n",
+            GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, f, LINE, FUNC);
+
+        exit(EXIT_FAILURE);
+    }
+
+    return ptr;
+}
 
 opcode get_opcode(const char *op) {
     if (strcmp(op, "+") == 0)
@@ -171,7 +193,7 @@ char *bc_strcat(const char *dest, const char *src) {
 
     size_t total = (len1 - 2) + (len2 - 2) + 3;
 
-    char *cat = malloc(total);
+    char *cat = safe_malloc(total, __LINE__, __FILE__, __func__);
     if (!cat)
         return NULL;
 

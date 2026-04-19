@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#ifdef __APPLE__
+    extern int snprintf(char *, unsigned long, const char *, ...);
+#endif
+
 void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE, const char *FUNC) {
     void *ptr = malloc(bytes);
 

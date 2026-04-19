@@ -2889,6 +2889,28 @@ float64 s_log(char *operation) {
     return log(num) / log(base);
 }
 
+static uint32_t better_rand32(void) {
+    return ((uint32_t)rand() << 16) ^ (uint32_t)rand();
+}
+
+static float64 random_range_float(float64 min, float64 max) {
+    uint32_t r = better_rand32();
+    float64 normalized = (float64)r / (float64)UINT32_MAX;
+    return min + normalized * (max - min);
+}
+
+static int32_t random_range_int(int32_t min, int32_t max) {
+    uint32_t range = (uint32_t)(max - min + 1);
+    uint32_t limit = UINT32_MAX - (UINT32_MAX % range);
+
+    uint32_t r;
+    do {
+        r = better_rand32();
+    } while (r >= limit);
+
+    return min + (int32_t)(r % range);
+}
+
 float64 s_randFloat(char *operation) {
     char *p = strchr(operation, '(');
     if (!p)
@@ -3405,6 +3427,24 @@ float64 s_sign(char *operation) {
         return NAN;
 
     return signbit(num);
+}
+
+static inline float64 gauss_range_double(float64 a, float64 b, float64 d) {
+    if (d <= 0.0)
+        return NAN;
+
+    if ((d > 0.0 && a > b) || (d < 0.0 && a < b))
+        return NAN;
+
+    float64 raw_n = (b - a) / d;
+
+    float64 steps = floor(raw_n);
+
+    float64 n = steps + 1.0;
+
+    float64 last = a + steps * d;
+
+    return n * (a + last) / 2.0;
 }
 
 float64 s_sum(char *operation) {

@@ -80,7 +80,7 @@ The focus is simplicity, flexibility and educational value.
 | Windows  | x86_64 / arm64 | ✅ Supported |
 | Linux    | x86_64 / arm64 | ✅ Supported |
 | Android  | arm64          | ✅ Supported |
-| macOS    | x86_64 / arm64 | ⚠️ Untested  |
+| macOS    | x86_64         | ✅ Supported |
 
 ---
 
@@ -123,10 +123,18 @@ sudo apt install build-essential cmake git
 
 ### Windows (PowerShell)
 
-```powershell
+```bash
 winget install --id Git.Git -e
 winget install --id Kitware.CMake -e
 winget install --id MSYS2.MSYS2 -e
+```
+
+### MacOS (using brew installer)
+
+```bash
+xcode-select --install
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install cmake git
 ```
 
 ---

@@ -3,9 +3,11 @@
 #endif
 
 #include "eval.h"
+#include <math.h>
 #include "utils.h"
 #include <ctype.h>
 #include <float.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include "s_math.h"
 

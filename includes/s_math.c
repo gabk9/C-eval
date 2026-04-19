@@ -3,8 +3,8 @@
 #endif
 
 #include "eval.h"
-#include <math.h>
 #include "utils.h"
+#include <math.h>
 #include <ctype.h>
 #include <float.h>
 #include <stdlib.h>
@@ -808,7 +808,7 @@ int64_t bc_int(char *operation) {
 
     len = strlen(buff.data.s);
 
-    if (!isalldigit(buff.data.s) || len < 1) {
+    if (!isalldigit(buff.data.s) || len < 1 || strchr(buff.data.s, '.')) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("invalid literal for "INT_VAR"()\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
@@ -2912,6 +2912,7 @@ static int32_t random_range_int(int32_t min, int32_t max) {
 
     return min + (int32_t)(r % range);
 }
+
 
 float64 s_randFloat(char *operation) {
     char *p = strchr(operation, '(');

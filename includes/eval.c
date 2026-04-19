@@ -3,8 +3,8 @@
 #endif
 
 #include "eval.h"
-#include <math.h>
 #include "types.h"
+#include <math.h>
 #include "utils.h"
 #include <ctype.h>
 #include "s_math.h"
@@ -28,7 +28,7 @@ var eval(char *operation, bool mathlib) {
     {.returnType = BC_INT,    .name = "trunc",     .fn.i = s_trunc,       .builtin = false},
     {.returnType = BC_INT,    .name = "rand",      .fn.i = s_randInt,     .builtin = false},
     {.returnType = BC_INT,    .name = "len",       .fn.i = bc_len,        .builtin = true},
-    {.returnType = BC_INT,    .name = INT_VAR,     .fn.i = bc_int,        .builtin = false},
+    {.returnType = BC_INT,    .name = INT_VAR,     .fn.i = bc_int,        .builtin = true},
     {.returnType = BC_FLOAT,  .name = "sqrt",      .fn.f = s_sqrt,        .builtin = false},
     {.returnType = BC_FLOAT,  .name = "tet",       .fn.f = s_tet,         .builtin = false},
     {.returnType = BC_FLOAT,  .name = "pow",       .fn.f = s_pow,         .builtin = false},

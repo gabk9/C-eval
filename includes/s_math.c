@@ -2062,7 +2062,7 @@ float64 s_cos(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = h_atof(operation, true);
+    var tmp = eval(operation, true);
 
     float64 num = 0;
 
@@ -2200,7 +2200,7 @@ float64 s_atan(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = h_atof(operation, true);
+    var tmp = eval(operation, true);
 
     float64 num = 0;
 
@@ -3112,7 +3112,7 @@ int64_t s_floor(char *operation) {
         return I64_NAN;
     operation = p;
 
-    var tmp = h_atof(operation, true);
+    var tmp = eval(operation, true);
 
     float64 num = 0;
 

@@ -62,7 +62,7 @@ The focus is simplicity, flexibility and educational value.
 - Bitwise and logical operators
 - Built-in functions (math, conversion, random, etc.)
 - Multiple numeric systems (ascii, binary, decimal, hexadecimal, octal)
-- Cross-platform support (Linux / Windows)
+- Cross-platform support (Linux / MacOS / Windows)
 
 ---
 
@@ -80,7 +80,7 @@ The focus is simplicity, flexibility and educational value.
 | Windows  | x86_64 / arm64 | ✅ Supported |
 | Linux    | x86_64 / arm64 | ✅ Supported |
 | Android  | arm64          | ✅ Supported |
-| macOS    | x86_64         | ✅ Supported |
+| MacOS    | x86_64         | ✅ Supported |
 
 ---
 
@@ -91,7 +91,7 @@ To build ceval, you need:
 ### Required
 
 - **C compiler**
-    - GCC or Clang (Linux)
+    - GCC or Clang (Linux and MacOS)
     - MinGW / MSYS2 / MSVC (Windows)
 - **CMake** (>= 3.10)
 - **Git**
@@ -160,7 +160,7 @@ ceval
 ```
 ---
 
-### Linux
+### Linux and MacOS
 
 ```bash
 git clone https://github.com/gabk9/C-eval.git

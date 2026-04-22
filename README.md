@@ -45,7 +45,7 @@ ceval was created mainly for:
 
 - Learning how expression parsers and evaluators work
 - Practicing low-level programming in C
-- Creating a lightweight alternative to tools like `bc`
+- Creating a lightweight alternative to tools like `bc` and `python`
 - Experimenting with custom operators and functions
 
 The focus is simplicity, flexibility and educational value.
@@ -132,8 +132,6 @@ winget install --id MSYS2.MSYS2 -e
 ### MacOS (using brew installer)
 
 ```bash
-xcode-select --install
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install cmake git
 ```
 
@@ -191,7 +189,6 @@ cd build
 cmake ..
 cmake --build .
 
-# add to PATH (permanent)
 $exePath = Get-ChildItem -Recurse -Filter ceval.exe | Select-Object -First 1 -ExpandProperty DirectoryName
 setx PATH "$env:Path;$exePath"
 

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(shell C)
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    message(FATAL_ERROR "Cannot compile in 32 bit or less architectures")
+endif()
+
 set(SOURCES
     main.c 
     includes/utils.c
@@ -13,11 +17,6 @@ include_directories(includes)
 add_executable(ceval ${SOURCES})
 
 if(WIN32)
-    set_target_properties(ceval PROPERTIES SUFFIX ".exe")
-    
-    if(MINGW)
-    endif()
-    
     if(MSVC)
         target_compile_definitions(ceval PRIVATE _CRT_SECURE_NO_WARNINGS)
     endif()

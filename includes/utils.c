@@ -688,14 +688,33 @@ bool isQuoted(const char *string, int16_t quoteMode) {
     return false;
 }
 
-bool isValidBcCommand(char *str, char *command) {
+bool trim_streq(char *str1, char *str2) {
+    if (!str1 || !str2) return false;
 
-    uint16_t len = strlen(command);
+    size_t len = strlen(str1);
+    if (len == 0)
+        return false;
 
-    if (strncmp(str, command, strlen(command)) == 0 && (str[len] == '\0' || str[len] == ' '))
-        return true;
+    while (len - 1 > 0 && str1[len-1] == ' ') len--;
 
-    return false;
+
+    if (len - 1 == 0 && str1[0] == ' ')
+        return str2[0] == '\0';
+
+    bool endTrim = false;
+    size_t j = 0;
+
+    for (size_t i = 0; i <= len - 1; i++) {
+        if (str1[i] == ' ' && !endTrim)
+            continue;
+        else
+            endTrim = true;
+
+        if (str1[i] != str2[j++])
+            return false;
+    }
+
+    return str2[j] == '\0';
 }
 
 void charRm(char *str, int8_t targ) {

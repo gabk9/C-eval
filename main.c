@@ -163,29 +163,29 @@ int32_t main(int32_t argc, char **argv) {
             continue;
         }
 
-        if (isValidBcCommand(operation, "quit") ||
-            isValidBcCommand(operation, "exit")) {
+        if (trim_streq(operation, "quit") ||
+            trim_streq(operation, "exit")) {
             break;
 
-        } else if (isValidBcCommand(operation, "mathlib")) {
+        } else if (trim_streq(operation, "mathlib")) {
             clear();
             mathlib = !mathlib;
             appear = false;
             continue;
-        } else if (isValidBcCommand(operation, "quiet")) {
+        } else if (trim_streq(operation, "quiet")) {
             clear();
             show_init = !show_init;
             appear = false;
             continue;
-        } else if (isValidBcCommand(operation, "cls")) {
+        } else if (trim_streq(operation, "cls")) {
             clear();
             appear = false;
             continue;
-        } else if (isValidBcCommand(operation, "clear")) {
+        } else if (trim_streq(operation, "clear")) {
             clear();
             appear = false;
             continue;
-        } else if (isValidBcCommand(operation, "help")) {
+        } else if (trim_streq(operation, "help")) {
             print_manual();
             putchar('\n');
             appear = true;

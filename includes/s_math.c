@@ -159,14 +159,15 @@ static var mathlibPart(char *buf, bool mathlib) {
 
         var tmp = eval(buf, mathlib);
 
-        if (tmp.type == BC_STR)
-            SAFE_FREE(tmp.data.s);
-
-        if (tmp.type == BC_NULL)
-            return (var){.type = BC_FLOAT, .data.f = NAN};
-
-        if (tmp.type == BC_FLOAT)
-            return (var){.type = BC_FLOAT, .data.f = tmp.data.f * PI};
+        switch (tmp.type) {
+            case BC_NONE:
+            case BC_NULL:
+                return (var){.type = BC_FLOAT, .data.f = NAN};
+            case BC_FLOAT:
+                return (var){.type = BC_FLOAT, .data.f = tmp.data.f * PI};
+            default:
+                break;
+        }
 
         return (var){.type = BC_FLOAT, .data.f = (float64)tmp.data.i * PI};
     } else if (i > 0 && strcmp(buf + i, E_VAR) == 0) {
@@ -176,14 +177,15 @@ static var mathlibPart(char *buf, bool mathlib) {
 
         var tmp = eval(buf, mathlib);
 
-        if (tmp.type == BC_STR)
-            SAFE_FREE(tmp.data.s);
-
-        if (tmp.type == BC_NULL)
-            return (var){.type = BC_FLOAT, .data.f = NAN};
-
-        if (tmp.type == BC_FLOAT)
-            return (var){.type = BC_FLOAT, .data.f = tmp.data.f * E};
+        switch (tmp.type) {
+            case BC_NONE:
+            case BC_NULL:
+                return (var){.type = BC_FLOAT, .data.f = NAN};
+            case BC_FLOAT:
+                return (var){.type = BC_FLOAT, .data.f = tmp.data.f * PI};
+            default:
+                break;
+        }
 
         return (var){.type = BC_FLOAT, .data.f = (float64)tmp.data.i * E};
     }
@@ -563,7 +565,7 @@ static uint16_t countCommaOutsideQuotes(const char *str, uint8_t quoteType) {
     if (str == NULL) {
         return 0;
     }
-    
+
     while (*str) {
         if (*str == (char)quoteType) {
             insideQuotes = !insideQuotes;
@@ -572,7 +574,7 @@ static uint16_t countCommaOutsideQuotes(const char *str, uint8_t quoteType) {
         }
         str++;
     }
-    
+
     return count;
 }
 
@@ -712,8 +714,16 @@ float64 bc_float(char *operation) {
             return (float64)buff.data.i;
         case BC_FLOAT:
             return buff.data.f;
-        default:
+        case BC_NONE:
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc(""FLOAT_VAR"() cannot work with '"NONE_VAR"' type\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            return NAN;
+        case BC_STR:
             break;
+        default:
+            return NAN;
     }
 
     size_t len = strlen(buff.data.s);
@@ -777,8 +787,16 @@ int64_t bc_int(char *operation) {
             return buff.data.i;
         case BC_FLOAT:
             return (int64_t)buff.data.f;
-        default:
+        case BC_NONE:
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc(""INT_VAR"() cannot work with '"NONE_VAR"' type\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            return I64_NAN;
+        case BC_STR:
             break;
+        default:
+            return I64_NAN;
     }
 
     size_t len = strlen(buff.data.s);
@@ -995,10 +1013,14 @@ float64 s_abs(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("abs() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1030,12 +1052,14 @@ float64 s_miles(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("mi() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1067,12 +1091,14 @@ float64 s_km(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("km() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1104,12 +1130,14 @@ float64 s_pounds(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("lb() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1141,12 +1169,14 @@ float64 s_kg(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("kg() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1178,12 +1208,14 @@ float64 s_feet(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("feet() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1215,12 +1247,14 @@ float64 s_meter(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("meter() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1252,12 +1286,14 @@ float64 s_fah(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("fah() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1289,12 +1325,14 @@ float64 s_cel(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("cel() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1323,6 +1361,7 @@ char *s_oct(char *operation) {
         case BC_INT:
             val1 = tmp.data.i;
             break;
+        case BC_NONE:
         case BC_FLOAT:
         case BC_STR:
             if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
@@ -1339,7 +1378,6 @@ char *s_oct(char *operation) {
         default:
             return NULL;
     }
-
 
     bool isNeg = val1 < 0;
 
@@ -1451,6 +1489,7 @@ char *s_chr(char *operation) {
             num = tmp.data.i;
             break;
         case BC_FLOAT:
+        case BC_NONE:
         case BC_STR:
             if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
                 return NULL;
@@ -1537,6 +1576,7 @@ char *s_hex(char *operation) {
             val1 = tmp.data.i;
             break;
         case BC_FLOAT:
+        case BC_NONE:
         case BC_STR:
             if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
                 return NULL;
@@ -1583,6 +1623,7 @@ char *s_bin(char *operation) {
             val1 = tmp.data.i;
             break;
         case BC_FLOAT:
+        case BC_NONE:
         case BC_STR:
             if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
                 return NULL;
@@ -1656,12 +1697,14 @@ int64_t s_trunc(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("trunc() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return I64_NAN;
         default:
@@ -1693,12 +1736,14 @@ float64 s_rad(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("deg2rad() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1730,12 +1775,14 @@ float64 s_gon(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("rad2gon() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1768,12 +1815,14 @@ float64 s_deg(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("rad2deg() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1805,12 +1854,14 @@ float64 s_sqrt(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("sqrt() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1842,12 +1893,14 @@ int64_t s_scale(char *operation) {
     switch (tmp.type) {
         case BC_NULL:
             return I64_NAN;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("scale() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return I64_NAN;
         case BC_FLOAT:
@@ -1886,12 +1939,14 @@ float64 s_sin(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("sin() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1928,12 +1983,14 @@ float64 s_asin(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("asin() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -1973,12 +2030,14 @@ float64 s_cot(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("cot() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2020,12 +2079,14 @@ float64 s_acot(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("acot() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2057,12 +2118,14 @@ float64 s_cos(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("cos() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2099,12 +2162,14 @@ float64 s_acos(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("acos() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2144,12 +2209,13 @@ float64 s_tan(char *operation) {
         case BC_FLOAT:
             angle = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("tan() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2195,12 +2261,14 @@ float64 s_atan(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("atan() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2232,12 +2300,14 @@ float64 s_ln(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("ln() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2269,12 +2339,14 @@ float64 s_log10(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("log10() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2306,12 +2378,14 @@ float64 s_log2(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("log2() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -2370,12 +2444,14 @@ float64 s_tet(char *operation) {
         case BC_FLOAT:
             base = debug1.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 1st argument of tet() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug1.data.s);
+            if (debug1.type == BC_STR)
+                SAFE_FREE(debug1.data.s);
 
             return NAN;
         default:
@@ -2396,6 +2472,7 @@ float64 s_tet(char *operation) {
             tet = debug2.data.i;
             break;
         case BC_FLOAT:
+        case BC_NONE:
         case BC_STR:
             if (debug2.type == BC_FLOAT && isnan(debug2.data.f))
                 return NAN;
@@ -2485,12 +2562,14 @@ float64 s_pow(char *operation) {
         case BC_FLOAT:
             base = debug1.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 1st argument of pow() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug1.data.s);
+            if (debug1.type == BC_STR)
+                SAFE_FREE(debug1.data.s);
 
             return NAN;
         default:
@@ -2525,12 +2604,14 @@ float64 s_pow(char *operation) {
             }
 
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 2nd argument of pow() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug2.data.s);
+            if (debug2.type == BC_STR)
+                SAFE_FREE(debug2.data.s);
 
             return NAN;
         default:
@@ -2594,12 +2675,14 @@ float64 s_root(char *operation) {
         case BC_FLOAT:
             index = debug1.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 1st argument of root() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug1.data.s);
+            if (debug1.type == BC_STR)
+                SAFE_FREE(debug1.data.s);
 
             return NAN;
         default:
@@ -2622,12 +2705,14 @@ float64 s_root(char *operation) {
         case BC_FLOAT:
             rooting = debug2.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 2nd argument of root() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug2.data.s);
+            if (debug2.type == BC_STR)
+                SAFE_FREE(debug2.data.s);
 
             return NAN;
         default:
@@ -2727,12 +2812,14 @@ float64 s_bmi(char *operation) {
         case BC_FLOAT:
             weight = debug1.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 1st argument of bmi() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug1.data.s);
+            if (debug1.type == BC_STR)
+                SAFE_FREE(debug1.data.s);
 
             return NAN;
         default:
@@ -2755,12 +2842,14 @@ float64 s_bmi(char *operation) {
         case BC_FLOAT:
             height = debug2.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 2nd argument of bmi() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug2.data.s);
+            if (debug2.type == BC_STR)
+                SAFE_FREE(debug2.data.s);
 
             return NAN;
         default:
@@ -2819,12 +2908,14 @@ float64 s_log(char *operation) {
         case BC_FLOAT:
             base = debug1.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 1st argument of log() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug1.data.s);
+            if (debug1.type == BC_STR)
+                SAFE_FREE(debug1.data.s);
 
             return NAN;
         default:
@@ -2847,12 +2938,14 @@ float64 s_log(char *operation) {
         case BC_FLOAT:
             num = debug2.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 2nd argument of log() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug2.data.s);
+            if (debug2.type == BC_STR)
+                SAFE_FREE(debug2.data.s);
 
             return NAN;
         default:
@@ -2947,12 +3040,14 @@ float64 s_randFloat(char *operation) {
         case BC_FLOAT:
             maxLf = tmp1.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 1st argument of randf() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp1.data.s);
+            if (tmp1.type == BC_STR)
+                SAFE_FREE(tmp1.data.s);
 
             return NAN;
         default:
@@ -2975,12 +3070,14 @@ float64 s_randFloat(char *operation) {
         case BC_FLOAT:
             minLf = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 2nd argument of randf() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -3042,6 +3139,7 @@ int64_t s_randInt(char *operation) {
             maxInt = tmp1.data.i;
             break;
         case BC_FLOAT:
+        case BC_NONE:
         case BC_STR:
             if (tmp1.type == BC_FLOAT && isnan(tmp1.data.f))
                 return I64_NAN;
@@ -3069,6 +3167,7 @@ int64_t s_randInt(char *operation) {
             minInt = tmp.data.i;
             break;
         case BC_FLOAT:
+        case BC_NONE:
         case BC_STR:
             if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
                 return I64_NAN;
@@ -3107,12 +3206,14 @@ int64_t s_floor(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("floor() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return I64_NAN;
         default:
@@ -3144,12 +3245,14 @@ int64_t s_ceil(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("ceil() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return I64_NAN;
         default:
@@ -3181,12 +3284,14 @@ int64_t s_round(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("round() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return I64_NAN;
         default:
@@ -3241,6 +3346,7 @@ int64_t s_isprime(char *operation) {
             num = tmp.data.i;
             break;
         case BC_FLOAT:
+        case BC_NONE:
         case BC_STR:
             if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
                 return I64_NAN;
@@ -3396,12 +3502,14 @@ float64 s_sign(char *operation) {
         case BC_FLOAT:
             num = tmp.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("sign() requires an argument of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(tmp.data.s);
+            if (tmp.type == BC_STR)
+                SAFE_FREE(tmp.data.s);
 
             return NAN;
         default:
@@ -3502,12 +3610,14 @@ float64 s_sum(char *operation) {
         case BC_FLOAT:
             init = debug1.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 1st argument of sum() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug1.data.s);
+            if (debug1.type == BC_STR)
+                SAFE_FREE(debug1.data.s);
 
             return NAN;
         default:
@@ -3530,12 +3640,14 @@ float64 s_sum(char *operation) {
         case BC_FLOAT:
             end = debug2.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 2nd argument of sum() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug2.data.s);
+            if (debug2.type == BC_STR)
+                SAFE_FREE(debug2.data.s);
 
             return NAN;
         default:
@@ -3561,12 +3673,14 @@ float64 s_sum(char *operation) {
         case BC_FLOAT:
             diff = debug3.data.f;
             break;
+        case BC_NONE:
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("the 3rd argument of sum() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            SAFE_FREE(debug3.data.s);
+            if (debug3.type == BC_STR)
+                SAFE_FREE(debug3.data.s);
 
             return NAN;
         default:

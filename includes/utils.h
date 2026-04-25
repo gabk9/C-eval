@@ -48,7 +48,7 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.2.50"
+#define VERSION "r0.2.78"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -65,6 +65,7 @@
 #define STR_VAR "str"
 #define CHR_VAR "chr"
 #define NONE_VAR "none"
+#define NULL_VAR "NULL"
 #define TRUE_VAR "true"
 #define BOOL_VAR "bool"
 #define FLOAT_VAR "float"

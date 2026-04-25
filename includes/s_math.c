@@ -162,7 +162,7 @@ static var mathlibPart(char *buf, bool mathlib) {
         if (tmp.type == BC_STR)
             SAFE_FREE(tmp.data.s);
 
-        if (tmp.type == BC_NONE)
+        if (tmp.type == BC_NULL)
             return (var){.type = BC_FLOAT, .data.f = NAN};
 
         if (tmp.type == BC_FLOAT)
@@ -179,7 +179,7 @@ static var mathlibPart(char *buf, bool mathlib) {
         if (tmp.type == BC_STR)
             SAFE_FREE(tmp.data.s);
 
-        if (tmp.type == BC_NONE)
+        if (tmp.type == BC_NULL)
             return (var){.type = BC_FLOAT, .data.f = NAN};
 
         if (tmp.type == BC_FLOAT)
@@ -188,7 +188,7 @@ static var mathlibPart(char *buf, bool mathlib) {
         return (var){.type = BC_FLOAT, .data.f = (float64)tmp.data.i * E};
     }
 
-    return (var){.type = BC_NONE};
+    return (var){.type = BC_NULL};
 }
 
 var h_atof(const char *str, bool mathlib) {
@@ -234,20 +234,6 @@ var h_atof(const char *str, bool mathlib) {
     }
 
 
-    if (strcmp(buf, NONE_VAR) == 0) {
-        if (isUnaryNeg) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("bad operand type for unary negative(-): '"NONE_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-        } else if (isUnaryNot) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("bad operand type for unary not(~): '"NONE_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-        }
-
-        return (var){.type = BC_FLOAT, .data.f = NAN};
-    }
-
     bool isInf = strcasecmp(buf, INF_VAR) == 0;
     if (mathlib && isInf) {
 
@@ -267,22 +253,16 @@ var h_atof(const char *str, bool mathlib) {
     bool isAns = mathlib && strcmp(buf, ANS_VAR) == 0;
 
     if (isAns) {
-        if (Ans.type == BC_NONE) {
+        if (Ans.type == BC_NULL) {
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
-            printc("'ans' is undefined\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-            return (var){.type = BC_FLOAT, .data.f = NAN};
-        } else if (Ans.type == BC_STR) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("cannot operate with strings\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
+            printc("'"ANS_VAR"' is undefined\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+    
             return (var){.type = BC_FLOAT, .data.f = NAN};
         }
 
-        return Ans;
-
+        if (!isUnaryNeg && !isUnaryNot)
+            return Ans;
     } 
 
     if (isUnaryNeg) {
@@ -298,17 +278,14 @@ var h_atof(const char *str, bool mathlib) {
         int64_t num1;
         bool isInt = false;
 
-        if (isAns && Ans.type != BC_STR)
-            return Ans;
-
         var tmp;
 
         if (strcmp(buf, "0") == 0)
             tmp = (var){.type = BC_FLOAT, .data.f = 0.0};
         else
-            tmp = eval(buf, mathlib);
+            tmp = isAns ? Ans : eval(buf, mathlib);
 
-        if (tmp.type == BC_NONE)
+        if (tmp.type == BC_NULL)
             return (var){.type = BC_FLOAT, .data.f = NAN};
 
         switch (tmp.type) {
@@ -324,7 +301,7 @@ var h_atof(const char *str, bool mathlib) {
             default:
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("unary not(~) requires an argument of type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                printc("unary neg(-) requires an argument of of numeric type\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
                 if (tmp.type == BC_STR)
                     SAFE_FREE(tmp.data.s);
@@ -366,13 +343,14 @@ var h_atof(const char *str, bool mathlib) {
         }
 
         int64_t num1;
+        var tmp;
 
-        if (isAns && Ans.type != BC_STR)
-            return Ans;
+        if (strcmp(buf, "0") == 0)
+            tmp = (var){.type = BC_FLOAT, .data.f = 0.0};
+        else
+            tmp = isAns ? Ans : eval(buf, mathlib);
 
-        var tmp = eval(buf, mathlib);
-
-        if (tmp.type == BC_NONE)
+        if (tmp.type == BC_NULL)
             return (var){.type = BC_FLOAT, .data.f = NAN};
 
         switch (tmp.type) {
@@ -399,6 +377,8 @@ var h_atof(const char *str, bool mathlib) {
         return (var){.type = BC_BOOL, .data.i = true};
     else if (strcmp(buf, FALSE_VAR) == 0)
         return (var){.type = BC_BOOL, .data.i = false};
+    else if (strcmp(buf, NONE_VAR) == 0)
+        return (var){.type = BC_NONE};
     else if (mathlib && strcmp(buf, RAND_MAX_VAR) == 0)
         return (var){.type = BC_INT, .data.i = RAND_MAX};
 
@@ -457,7 +437,7 @@ var h_atof(const char *str, bool mathlib) {
     if (mathlib) {
         var tmp = mathlibPart(buf, mathlib);
 
-        if (tmp.type != BC_NONE)
+        if (tmp.type != BC_NULL)
             return tmp;
     }
 
@@ -697,6 +677,8 @@ int64_t bc_bool(char *operation) {
 
             SAFE_FREE(buff.data.s);
             return true;
+        case BC_NONE:
+            return false;
         default:
             return I64_NAN;
     }
@@ -722,7 +704,7 @@ float64 bc_float(char *operation) {
     var buff = eval(operation, true);
 
     switch (buff.type) {
-        case BC_NONE:
+        case BC_NULL:
             return NAN;
         case BC_BOOL:
         case BC_CHR:
@@ -787,7 +769,7 @@ int64_t bc_int(char *operation) {
     var buff = eval(operation, true);
 
     switch (buff.type) {
-        case BC_NONE:
+        case BC_NULL:
             return I64_NAN;
         case BC_BOOL:
         case BC_CHR:
@@ -844,7 +826,7 @@ char *bc_typeof(char *operation) {
 
     if (buff.type == BC_STR)
         SAFE_FREE(buff.data.s);
-    else if (buff.type == BC_NONE)
+    else if (buff.type == BC_NULL)
         return NULL;
 
     char tmp[0x20] = {0};
@@ -957,7 +939,7 @@ int64_t bc_len(char *operation) {
 
     var buff = eval(operation, true);
 
-    if (buff.type == BC_NONE)
+    if (buff.type == BC_NULL)
         return I64_NAN;
 
     if (buff.type != BC_STR) {
@@ -996,7 +978,7 @@ float64 s_abs(char *operation) {
 
     var tmp = eval(operation, true);
 
-    if (tmp.type == BC_NONE)
+    if (tmp.type == BC_NULL)
         return NAN;
 
     if (tmp.type == BC_STR)
@@ -1383,7 +1365,7 @@ char *s_lower(char *operation) {
 
     var buff = eval(operation, true);
 
-    if (buff.type == BC_NONE)
+    if (buff.type == BC_NULL)
         return NULL;
 
     if (buff.type != BC_STR) {
@@ -1416,7 +1398,7 @@ char *s_upper(char *operation) {
 
     var buff = eval(operation, true);
 
-    if (buff.type == BC_NONE)
+    if (buff.type == BC_NULL)
         return NULL;
 
     if (buff.type != BC_STR) {
@@ -1858,7 +1840,7 @@ int64_t s_scale(char *operation) {
     var tmp = eval(operation, true);
 
     switch (tmp.type) {
-        case BC_NONE:
+        case BC_NULL:
             return I64_NAN;
         case BC_STR:
             printc("ceval", BC_PROMPT_COLOR, WHITE);

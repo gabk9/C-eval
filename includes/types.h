@@ -15,8 +15,8 @@
 typedef double float64;
 
 typedef enum op_code {
-    ADD, SUB, DIV, MUL, XOR, MOD, AND, OR, LS, GR,
-    LAND, LOR, SHL, SHR, LSE, EQ, GRE, NE, POW, UNKNOWN
+    ADD, SUB, DIV, MUL, XOR, MOD, AND, SHL, SHR, POW,
+    OR, LS, LSE, GR, GRE, LAND, LOR, EQ, NE, UNKNOWN
 } opcode;
 
 typedef struct operators {
@@ -27,7 +27,8 @@ typedef struct operators {
 
 typedef enum types {
     BC_STR, BC_FLOAT, BC_INT,
-    BC_BOOL, BC_CHR, BC_NONE
+    BC_BOOL, BC_CHR, BC_NONE,
+    BC_NULL
 } eval_ty;
 
 typedef char *(*S_Func)(char *operation);

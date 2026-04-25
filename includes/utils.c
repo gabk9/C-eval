@@ -78,12 +78,15 @@ eval_ty eval_typeof(const char *str) {
     if (strcmp(str, FALSE_VAR) == 0 || strcmp(str, TRUE_VAR) == 0)
         return BC_BOOL;
 
+    if (strcmp(str, NONE_VAR) == 0)
+        return BC_NONE;
+
     if (strchr(str, '.'))
         return BC_FLOAT;
     else
         return BC_INT;
 
-    return BC_NONE;
+    return BC_NULL;
 }
 
 void extractParenthesis(char *str) {
@@ -160,7 +163,7 @@ void getItemTypeStr(char *buff, size_t size, var item) {
         case BC_CHR:    snprintf(buff, size, CHR_VAR);    break;
         case BC_BOOL:   snprintf(buff, size, BOOL_VAR);   break;
         case BC_NONE:   snprintf(buff, size, NONE_VAR);   break;
-        default:        snprintf(buff, size, "NULL");     break;
+        default:        snprintf(buff, size, NULL_VAR);   break;
     }
 }
 

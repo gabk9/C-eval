@@ -27,7 +27,7 @@ int32_t main(int32_t argc, char **argv) {
     if (Ans.type == BC_STR && Ans.data.s)
         SAFE_FREE(Ans.data.s);
     else
-        Ans.type = BC_NONE;
+        Ans.type = BC_NULL;
 
     if (argc > 1) {
         for (int32_t i = 1; i < argc; i++) {
@@ -53,7 +53,7 @@ int32_t main(int32_t argc, char **argv) {
                     for (uint16_t j = 1; opt[j]; j++) {
                         unsigned char chr = (unsigned char)opt[j];
                         switch (chr) {
-                            case 'v': flags |= BC_VERSION; break;
+                            case 'v': flags  |= BC_VERSION; break;
                             case 'q': flags |= BC_QUIET; break;
                             case 'l': flags |= BC_MATHLIB; break;
                             case 'h': flags |= BC_HELP; break;

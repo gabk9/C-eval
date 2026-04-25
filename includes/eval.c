@@ -11,12 +11,12 @@
 
 
 static int32_t eval_depth = 0;
-var Ans = { .type = BC_NONE };
+var Ans = { .type = BC_NULL };
 
 var eval(char *operation, bool mathlib) {
 
     if (!operation)
-        return (var){.type = BC_NONE};
+        return (var){.type = BC_NULL};
 
     const FuncEntry math_table[] = {
     {.returnType = BC_BOOL,   .name = "isprime",   .fn.i = s_isprime,     .builtin = false},
@@ -130,7 +130,7 @@ var eval(char *operation, bool mathlib) {
                 break;
         }
 
-        return (var){.type = BC_NONE};
+        return (var){.type = BC_NULL};
     }
 
     for (size_t i = 0; operation[i]; i++) {
@@ -139,7 +139,7 @@ var eval(char *operation, bool mathlib) {
             printf(": ");
             printc("cannot work with multi-byte characters\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
     
-            return (var){.type = BC_NONE};
+            return (var){.type = BC_NULL};
         }
     }
 
@@ -153,10 +153,10 @@ var eval(char *operation, bool mathlib) {
     trimEnd(tmp);
 
     if (!*tmp)
-        return (var){.type = BC_NONE};
+        return (var){.type = BC_NULL};
 
     if (!getInvalidEscape(tmp, "ceval"))
-        return (var){.type = BC_NONE};
+        return (var){.type = BC_NULL};
 
     eval_depth++;
 
@@ -164,20 +164,21 @@ var eval(char *operation, bool mathlib) {
 
     if (mathlib) {
         switch (buff.type) {
-            case BC_NONE:
+            case BC_NULL:
+                Ans.type = BC_NULL;
                 break;
-    
+
             case BC_STR:
                 if (eval_depth == 1) {
                     if (Ans.type == BC_STR && Ans.data.s)
                         SAFE_FREE(Ans.data.s);
-    
+
                     Ans.type = BC_STR;
                     Ans.data.s = strdup(buff.data.s);
                 }
-    
+
                 break;
-    
+
             default:
                 if (eval_depth == 1)
                     Ans = buff;
@@ -190,6 +191,9 @@ var eval(char *operation, bool mathlib) {
 
 char *var2str(var buff) {
     switch (buff.type) {
+
+        case BC_NONE:
+            return strdup(NONE_VAR);
 
         case BC_STR:
             return buff.data.s;
@@ -220,16 +224,30 @@ char *var2str(var buff) {
 var calc(var left, const char *operation, var right, bool mathLib) {
 
     var out;
-    out.type = BC_NONE;
+    out.type = BC_NULL;
 
-    if (left.type == BC_NONE || right.type == BC_NONE) {
+    if (left.type == BC_NULL || right.type == BC_NULL) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
-        printc("invalid data type: '"NONE_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+        printc("invalid data type: '"NULL_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
         return out;
     }
 
     opcode code = get_opcode(operation);
+
+    if ((left.type == BC_NONE || right.type == BC_NONE) && code != EQ && code != NE) {
+        char type1[0x10] = {0};
+        getItemTypeStr(type1, sizeof(type1), left);
+
+        char type2[0x10] = {0};
+        getItemTypeStr(type2, sizeof(type2), right);
+
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("bad operand combination with '%s' and '%s' with operation: '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type1, type2, operation);
+
+        return out;
+    }
 
     if (left.type == BC_STR || right.type == BC_STR) {
 
@@ -259,7 +277,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.data.s = bc_strcat(left.data.s, right.data.s);
 
                 if (!out.data.s) {
-                    out.type = BC_NONE;
+                    out.type = BC_NULL;
                     return out;
                 }
 
@@ -310,7 +328,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 out.type = BC_STR;
                 char *result = strdup(multiplied_str);
                 if (!result) {
-                    out.type = BC_NONE;
+                    out.type = BC_NULL;
                     return out;
                 }
 
@@ -320,7 +338,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
                     SAFE_FREE(old);
                     if (!result) { 
-                        out.type = BC_NONE;
+                        out.type = BC_NULL;
                         return out;
                     }
                 }
@@ -404,7 +422,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             default: {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("unsupported operand for 'str' type: '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, operation);
+                printc("unsupported operand for '"STR_VAR"' type: '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, operation);
 
                 return out;
             }
@@ -426,6 +444,8 @@ var calc(var left, const char *operation, var right, bool mathLib) {
         case BC_FLOAT:
             num1 = left.data.f;
             break;
+        case BC_NONE:
+            break;
         default:
             return out;
     }
@@ -441,6 +461,8 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             break;
         case BC_FLOAT:
             num2 = right.data.f;
+            break;
+        case BC_NONE:
             break;
         default:
             return out;
@@ -465,7 +487,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                     printc("ceval", BC_PROMPT_COLOR, WHITE);
                     printf(": ");
                     printc("cannot divide by 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                    out.type = BC_NONE;
+                    out.type = BC_NULL;
                     return out;
                 }
 
@@ -486,7 +508,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("cannot divide by 0\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                out.type = BC_NONE;
+                out.type = BC_NULL;
                 return out;
             }
 
@@ -498,7 +520,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("'^' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                out.type = BC_NONE;
+                out.type = BC_NULL;
                 return out;
             }
 
@@ -511,7 +533,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("'&' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                out.type = BC_NONE;
+                out.type = BC_NULL;
                 return out;
             }
 
@@ -523,7 +545,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("'|' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                out.type = BC_NONE;
+                out.type = BC_NULL;
                 return out;
             }
 
@@ -552,11 +574,38 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
         case NE:
             out.type = BC_BOOL;
-            out.data.i = !T_CMP(num1, num2);
+
+            if (left.type == BC_NONE || right.type == BC_NONE) {
+                if (left.type == BC_NONE && right.type == BC_NONE)
+                    out.data.i = false;
+                else
+                    out.data.i = true;
+
+                break;
+            }
+
+            if (isnan(num1) || isnan(num2))
+                out.data.i = true;
+
+            else if (isinf(num1) || isinf(num2))
+                out.data.i = (num1 != num2);
+
+            else
+                out.data.i = !T_CMP(num1, num2);
+
             break;
 
         case EQ:
             out.type = BC_BOOL;
+
+            if (left.type == BC_NONE || right.type == BC_NONE) {
+                if (left.type == BC_NONE && right.type == BC_NONE)
+                    out.data.i = true;
+                else
+                    out.data.i = false;
+
+                break;
+            }
 
             if (isnan(num1) || isnan(num2))
                 out.data.i = false;
@@ -574,7 +623,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("invalid shift amount\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                out.type = BC_NONE;
+                out.type = BC_NULL;
                 return out;
             }
 
@@ -586,7 +635,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("invalid shift amount\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                out.type = BC_NONE;
+                out.type = BC_NULL;
                 return out;
             }
 
@@ -609,7 +658,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                 printf(": ");
                 printc("to use negative bases the power must not be of type '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-                out.type = BC_NONE;
+                out.type = BC_NULL;
                 return out;
             }
 
@@ -620,7 +669,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("Unknown operator '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, operation);
-            out.type = BC_NONE;
+            out.type = BC_NULL;
             return out;
     }
 
@@ -654,7 +703,7 @@ static var lNot_section(char *operation, bool mathlib) {
         printf(": ");
         printc("syntax error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-        return (var){ .type = BC_NONE };
+        return (var){ .type = BC_NULL };
     }
 
     if (isQuoted(expr, DOUBLE_QUOTES)) {
@@ -678,8 +727,8 @@ static var lNot_section(char *operation, bool mathlib) {
 
     var tmp = eval(expr, mathlib);
 
-    if (tmp.type == BC_NONE)
-        return (var){.type = BC_NONE};
+    if (tmp.type == BC_NULL)
+        return (var){.type = BC_NULL};
 
     float64 num = (tmp.type == BC_BOOL) ? (float64)tmp.data.i : tmp.data.f;
     if (tmp.type == BC_INT) {
@@ -693,7 +742,7 @@ static var lNot_section(char *operation, bool mathlib) {
     }
 
     if (isnan(num))
-        return (var){ .type = BC_NONE };
+        return (var){ .type = BC_NULL };
 
     bool value = (num != 0.0);
 
@@ -716,13 +765,13 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
     trimEnd(name);
 
     if (!*name)
-        return (var){ .type = BC_NONE };
+        return (var){ .type = BC_NULL };
 
     if (*operation == '~' || *operation == '-') {
         var tmp = h_atof(operation, mathlib);
 
         if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
-            return (var){ .type = BC_NONE };
+            return (var){ .type = BC_NULL };
 
         return tmp;
     }
@@ -747,7 +796,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
         printf(": ");
         printc("invalid syntax\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-        return (var){ .type = BC_NONE };
+        return (var){ .type = BC_NULL };
     }
 
     if (!isValidBcFuncName(name)) {
@@ -755,7 +804,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
         printf(": ");
         printc("invalid function name: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, name);
 
-        return (var){ .type = BC_NONE };
+        return (var){ .type = BC_NULL };
     }
 
     for (size_t i = 0; i < funcCount; i++) {
@@ -771,7 +820,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
                 int64_t num = functions[i].fn.i(operation);
 
                 if (num == I64_NAN)
-                    return (var){ .type = BC_NONE };
+                    return (var){ .type = BC_NULL };
 
                 if (functions[i].returnType == BC_BOOL)
                     return (var){ .type = BC_BOOL, .data.i = (bool)num };
@@ -783,7 +832,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
                 float64 num = functions[i].fn.f(operation);
 
                 if (isnan(num))
-                    return (var){ .type = BC_NONE };
+                    return (var){ .type = BC_NULL };
 
                 return (var){ .type = functions[i].returnType, .data.f = num };
             }
@@ -792,7 +841,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
                 char *result = functions[i].fn.s(operation);
 
                 if (!result)
-                    return (var){ .type = BC_NONE };
+                    return (var){ .type = BC_NULL };
 
                 return (var){ .type = functions[i].returnType, .data.s = result};
             }
@@ -806,7 +855,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
                 printf(": ");
                 printc("invalid function with '%s' unknown type: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, type, name);
 
-                return (var){ .type = BC_NONE} ;
+                return (var){ .type = BC_NULL} ;
             }
         }
     }
@@ -815,7 +864,7 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
     printf(": ");
     printc("undefined function: '%s()'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, name);
 
-    return (var){ .type = BC_NONE };
+    return (var){ .type = BC_NULL };
 }
 
 static var parse_single(char *operation, const FuncEntry *functions, size_t funcCount, bool mathlib) {
@@ -888,7 +937,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                             printf("illegal character: '"HEX_PREF"%X'\n", chr);
 
                         setColor(WHITE);
-                        return (var){ .type = BC_NONE };
+                        return (var){ .type = BC_NULL };
                     }
                 }
             }
@@ -898,7 +947,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-                return (var){ .type = BC_NONE };
+                return (var){ .type = BC_NULL };
             }
 
             final[0] = '"';
@@ -912,7 +961,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
         var tmp = h_atof(operation, mathlib);
 
         if (tmp.type == BC_FLOAT && isnan(tmp.data.f))
-            return (var){ .type = BC_NONE };
+            return (var){ .type = BC_NULL };
 
         return tmp;
     }
@@ -921,7 +970,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
         int64_t result = s_fact(operation);
 
         if (result == I64_NAN)
-            return (var){ .type = BC_NONE };
+            return (var){ .type = BC_NULL };
 
         return (var){ .type = BC_INT, .data.i = result };
     }
@@ -966,18 +1015,18 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
         printf(": ");
         printc("invalid syntax\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-        return (var){ .type = BC_NONE };
+        return (var){ .type = BC_NULL };
     }
 
     var val1 = eval(num1, mathlib);
 
-    if (val1.type == BC_NONE)
-        return (var){.type = BC_NONE};
+    if (val1.type == BC_NULL)
+        return (var){.type = BC_NULL};
 
     var val2 = eval(num2, mathlib);
 
-    if (val2.type == BC_NONE)
-        return (var){.type = BC_NONE};
+    if (val2.type == BC_NULL)
+        return (var){.type = BC_NULL};
 
     var result = calc(val1, op, val2, mathlib);
 

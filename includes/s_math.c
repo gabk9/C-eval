@@ -623,7 +623,7 @@ char *bc_parse_str(char *operation) {
 
     len = strlen(buff);
     if (*buff != '"' && buff[len-1] != '"') {
-        char *buff2 = safe_malloc(len+3, __LINE__, __FILE__, __func__);
+        char *buff2 = alloc(len+3);
         buff2[len+3] = '\0';
 
         snprintf(buff2, len+3, "\"%s\"", buff);
@@ -833,7 +833,7 @@ char *bc_typeof(char *operation) {
     getItemTypeStr(tmp, sizeof(tmp), buff);
 
     size_t extra = strlen(tmp) + 3;
-    char *result = safe_malloc(extra, __LINE__, __FILE__, __func__);
+    char *result = alloc(extra);
 
     if (!result)
         return NULL;
@@ -905,7 +905,7 @@ char *s_input(char *operation) {
         return strdup("\"\"");
 
     size_t extra = strlen(tmp) + 3;
-    char *result = safe_malloc(extra, __LINE__, __FILE__, __func__);
+    char *result = alloc(extra);
 
     if (!result) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
@@ -1348,7 +1348,7 @@ char *s_oct(char *operation) {
 
     const size_t size = 0x80;
 
-    char *buffer = safe_malloc(size, __LINE__, __FILE__, __func__);
+    char *buffer = alloc(size);
     if (!buffer)
         return NULL;
 
@@ -1480,7 +1480,7 @@ char *s_chr(char *operation) {
         return NULL;
     }
 
-    char *chr = safe_malloc(5, __LINE__, __FILE__, __func__);
+    char *chr = alloc(5);
     if (!chr)
         return NULL;
 
@@ -1554,7 +1554,7 @@ char *s_hex(char *operation) {
     }
 
     const size_t size = 0x80;
-    char *buffer = safe_malloc(size, __LINE__, __FILE__, __func__);
+    char *buffer = alloc(size);
     if (!buffer)
         return NULL;
 
@@ -1617,7 +1617,7 @@ char *s_bin(char *operation) {
 
     int16_t len = 64 - start;
 
-    char *result = safe_malloc(len + 5, __LINE__, __FILE__, __func__);
+    char *result = alloc(len + 5);
 
     if (!result)
         return NULL;

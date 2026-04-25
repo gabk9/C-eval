@@ -4,7 +4,7 @@
 #include <stdarg.h>
 
 
-void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE, const char *FUNC) {
+void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE) {
     void *ptr = malloc(bytes);
 
     if (!ptr) {
@@ -16,8 +16,8 @@ void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE, const char *FUNC) {
 
         f = !f ? FILE : f + 1;
 
-        printc("%s:%" PRIu32": malloc() failed in function '%s'\n",
-            GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, f, LINE, FUNC);
+        printc("%s:%" PRIu32": malloc() failed\n",
+            GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, f, LINE);
 
         exit(EXIT_FAILURE);
     }
@@ -196,7 +196,7 @@ char *bc_strcat(const char *dest, const char *src) {
 
     size_t total = (len1 - 2) + (len2 - 2) + 3;
 
-    char *cat = safe_malloc(total, __LINE__, __FILE__, __func__);
+    char *cat = alloc(total);
     if (!cat)
         return NULL;
 

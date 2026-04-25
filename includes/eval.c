@@ -209,7 +209,7 @@ char *var2str(var buff) {
         case BC_INT:
         case BC_FLOAT: {
             const size_t max = 0x60;
-            char *tmp = safe_malloc(max, __LINE__, __FILE__, __func__);
+            char *tmp = alloc(max);
             if (!tmp) return NULL;
 
             num_snprintf(tmp, max, buff);
@@ -942,7 +942,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                 }
             }
 
-            char *final = safe_malloc(res_len + 3, __LINE__, __FILE__, __func__);
+            char *final = alloc(res_len + 3);
             if (!final) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");

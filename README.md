@@ -179,7 +179,7 @@ ceval
 
 ### Windows (PowerShell - MSVC)
 
-```powershell
+```bash
 git clone https://github.com/gabk9/C-eval.git
 cd C-eval
 

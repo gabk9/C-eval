@@ -172,11 +172,6 @@ int32_t main(int32_t argc, char **argv) {
             mathlib = !mathlib;
             appear = false;
             continue;
-        } else if (trim_streq(operation, "quiet")) {
-            clear();
-            show_init = !show_init;
-            appear = false;
-            continue;
         } else if (trim_streq(operation, "cls")) {
             clear();
             appear = false;

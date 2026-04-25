@@ -48,7 +48,7 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.2.78"
+#define VERSION "r0.2.84"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \

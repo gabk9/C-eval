@@ -84,6 +84,7 @@ var eval(char *operation, bool mathlib) {
         {.op = "==",  .precedence = 2,  .right_assoc = 0},
         {.op = "!=",  .precedence = 2,  .right_assoc = 0},
         {.op = "&&",  .precedence = -2, .right_assoc = 0},
+        {.op = "||",  .precedence = -3, .right_assoc = 0},
 
         {.op = "*",   .precedence = 6,  .right_assoc = 0}, 
         {.op = "/",   .precedence = 6,  .right_assoc = 0},
@@ -95,7 +96,6 @@ var eval(char *operation, bool mathlib) {
         {.op = "&",   .precedence = 1,  .right_assoc = 0},
         {.op = "^",   .precedence = 0,  .right_assoc = 0},
         {.op = "|",   .precedence = -1, .right_assoc = 0},
-        {.op = "||",  .precedence = -3, .right_assoc = 0},
 
         {.op = NULL,  .precedence = 0,  .right_assoc = 0}
     };

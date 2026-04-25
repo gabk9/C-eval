@@ -9,8 +9,12 @@
     #define _CRT_NONSTDC_NO_WARNINGS
 #endif
 
-#if !defined(_POSIX_C_SOURCE)
-    #define _POSIX_C_SOURCE 199309L
+#ifndef _POSIX_C_SOURCE
+    #ifdef __APPLE__
+        #define _POSIX_C_SOURCE 200809L
+    #else
+        #define _POSIX_C_SOURCE 199309L
+    #endif
 #endif
 
 #include <time.h>
@@ -44,7 +48,7 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.2.47"
+#define VERSION "r0.2.50"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \

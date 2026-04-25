@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#ifdef __APPLE__
-    extern int snprintf(char *, unsigned long, const char *, ...);
-#endif
 
 void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE, const char *FUNC) {
     void *ptr = malloc(bytes);
@@ -166,7 +163,6 @@ void getItemTypeStr(char *buff, size_t size, var item) {
         default:        snprintf(buff, size, "NULL");     break;
     }
 }
-
 
 int32_t bc_strcmp(char *str1, char *str2) {
     char buff1[0x100], buff2[0x100];

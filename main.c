@@ -53,7 +53,7 @@ int32_t main(int32_t argc, char **argv) {
                     for (uint16_t j = 1; opt[j]; j++) {
                         unsigned char chr = (unsigned char)opt[j];
                         switch (chr) {
-                            case 'v': flags  |= BC_VERSION; break;
+                            case 'v': flags |= BC_VERSION; break;
                             case 'q': flags |= BC_QUIET; break;
                             case 'l': flags |= BC_MATHLIB; break;
                             case 'h': flags |= BC_HELP; break;

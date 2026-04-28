@@ -621,6 +621,14 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             break;
 
         case SHL:
+            if (left.type == BC_FLOAT || right.type == BC_FLOAT) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("'<<' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                out.type = BC_NULL;
+                return out;
+            }
+
             if (num2 < 0 || num2 >= sizeof(uint64_t) * 8) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
@@ -633,6 +641,14 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             break;
 
         case SHR:
+            if (left.type == BC_FLOAT || right.type == BC_FLOAT) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("'>>' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                out.type = BC_NULL;
+                return out;
+            }
+
             if (num2 < 0 || num2 >= sizeof(int64_t) * 8) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");

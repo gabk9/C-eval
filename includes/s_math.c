@@ -916,7 +916,7 @@ char *s_input(char *operation) {
 
     char tmp[MAX_CHAR] = {0};
 
-    printc("%s", BC_PROMPT_COLOR, WHITE, str);
+    printf("%s", str);
     if (!fgets(tmp, sizeof(tmp), stdin))
         return strdup("\"\"");
 

@@ -21,6 +21,7 @@ var eval(char *operation, bool mathlib) {
         return (var){.type = BC_NULL};
 
     const FuncEntry math_table[] = {
+    {.returnType = BC_NONE,   .name = "print",     .fn.i = s_print,       .builtin = true},
     {.returnType = BC_BOOL,   .name = "isprime",   .fn.i = s_isprime,     .builtin = false},
     {.returnType = BC_BOOL,   .name = BOOL_VAR,    .fn.i = bc_bool,       .builtin = true},
     {.returnType = BC_INT,    .name = "scale",     .fn.i = s_scale,       .builtin = false},
@@ -200,12 +201,8 @@ char *var2str(var buff) {
         case BC_STR:
             return buff.data.s;
 
-        case BC_BOOL: {
-            if (buff.data.i == false)
-                return strdup(FALSE_VAR);
-            else
-                return strdup(TRUE_VAR);
-        }
+        case BC_BOOL:
+            return (buff.data.i == false) ? strdup(FALSE_VAR) : strdup(TRUE_VAR);
 
         case BC_CHR:
         case BC_INT:
@@ -862,6 +859,11 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
                     return (var){ .type = BC_NULL };
 
                 return (var){ .type = functions[i].returnType, .data.s = result};
+            }
+
+            case BC_NONE: {
+                functions[i].fn.i(operation);
+                return (var){ .type = BC_NULL };
             }
 
             default: {

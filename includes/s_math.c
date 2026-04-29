@@ -17,6 +17,10 @@
     #error "Operational system not recognized, terminating program!!"
 #endif
 
+/*
+    !I need to fix the mathlib unexpected behavior
+*/
+
 static uint8_t isnull(int32_t count, ...) {
 
     if (count < 1) {
@@ -861,6 +865,29 @@ char *bc_typeof(char *operation) {
     snprintf(result, extra, "\"%s\"", tmp);
 
     return result;
+}
+
+int64_t s_print(char *operation) {
+    char *p = strchr(operation, '(');
+    if (!p)
+        return false;
+    operation = p;
+
+    char *str = var2str(eval(operation, true));
+
+    if (!str)
+        return false;
+
+    if (!injectEscape(str, "ceval"))
+        return false;
+
+    if (isQuoted(str, DOUBLE_QUOTES)) {
+        size_t len = strlen(str);
+        memmove(str, str+1, len+1);
+        str[len-2] = '\0';
+    }
+
+    return printf("%s\n", str);
 }
 
 char *s_input(char *operation) {

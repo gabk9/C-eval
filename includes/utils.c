@@ -5,6 +5,80 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+char *lineContinuation(char *str) {
+    bool inDoubleQuotes = false;
+    bool inSingleQuotes = false;
+
+    trimEnd(str);
+
+    size_t len = strlen(str);
+
+    for (size_t i = 0; str[i]; i++) {
+        char chr = str[i];
+        bool escaped = is_escaped(str, i);
+
+        if (chr == '"' && !inSingleQuotes && !escaped)
+            inDoubleQuotes = !inDoubleQuotes;
+
+        else if (chr == '\'' && !inDoubleQuotes && !escaped)
+            inSingleQuotes = !inSingleQuotes;
+
+        if (chr == '\\' && !inDoubleQuotes && !inSingleQuotes && !escaped) {
+            if (i != len - 1) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("unexpected character after line continuation character\n",
+                    GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+                return NULL;
+            }
+        }
+    }
+
+    if ((len > 0 && str[len - 1] == '\\' && !is_escaped(str, len - 1)) ||
+        inDoubleQuotes || inSingleQuotes) {
+
+        if (len > 0 && str[len - 1] == '\\') {
+            str[len - 1] = '\0';
+            len--;
+        }
+
+        char tmp[MAX_CHAR] = {0};
+
+        for (size_t i = 0; i < 2; i++) {
+            printc("... ", BC_PROMPT_COLOR, WHITE);
+
+            if (!fgets(tmp, sizeof(tmp), stdin))
+                continue;
+
+            tmp[strcspn(tmp, "\r\n")] = '\0';
+
+            if (tmp[0] == '\0') {
+                if (i == 1)
+                    return strdup(str);
+
+                continue;
+            }
+
+            break;
+        }
+
+        char *new = alloc(len + strlen(tmp) + 1);
+
+        memcpy(new, str, len);
+        new[len] = '\0';
+        strcat(new, tmp);
+
+        char *result = lineContinuation(new);
+
+        free(new);
+
+        return result;
+    }
+
+    return strdup(str);
+}
+
 bool is_escaped(const char *str, size_t pos) {
     size_t backslashes = 0;
 

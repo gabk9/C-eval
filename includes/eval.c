@@ -137,11 +137,10 @@ var eval(char *operation, bool mathlib) {
             printc("ceval", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("cannot work with multi-byte characters\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-    
+
             return (var){.type = BC_NULL};
         }
     }
-
 
     char tmp[MAX_CHAR] = {0};
     size_t len = strlen(operation);

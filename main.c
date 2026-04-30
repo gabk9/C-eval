@@ -157,37 +157,43 @@ int32_t main(int32_t argc, char **argv) {
 
         operation[strcspn(operation, "\r\n")] = '\0';
 
+        char *new = lineContinuation(operation);
 
-        if (!*operation) {
+        if (!new) {
             putchar('\n');
             continue;
         }
 
-        if (trim_streq(operation, "quit") ||
-            trim_streq(operation, "exit")) {
+        if (!*new) {
+            putchar('\n');
+            continue;
+        }
+
+        if (trim_streq(new, "quit") ||
+            trim_streq(new, "exit")) {
             break;
 
-        } else if (trim_streq(operation, "mathlib")) {
+        } else if (trim_streq(new, "mathlib")) {
             clear();
             mathlib = !mathlib;
             appear = false;
             continue;
-        } else if (trim_streq(operation, "cls")) {
+        } else if (trim_streq(new, "cls")) {
             clear();
             appear = false;
             continue;
-        } else if (trim_streq(operation, "clear")) {
+        } else if (trim_streq(new, "clear")) {
             clear();
             appear = false;
             continue;
-        } else if (trim_streq(operation, "help")) {
+        } else if (trim_streq(new, "help")) {
             print_manual();
             putchar('\n');
             appear = true;
             continue;
         }
 
-        result = var2str(eval(operation, mathlib));
+        result = var2str(eval(new, mathlib));
 
         if (!result) {
             putchar('\n');
@@ -199,6 +205,7 @@ int32_t main(int32_t argc, char **argv) {
         printf("%s\n\n", result);
 
         SAFE_FREE(result);
+        SAFE_FREE(new);
         fflush(stdout);
     }
 

@@ -48,7 +48,7 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.3.10"
+#define VERSION "r0.3.17"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -117,6 +117,7 @@ int64_t hex_to_long(char *str);
 bool isalldigit(const char *s);
 void removeComments(char *str);
 int16_t injectEscape(char *str);
+char *lineContinuation(char *str);
 opcode get_opcode(const char *op);
 void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);

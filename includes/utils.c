@@ -51,6 +51,7 @@ char *lineContinuation(char *str) {
             if (!fgets(tmp, sizeof(tmp), stdin))
                 continue;
 
+            trim(tmp);
             tmp[strcspn(tmp, "\r\n")] = '\0';
 
             if (tmp[0] == '\0') {

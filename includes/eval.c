@@ -1,9 +1,5 @@
 #define _GNU_SOURCE
 
-#if !defined(_POSIX_C_SOURCE)
-    #define _POSIX_C_SOURCE 200809L
-#endif
-
 #include "eval.h"
 #include "types.h"
 #include <math.h>

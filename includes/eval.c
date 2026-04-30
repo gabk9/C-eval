@@ -158,7 +158,7 @@ var eval(char *operation, bool mathlib) {
     if (!*tmp)
         return (var){.type = BC_NULL};
 
-    if (!getInvalidEscape(tmp, "ceval"))
+    if (!getInvalidEscape(tmp))
         return (var){.type = BC_NULL};
 
     eval_depth++;
@@ -168,7 +168,6 @@ var eval(char *operation, bool mathlib) {
     if (mathlib) {
         switch (buff.type) {
             case BC_NULL:
-                Ans.type = BC_NULL;
                 break;
 
             case BC_STR:
@@ -862,8 +861,12 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
             }
 
             case BC_NONE: {
-                functions[i].fn.i(operation);
-                return (var){ .type = BC_NULL };
+                bool status = functions[i].fn.i(operation);
+
+                if (!status)
+                    return (var){ .type = BC_NULL };
+
+                return (var){ .type = BC_NONE };
             }
 
             default: {
@@ -905,21 +908,40 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
 
         size_t len = strlen(operation);
 
-        if (len > 1 && operation[0] == '"') {
+        if (len > 1 && *operation == '"') {
             char result[0x400] = {0};
             size_t res_len = 0;
             const char *p = operation;
 
             while (*p) {
-                while (isspace((unsigned char)*p)) p++;
+                while (isspace((unsigned char)*p))
+                    p++;
 
                 if (*p != '"')
                     break;
 
                 p++;
 
-                while (*p && *p != '"') {
-                    result[res_len++] = *p;
+                while (*p) {
+
+                    if (*p == '"' && !is_escaped(operation, p - operation))
+                        break;
+
+                    if (*p == '\\' && p[1]) {
+
+                        if (res_len + 2 < sizeof(result)) {
+                            result[res_len++] = *p++;
+                            result[res_len++] = *p++;
+                        } else {
+                            break;
+                        }
+
+                        continue;
+                    }
+
+                    if (res_len + 1 < sizeof(result))
+                        result[res_len++] = *p;
+
                     p++;
                 }
 
@@ -927,7 +949,17 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                     p++;
             }
 
-            while (isspace((unsigned char)*p)) p++;
+            while (isspace((unsigned char)*p))
+                p++;
+
+            if (*p != '\0') {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("invalid string syntax\n",
+                    GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+                return (var){ .type = BC_NULL };
+            }
 
             bool dquote = false;
             bool squote = false;
@@ -935,26 +967,27 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
             for (size_t i = 0; operation[i]; i++) {
                 unsigned char chr = (unsigned char)operation[i];
 
-                if (chr == '"' && !squote) {
+                if (chr == '"' && !squote && !is_escaped(operation, i)) {
                     dquote = !dquote;
                     continue;
                 }
 
-                if (chr == '\'' && !dquote) {
+                if (chr == '\'' && !dquote && !is_escaped(operation, i)) {
                     squote = !squote;
                     continue;
                 }
 
                 if (!dquote && !squote) {
-                    if (!isalnum(chr) && !strchr("+-/*^%&|=() ", chr)) {
+
+                    if (!isalnum(chr) &&
+                        !strchr("+-/*^%&|=() \t", chr)) {
 
                         printc("ceval", BC_PROMPT_COLOR, WHITE);
-                        printc(": ", WHITE, GET_BASE_COLOR(BC_PROMPT_COLOR));
+                        printc(": ",
+                            WHITE,
+                            GET_BASE_COLOR(BC_PROMPT_COLOR));
 
-                        if (chr < 0x80)
-                            printf("illegal character: '%c'\n", chr);
-                        else
-                            printf("illegal character: '"HEX_PREF"%X'\n", chr);
+                        printf("illegal character: '%c'\n", chr);
 
                         setColor(WHITE);
                         return (var){ .type = BC_NULL };
@@ -966,16 +999,21 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
             if (!final) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                printc("memory allocation error\n",
+                    GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
                 return (var){ .type = BC_NULL };
             }
 
-            final[0] = '"';
+            *final = '"';
             memcpy(final + 1, result, res_len);
             final[res_len + 1] = '"';
             final[res_len + 2] = '\0';
 
-            return (var){ .type = BC_STR, .data.s = final };
+            return (var){
+                .type = BC_STR,
+                .data.s = final
+            };
         }
 
         var tmp = h_atof(operation, mathlib);

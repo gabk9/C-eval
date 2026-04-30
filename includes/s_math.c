@@ -393,7 +393,7 @@ var h_atof(const char *str, bool mathlib) {
     len = strlen(buf);
 
     if (isQuoted(buf, SINGLE_QUOTES)) {
-        if (!injectEscape(buf, "ceval"))
+        if (!injectEscape(buf))
             return (var){.type = BC_FLOAT, .data.f = NAN};
 
         size_t oldLen = len;
@@ -510,8 +510,13 @@ var h_atof(const char *str, bool mathlib) {
     char *end;
     float64 result = strtod(buf, &end);
 
-    if (*end != '\0')
-        return (var){.type = BC_INT, .data.i = 0};
+    if (*end != '\0') {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("undefined identifier: '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, buf);
+
+        return (var){.type = BC_FLOAT, .data.f = NAN};
+    }
 
     return (var){.type = BC_FLOAT, .data.f = result};
 }
@@ -878,7 +883,7 @@ int64_t s_print(char *operation) {
     if (!str)
         return false;
 
-    if (!injectEscape(str, "ceval"))
+    if (!injectEscape(str))
         return false;
 
     if (isQuoted(str, DOUBLE_QUOTES)) {
@@ -930,7 +935,7 @@ char *s_input(char *operation) {
         return NULL;
 
     if (isQuoted(str, DOUBLE_QUOTES)) {
-        if (!injectEscape(str, "ceval")) {
+        if (!injectEscape(str)) {
             SAFE_FREE(str);
             return NULL;
         }
@@ -997,7 +1002,7 @@ int64_t bc_len(char *operation) {
         return I64_NAN;
     }
 
-    if (!injectEscape(buff.data.s, "ceval")) {
+    if (!injectEscape(buff.data.s)) {
         SAFE_FREE(buff.data.s);
         return I64_NAN;
     }
@@ -1479,23 +1484,15 @@ char *s_upper(char *operation) {
     for (size_t i = 0; buff.data.s[i]; i++) {
         char chr = buff.data.s[i];
 
-        int32_t backslashes = 0;
-        size_t j = i;
-
-        while (j > 0 && buff.data.s[j-1] == '\\') {
-            backslashes++;
-            j--;
-        }
-
-        bool escaped = backslashes & 1;
+        bool escaped = is_escaped(buff.data.s, i);
 
         if (escaped && strchr("ntbra'\"?fv0\\", chr)) {
             buff.data.s[i] = chr;
             continue;
         }
 
-        if (islower(chr))
-            buff.data.s[i] = toupper(chr);
+        if (islower((unsigned char)chr))
+            buff.data.s[i] = toupper((unsigned char)chr);
     }
 
     return buff.data.s;

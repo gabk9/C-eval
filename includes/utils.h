@@ -48,7 +48,7 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.2.96"
+#define VERSION "r0.3.10"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -116,6 +116,7 @@ bool isOct(const char *str);
 int64_t hex_to_long(char *str);
 bool isalldigit(const char *s);
 void removeComments(char *str);
+int16_t injectEscape(char *str);
 opcode get_opcode(const char *op);
 void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);
@@ -123,7 +124,9 @@ eval_ty eval_typeof(const char *str);
 bool isValidBcFuncName(const char *str);
 bool trim_streq(char *str1, char *str2);
 void shiftLeft_at(char *str, size_t pos);
+int8_t getInvalidEscape(const char *str);
 int32_t bc_strcmp(char *str1, char *str2);
+bool is_escaped(const char *str, size_t pos);
 int16_t strchar(const char *str, int8_t chr);
 bool is_wrapped_by_parentheses(const char *s);
 paren_status parenthesis_check(const char *str);
@@ -132,11 +135,9 @@ void num_snprintf(char *buff, size_t size, var num);
 bool isQuoted(const char *string, int16_t quoteMode);
 bool isBcVariable(const char *str, bool *shouldError);
 void getItemTypeStr(char *buff, size_t size, var item);
-int16_t injectEscape(char *str, const char *error_str);
 void getItemTypeStr(char *buff, size_t size, var item);
 void int64_to_hex_min(int64_t v, char *out, size_t size);
 void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE);
-int8_t getInvalidEscape(const char *str, const char *error_str);
 void printc(const char *fmt, color4 initColor, color4 resetColor, ...);
 int16_t find_main_operator_full(const char *s, const ops *operators, char *foundOp);
 

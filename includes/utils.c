@@ -5,6 +5,15 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+bool is_escaped(const char *str, size_t pos) {
+    size_t backslashes = 0;
+
+    while (pos > 0 && str[--pos] == '\\') {
+        backslashes++;
+    }
+
+    return backslashes & 1;
+}
 
 void *safe_malloc(size_t bytes, uint32_t LINE, char *FILE) {
     void *ptr = malloc(bytes);
@@ -209,7 +218,7 @@ char *bc_strcat(const char *dest, const char *src) {
     return cat;
 }
 
-int8_t getInvalidEscape(const char *str, const char *error_str) {
+int8_t getInvalidEscape(const char *str) {
 
     bool inDoubleQuotes = false;
     bool inSingleQuotes = false;
@@ -218,15 +227,7 @@ int8_t getInvalidEscape(const char *str, const char *error_str) {
 
     for (size_t i = 0; i < len; i++) {
 
-        int32_t backslashes = 0;
-        size_t j = i;
-
-        while (j > 0 && str[j-1] == '\\') {
-            backslashes++;
-            j--;
-        }
-
-        bool escaped = (backslashes & 1);
+        bool escaped = is_escaped(str, i);
 
         if (str[i] == '"' && !inSingleQuotes && !escaped)
             inDoubleQuotes = !inDoubleQuotes;
@@ -240,12 +241,9 @@ int8_t getInvalidEscape(const char *str, const char *error_str) {
         if (str[i] == '\\') {
 
             if (i == len - 1) {
-                color4 color1 = (strcasecmp(error_str, "ceval") == 0) ? BC_PROMPT_COLOR : WHITE;
-                color4 color2 = (color1 == BC_PROMPT_COLOR) ? GET_BASE_COLOR(color1) : WHITE;
-
-                printc("%s", color1, WHITE, error_str);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("missing escape char after slash\n", color2, WHITE);
+                printc("missing escape char after slash\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
                 return 0;
             }
@@ -253,12 +251,9 @@ int8_t getInvalidEscape(const char *str, const char *error_str) {
             char chr = str[i+1];
 
             if (!strchr("ntbra'\"?fv0\\", chr)) {
-                color4 color1 = (strcasecmp(error_str, "ceval") == 0) ? BC_PROMPT_COLOR : WHITE;
-                color4 color2 = (color1 == BC_PROMPT_COLOR) ? GET_BASE_COLOR(color1) : WHITE;
-
-                printc("%s", color1, WHITE, error_str);
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("invalid escape character: '\\%c'\n", color2, WHITE, chr);
+                printc("invalid escape character: '\\%c'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, chr);
 
                 return 0;
             }
@@ -479,23 +474,39 @@ int16_t find_main_operator_full(const char *s, const ops *operators, char *found
     return best_pos;
 }
 
-int16_t injectEscape(char *str, const char *error_str) {
+int16_t injectEscape(char *str) {
     bool inQuotes = false;
+    size_t write = 0;
 
-    for (size_t i = 0; str[i]; i++) {
-        if ((str[i] == '"' || str[i] == '\'') && (i == 0 || str[i-1] != '\\')) {
+    for (size_t read = 0; str[read]; read++) {
+
+        bool escape = is_escaped(str, read);
+
+        if ((str[read] == '"' || str[read] == '\'') && !escape) {
             inQuotes = !inQuotes;
+            str[write++] = str[read];
             continue;
         }
 
-        if (!inQuotes)
+        if (!inQuotes) {
+            str[write++] = str[read];
             continue;
+        }
 
-        if (str[i] == '\\' && str[i+1]) {
-            char next = str[i+1];
-            char replace = 0;
+        if (str[read] == '\\' && !escape) {
 
-            switch(next) {
+            if (!str[read + 1]) {
+                printc("ceval", BC_PROMPT_COLOR, WHITE);
+                printf(": ");
+                printc("missing escape char after slash\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+                return 0;
+            }
+
+            char next = str[++read];
+            char replace;
+
+            switch (next) {
                 case 'n':  replace = '\n'; break;
                 case 't':  replace = '\t'; break;
                 case 'b':  replace = '\b'; break;
@@ -508,15 +519,24 @@ int16_t injectEscape(char *str, const char *error_str) {
                 case 'f':  replace = '\f'; break;
                 case 'v':  replace = '\v'; break;
                 case '0':  replace = '\0'; break;
-                default: 
-                    printf("%s: invalid escape character: '\\%c'\n", error_str, next);
+
+                default: {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("invalid escape character: '\\%c'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, next);
+
                     return 0;
+                }
             }
 
-            str[i] = replace;
-            shiftLeft_at(str, i+1);
+            str[write++] = replace;
+            continue;
         }
+
+        str[write++] = str[read];
     }
+
+    str[write] = '\0';
     return 1;
 }
 
@@ -549,11 +569,7 @@ paren_status parenthesis_check(const char *str) {
 
     for (const char *s = str; *s; s++) {
 
-        int32_t backslashes = 0;
-        for (const char *p = s; p > str && *(p - 1) == '\\'; p--)
-            backslashes++;
-
-        bool escaped = (backslashes & 1);
+        bool escaped = is_escaped(str, s - str);
 
         if (*s == '"' && !in_single_quotes && !escaped) {
             in_double_quotes = !in_double_quotes;
@@ -1146,6 +1162,9 @@ void print_manual(void) {
         "\n"
         "\tinput(X)       : Takes an input from the user and returns it as a string\n"
         "\t                 Example: input(\"Type-in: \") Type-in: <input typed> = \"input typed\"\n"
+        "\n"
+        "\tprint(X)       : Prints the arguments to the screen\n"
+        "\t                 Example: print(\"Hello, World!\") = Hello, World!\n"
 
         "\nBuiltin Variables: (mathlib must be on to grant access)\n"
         "\tAns   : stores the result of the last operation\n"

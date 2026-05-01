@@ -54,7 +54,7 @@ char *lineContinuation(char *str) {
             trim(tmp);
             tmp[strcspn(tmp, "\r\n")] = '\0';
 
-            if (tmp[0] == '\0') {
+            if (*tmp == '\0') {
                 if (i == 1)
                     return strdup(str);
 
@@ -72,7 +72,7 @@ char *lineContinuation(char *str) {
 
         char *result = lineContinuation(new);
 
-        free(new);
+        SAFE_FREE(new);
 
         return result;
     }

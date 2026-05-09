@@ -47,7 +47,9 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.3.23"
+extern bool mathlib;
+
+#define VERSION "r0.3.27"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \

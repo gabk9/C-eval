@@ -18,10 +18,6 @@
     #error "Operational system not recognized, terminating program!!"
 #endif
 
-/*
-    !I need to fix the mathlib unexpected behavior
-*/
-
 static uint8_t isnull(int32_t count, ...) {
 
     if (count < 1) {
@@ -151,7 +147,7 @@ static var numericDebug(const char *buf) {
     return (var){.type = BC_FLOAT, .data.f = NAN};
 }
 
-static var mathlibPart(char *buf, bool mathlib) {
+static var mathlibPart(char *buf) {
     if (strcmp(buf, PI_VAR) == 0) return (var){.type = BC_FLOAT, .data.f = PI};
     else if (strcmp(buf, E_VAR) == 0) return (var){.type = BC_FLOAT, .data.f = E};
 
@@ -164,7 +160,7 @@ static var mathlibPart(char *buf, bool mathlib) {
         strncpy(temp, buf, i);
         temp[i] = '\0';
 
-        var tmp = eval(buf, mathlib);
+        var tmp = eval(buf);
 
         switch (tmp.type) {
             case BC_NONE:
@@ -182,7 +178,7 @@ static var mathlibPart(char *buf, bool mathlib) {
         strncpy(temp, buf, i);
         temp[i] = '\0';
 
-        var tmp = eval(buf, mathlib);
+        var tmp = eval(buf);
 
         switch (tmp.type) {
             case BC_NONE:
@@ -292,7 +288,7 @@ var h_atof(const char *str, bool mathlib) {
         if (strcmp(buf, "0") == 0)
             tmp = (var){.type = BC_FLOAT, .data.f = 0.0};
         else
-            tmp = isAns ? Ans : eval(buf, mathlib);
+            tmp = isAns ? Ans : eval(buf);
 
         if (tmp.type == BC_NULL)
             return (var){.type = BC_FLOAT, .data.f = NAN};
@@ -357,7 +353,7 @@ var h_atof(const char *str, bool mathlib) {
         if (strcmp(buf, "0") == 0)
             tmp = (var){.type = BC_FLOAT, .data.f = 0.0};
         else
-            tmp = isAns ? Ans : eval(buf, mathlib);
+            tmp = isAns ? Ans : eval(buf);
 
         if (tmp.type == BC_NULL)
             return (var){.type = BC_FLOAT, .data.f = NAN};
@@ -444,7 +440,7 @@ var h_atof(const char *str, bool mathlib) {
         return numericDebug(buf);
 
     if (mathlib) {
-        var tmp = mathlibPart(buf, mathlib);
+        var tmp = mathlibPart(buf);
 
         if (tmp.type != BC_NULL)
             return tmp;
@@ -630,7 +626,7 @@ char *bc_parse_str(char *operation) {
         return NULL;
     }
 
-    char *buff = var2str(eval(operation, true));
+    char *buff = var2str(eval(operation));
 
     if (!buff)
         return NULL;
@@ -676,7 +672,7 @@ int64_t bc_bool(char *operation) {
     if (!content)
         return false;
 
-    var buff = eval(operation, true);
+    var buff = eval(operation);
 
     switch (buff.type) {
         case BC_FLOAT:
@@ -715,7 +711,7 @@ float64 bc_float(char *operation) {
         return NAN;
     }
 
-    var buff = eval(operation, true);
+    var buff = eval(operation);
 
     switch (buff.type) {
         case BC_NULL:
@@ -788,7 +784,7 @@ int64_t bc_int(char *operation) {
         return I64_NAN;
     }
 
-    var buff = eval(operation, true);
+    var buff = eval(operation);
 
     switch (buff.type) {
         case BC_NULL:
@@ -852,7 +848,7 @@ char *bc_typeof(char *operation) {
         return NULL;
     operation = p;
 
-    var buff = eval(operation, true);
+    var buff = eval(operation);
 
     if (buff.type == BC_STR)
         SAFE_FREE(buff.data.s);
@@ -879,7 +875,7 @@ int64_t s_print(char *operation) {
         return false;
     operation = p;
 
-    char *str = var2str(eval(operation, true));
+    char *str = var2str(eval(operation));
 
     if (!str)
         return false;
@@ -928,7 +924,7 @@ char *s_input(char *operation) {
     if (!hasContent)
         buff = (var){ .type = BC_STR, .data.s = input };
     else
-        buff = eval(operation, true);
+        buff = eval(operation);
 
     char *str = var2str(buff);
 
@@ -990,7 +986,7 @@ int64_t bc_len(char *operation) {
         return I64_NAN;
     }
 
-    var buff = eval(operation, true);
+    var buff = eval(operation);
 
     if (buff.type == BC_NULL)
         return I64_NAN;
@@ -1029,7 +1025,7 @@ float64 s_abs(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     if (tmp.type == BC_NULL)
         return NAN;
@@ -1074,7 +1070,7 @@ float64 s_miles(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1113,7 +1109,7 @@ float64 s_km(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1152,7 +1148,7 @@ float64 s_pounds(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1191,7 +1187,7 @@ float64 s_kg(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1230,7 +1226,7 @@ float64 s_feet(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1269,7 +1265,7 @@ float64 s_meter(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1308,7 +1304,7 @@ float64 s_fah(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1347,7 +1343,7 @@ float64 s_cel(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1386,7 +1382,7 @@ char *s_oct(char *operation) {
         return NULL;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     int64_t val1 = 0;
 
@@ -1436,7 +1432,7 @@ char *s_lower(char *operation) {
         return NULL;
     operation = p;
 
-    var buff = eval(operation, true);
+    var buff = eval(operation);
 
     if (buff.type == BC_NULL)
         return NULL;
@@ -1469,7 +1465,7 @@ char *s_upper(char *operation) {
         return NULL;
     operation = p;
 
-    var buff = eval(operation, true);
+    var buff = eval(operation);
 
     if (buff.type == BC_NULL)
         return NULL;
@@ -1505,7 +1501,7 @@ char *s_chr(char *operation) {
         return NULL;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     int64_t num = 0;
 
@@ -1592,7 +1588,7 @@ char *s_hex(char *operation) {
         return NULL;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     int64_t val1 = 0;
 
@@ -1639,7 +1635,7 @@ char *s_bin(char *operation) {
         return NULL;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     int64_t val1 = 0;
 
@@ -1711,7 +1707,7 @@ int64_t s_trunc(char *operation) {
         return I64_NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1750,7 +1746,7 @@ float64 s_rad(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1789,7 +1785,7 @@ float64 s_gon(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1828,7 +1824,7 @@ float64 s_deg(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1868,7 +1864,7 @@ float64 s_sqrt(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1915,7 +1911,7 @@ int64_t s_scale(char *operation) {
         return I64_NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     switch (tmp.type) {
         case BC_NULL:
@@ -1953,7 +1949,7 @@ float64 s_sin(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -1997,7 +1993,7 @@ float64 s_asin(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2044,7 +2040,7 @@ float64 s_cot(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2093,7 +2089,7 @@ float64 s_acot(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2132,7 +2128,7 @@ float64 s_cos(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2176,7 +2172,7 @@ float64 s_acos(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2223,7 +2219,7 @@ float64 s_tan(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 angle = 0;
 
@@ -2275,7 +2271,7 @@ float64 s_atan(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2314,7 +2310,7 @@ float64 s_ln(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2353,7 +2349,7 @@ float64 s_log10(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2392,7 +2388,7 @@ float64 s_log2(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -2458,7 +2454,7 @@ float64 s_tet(char *operation) {
     trim(baseStr);
     trim(tetStr);
 
-    var debug1 = eval(baseStr, true);
+    var debug1 = eval(baseStr);
 
     float64 base = 0;
 
@@ -2488,7 +2484,7 @@ float64 s_tet(char *operation) {
     if (debug1.type == BC_FLOAT && isnan(debug1.data.f))
         return NAN;
 
-    var debug2 = eval(tetStr, true);
+    var debug2 = eval(tetStr);
 
     int64_t tet = 0;
 
@@ -2576,7 +2572,7 @@ float64 s_pow(char *operation) {
     trim(baseStr);
     trim(powerStr);
 
-    var debug1 = eval(baseStr, true);
+    var debug1 = eval(baseStr);
 
     float64 base = 0;
 
@@ -2606,7 +2602,7 @@ float64 s_pow(char *operation) {
     if (debug1.type == BC_FLOAT && isnan(debug1.data.f))
         return NAN;
 
-    var debug2 = eval(powerStr, true);
+    var debug2 = eval(powerStr);
 
     float64 power = 0;
 
@@ -2689,7 +2685,7 @@ float64 s_root(char *operation) {
     trim(indexStr);
     trim(rootingStr);
 
-    var debug1 = eval(indexStr, true);
+    var debug1 = eval(indexStr);
 
     float64 index = 0;
 
@@ -2719,7 +2715,7 @@ float64 s_root(char *operation) {
     if (debug1.type == BC_FLOAT && isnan(index))
         return NAN;
 
-    var debug2 = eval(rootingStr, true);
+    var debug2 = eval(rootingStr);
 
     float64 rooting = 0;
 
@@ -2826,7 +2822,7 @@ float64 s_bmi(char *operation) {
     trim(weightStr);
     trim(heightStr);
 
-    var debug1 = eval(weightStr, true);
+    var debug1 = eval(weightStr);
 
     float64 weight = 0;
 
@@ -2856,7 +2852,7 @@ float64 s_bmi(char *operation) {
     if (debug1.type == BC_FLOAT && isnan(weight))
         return NAN;
 
-    var debug2 = h_atof(heightStr, true);
+    var debug2 = eval(heightStr);
 
     float64 height = 0;
 
@@ -2922,7 +2918,7 @@ float64 s_log(char *operation) {
     trim(baseStr);
     trim(numStr);
 
-    var debug1 = eval(baseStr, true);
+    var debug1 = eval(baseStr);
 
     float64 base = 0;
 
@@ -2952,7 +2948,7 @@ float64 s_log(char *operation) {
     if (debug1.type == BC_FLOAT && isnan(base))
         return NAN;
 
-    var debug2 = h_atof(numStr, true);
+    var debug2 = eval(numStr);
 
     float64 num = 0;
 
@@ -3054,7 +3050,7 @@ float64 s_randFloat(char *operation) {
     float64 maxLf = 0.0;
     float64 minLf = 0.0;
 
-    var tmp1 = eval(str_max, true);
+    var tmp1 = eval(str_max);
 
     maxLf = 0;
 
@@ -3084,7 +3080,7 @@ float64 s_randFloat(char *operation) {
     if (tmp1.type == BC_FLOAT && isnan(tmp1.data.f))
         return NAN;
 
-    var tmp = h_atof(str_min, true);
+    var tmp = eval(str_min);
 
     minLf = 0;
 
@@ -3155,7 +3151,7 @@ int64_t s_randInt(char *operation) {
     int64_t maxInt = 0.0;
     int64_t minInt = 0.0;
 
-    var tmp1 = eval(str_max, true);
+    var tmp1 = eval(str_max);
 
     maxInt = 0;
 
@@ -3183,7 +3179,7 @@ int64_t s_randInt(char *operation) {
             return I64_NAN;
     }
 
-    var tmp = eval(str_min, true);
+    var tmp = eval(str_min);
 
     minInt = 0;
 
@@ -3220,7 +3216,7 @@ int64_t s_floor(char *operation) {
         return I64_NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -3259,7 +3255,7 @@ int64_t s_ceil(char *operation) {
         return I64_NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -3298,7 +3294,7 @@ int64_t s_round(char *operation) {
         return I64_NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -3362,7 +3358,7 @@ int64_t s_isprime(char *operation) {
         return I64_NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     int64_t num = 0;
 
@@ -3472,7 +3468,7 @@ int64_t s_fact(char *operation) {
         return I64_NAN;
     }
 
-    var tmp = eval(test, true);
+    var tmp = eval(test);
 
     SAFE_FREE(test);
 
@@ -3516,7 +3512,7 @@ float64 s_sign(char *operation) {
         return NAN;
     operation = p;
 
-    var tmp = eval(operation, true);
+    var tmp = eval(operation);
 
     float64 num = 0;
 
@@ -3624,7 +3620,7 @@ float64 s_sum(char *operation) {
     if (diffStr)
         trim(diffStr);
 
-    var debug1 = eval(initStr, true);
+    var debug1 = eval(initStr);
 
     float64 init = 0;
 
@@ -3654,7 +3650,7 @@ float64 s_sum(char *operation) {
     if (debug1.type == BC_FLOAT && isnan(debug1.data.f))
         return NAN;
 
-    var debug2 = eval(endStr, true);
+    var debug2 = eval(endStr);
 
     float64 end = 0;
 
@@ -3687,7 +3683,7 @@ float64 s_sum(char *operation) {
     char *defaultDiff = "1";
     char *tmp3 = diffStr ? diffStr : defaultDiff;
 
-    var debug3 = eval(tmp3, true);
+    var debug3 = eval(tmp3);
 
     float64 diff = 0;
 

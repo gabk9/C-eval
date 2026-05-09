@@ -5,6 +5,8 @@
     HANDLE hConsole;
 #endif
 
+bool mathlib = false;
+
 #define BC_MATHLIB 0x0001
 #define BC_QUIET   0x0002
 #define BC_VERSION 0x0004
@@ -21,7 +23,6 @@ int32_t main(int32_t argc, char **argv) {
     uint8_t flags = 0;
     uint32_t objCount = 0;
 
-    bool mathlib = false;
     bool show_init = true;
 
     if (Ans.type == BC_STR && Ans.data.s)
@@ -91,7 +92,7 @@ int32_t main(int32_t argc, char **argv) {
             for (uint16_t i = 0; i < objCount; i++) {
                 char *opt = argv[i];
 
-                char *buff = var2str(eval(opt, mathlib));
+                char *buff = var2str(eval(opt));
 
                 if (!buff)
                     return 1;
@@ -118,7 +119,7 @@ int32_t main(int32_t argc, char **argv) {
 
             if (!*line) continue;
 
-            char *result = var2str(eval(line, mathlib));
+            char *result = var2str(eval(line));
 
             if (!result)
                 return 1;
@@ -193,7 +194,7 @@ int32_t main(int32_t argc, char **argv) {
             continue;
         }
 
-        result = var2str(eval(new, mathlib));
+        result = var2str(eval(new));
 
         if (!result) {
             putchar('\n');

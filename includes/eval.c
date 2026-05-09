@@ -11,7 +11,7 @@
 static int32_t eval_depth = 0;
 var Ans = { .type = BC_NULL };
 
-var eval(char *operation, bool mathlib) {
+var eval(char *operation) {
 
     if (!operation)
         return (var){.type = BC_NULL};
@@ -734,7 +734,7 @@ static var lNot_section(char *operation, bool mathlib) {
         }
     }
 
-    var tmp = eval(expr, mathlib);
+    var tmp = eval(expr);
 
     if (tmp.type == BC_NULL)
         return (var){.type = BC_NULL};
@@ -1071,12 +1071,12 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
         return (var){ .type = BC_NULL };
     }
 
-    var val1 = eval(num1, mathlib);
+    var val1 = eval(num1);
 
     if (val1.type == BC_NULL)
         return (var){.type = BC_NULL};
 
-    var val2 = eval(num2, mathlib);
+    var val2 = eval(num2);
 
     if (val2.type == BC_NULL)
         return (var){.type = BC_NULL};

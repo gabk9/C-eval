@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #ifndef _WIN64
-typedef unsigned long size_t;
+    typedef unsigned long size_t;
 #endif
 
 #ifdef _WIN64

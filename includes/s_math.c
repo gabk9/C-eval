@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "s_math.h"
+#include <inttypes.h>
 
 #if !defined(_WIN64) && !defined(__linux__) && !defined(__APPLE__) && !defined(__ANDROID__)
     #error "Operational system not recognized, terminating program!!"

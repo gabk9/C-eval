@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <inttypes.h>
 
 
 #ifdef _WIN64
@@ -48,7 +47,7 @@
     #include <strings.h>
 #endif
 
-#define VERSION "r0.3.17"
+#define VERSION "r0.3.23"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \

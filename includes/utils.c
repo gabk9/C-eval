@@ -1,11 +1,16 @@
 #define _GNU_SOURCE
 
+#include "types.h"
 #include "utils.h"
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 char *lineContinuation(char *str) {
+    if (!str || *str == '\0')
+        return NULL;
+
     bool inDoubleQuotes = false;
     bool inSingleQuotes = false;
 
@@ -35,57 +40,71 @@ char *lineContinuation(char *str) {
         }
     }
 
-    if ((len > 0 && str[len - 1] == '\\' && !is_escaped(str, len - 1)) ||
-        inDoubleQuotes || inSingleQuotes) {
+    bool isSlash =
+        (len > 0 && str[len - 1] == '\\' && !is_escaped(str, len - 1));
 
-        if (len > 0 && str[len - 1] == '\\') {
-            str[len - 1] = '\0';
-            len--;
-        }
+    bool isParenthesis = parenthesis_check(str) == PAREN_MISSING_CLOSE;
 
-        char tmp[MAX_CHAR] = {0};
+    if (!isSlash && !isParenthesis)
+        return strdup(str);
 
-        for (size_t i = 0; i < 2; i++) {
-            printc("... ", BC_PROMPT_COLOR, WHITE);
-
-            if (!fgets(tmp, sizeof(tmp), stdin))
-                continue;
-
-            trim(tmp);
-            tmp[strcspn(tmp, "\r\n")] = '\0';
-
-            if (*tmp == '\0') {
-                if (i == 1)
-                    return strdup(str);
-
-                continue;
-            }
-
-            break;
-        }
-
-        char *new = alloc(len + strlen(tmp) + 1);
-
-        memcpy(new, str, len);
-        new[len] = '\0';
-        strcat(new, tmp);
-
-        char *result = lineContinuation(new);
-
-        SAFE_FREE(new);
-
-        return result;
+    if (isSlash && len > 0 && str[len - 1] == '\\') {
+        str[len - 1] = '\0';
+        len--;
     }
 
-    return strdup(str);
+    char tmp[MAX_CHAR] = {0};
+
+    int32_t emptyCount = 0;
+
+    while (1) {
+        printc("... ", BC_PROMPT_COLOR, WHITE);
+
+        if (!fgets(tmp, sizeof(tmp), stdin))
+            return strdup(str);
+
+        tmp[strcspn(tmp, "\r\n")] = '\0';
+
+        bool isEmpty = true;
+        for (size_t i = 0; tmp[i]; i++)
+            if (str[i] != ' ') {
+                (void)isEmpty;
+                isEmpty = false;
+                break;
+            }
+
+        if (isEmpty) {
+            if (isSlash) {
+                emptyCount++;
+
+                if (emptyCount >= 2)
+                    return strdup(str);
+            }
+            continue;
+        }
+
+        break;
+    }
+
+    char *new = alloc(len + strlen(tmp) + 2);
+
+    memcpy(new, str, len);
+    new[len] = '\0';
+
+    strcat(new, tmp);
+
+    char *result = lineContinuation(new);
+
+    SAFE_FREE(new);
+
+    return result;
 }
 
 bool is_escaped(const char *str, size_t pos) {
     size_t backslashes = 0;
 
-    while (pos > 0 && str[--pos] == '\\') {
+    while (pos > 0 && str[--pos] == '\\')
         backslashes++;
-    }
 
     return backslashes & 1;
 }

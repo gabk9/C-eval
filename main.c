@@ -115,6 +115,7 @@ int32_t main(int32_t argc, char **argv) {
         char line[INPUT_SIZE];
 
         while (fgets(line, sizeof(line), stdin)) {
+            trimTabs(line);
             line[strcspn(line, "\r\n")] = '\0';
 
             if (!*line) continue;
@@ -157,6 +158,7 @@ int32_t main(int32_t argc, char **argv) {
         }
 
         operation[strcspn(operation, "\r\n")] = '\0';
+        trimTabs(operation);
 
         char *new = lineContinuation(operation);
 

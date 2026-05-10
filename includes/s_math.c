@@ -953,18 +953,26 @@ char *s_input(char *operation) {
     if (!*tmp)
         return strdup("\"\"");
 
-    size_t extra = strlen(tmp) + 3;
+    char *expanded = expandEscape(tmp);
+
+    if (!expanded)
+        return NULL;
+
+    size_t extra = strlen(expanded) + 3;
     char *result = alloc(extra);
 
     if (!result) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("memory allocation error\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+        SAFE_FREE(expanded);
 
         return NULL;
     }
 
-    snprintf(result, extra, "\"%s\"", tmp);
+    snprintf(result, extra, "\"%s\"", expanded);
+    SAFE_FREE(expanded);
+
     return result;
 }
 

@@ -49,7 +49,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.27"
+#define VERSION "r0.3.34"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -76,6 +76,8 @@ extern bool mathlib;
 #define SINGLE_QUOTES 0
 #define DOUBLE_QUOTES 1
 #define BOTH_QUOTES   2
+
+#define TAB_LENGTH 4
 
 #define HEX_PREF "0x"
 #define OCT_PREF "0o"
@@ -110,6 +112,7 @@ void trim(char *str);
 void initRandom(void);
 void trimEnd(char *str);
 void print_manual(void);
+void trimTabs(char *str);
 bool isBin(const char *str);
 void setColor(color4 color);
 bool isHex(const char *str);
@@ -122,6 +125,7 @@ char *lineContinuation(char *str);
 opcode get_opcode(const char *op);
 void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);
+char *expandEscape(const char *str);
 eval_ty eval_typeof(const char *str);
 bool isValidBcFuncName(const char *str);
 bool trim_streq(char *str1, char *str2);
@@ -134,6 +138,7 @@ bool is_wrapped_by_parentheses(const char *s);
 paren_status parenthesis_check(const char *str);
 char *bc_strcat(const char *dest, const char *src);
 void num_snprintf(char *buff, size_t size, var num);
+char *tabsToSpaces(const char *str, int32_t tabSize);
 bool isQuoted(const char *string, int16_t quoteMode);
 bool isBcVariable(const char *str, bool *shouldError);
 void getItemTypeStr(char *buff, size_t size, var item);

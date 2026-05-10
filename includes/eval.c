@@ -142,9 +142,16 @@ var eval(char *operation) {
         }
     }
 
+    char *spaced = tabsToSpaces(operation, TAB_LENGTH);
+
+    if (!spaced)
+        return (var){ .type = BC_NULL };
+
     char tmp[MAX_CHAR] = {0};
-    size_t len = strlen(operation);
-    memcpy(tmp, operation, len + 1);
+    size_t len = strlen(spaced);
+    memcpy(tmp, spaced, len + 1);
+
+    SAFE_FREE(spaced);
 
     removeComments(tmp);
     trim(tmp);

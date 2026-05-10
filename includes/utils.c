@@ -568,6 +568,57 @@ int16_t find_main_operator_full(const char *s, const ops *operators, char *found
     return best_pos;
 }
 
+char *expandEscape(const char *str) {
+    size_t len = strlen(str);
+
+    char *result = alloc(len * 2 + 1);
+
+    if (!result)
+        return NULL;
+
+    size_t i = 0;
+    size_t j = 0;
+
+    while (str[i]) {
+        switch (str[i]) {
+            case '\n':
+                result[j++] = '\\';
+                result[j++] = 'n';
+                break;
+
+            case '\t':
+                result[j++] = '\\';
+                result[j++] = 't';
+                break;
+
+            case '\r':
+                result[j++] = '\\';
+                result[j++] = 'r';
+                break;
+
+            case '\\':
+                result[j++] = '\\';
+                result[j++] = '\\';
+                break;
+
+            case '\"':
+                result[j++] = '\\';
+                result[j++] = '\"';
+                break;
+
+            default:
+                result[j++] = str[i];
+                break;
+        }
+
+        i++;
+    }
+
+    result[j] = '\0';
+
+    return result;
+}
+
 int16_t injectEscape(char *str) {
     bool inQuotes = false;
     size_t write = 0;
@@ -696,10 +747,69 @@ paren_status parenthesis_check(const char *str) {
     return PAREN_OK;
 }
 
-void trimEnd(char *str) {
-    uint16_t len = strlen(str);
+char *tabsToSpaces(const char *str, int32_t tabSize) {
+    if (!str || !*str || tabSize <= 0)
+        return NULL;
 
-    for (int16_t i = len - 1; i >= 0; i--)
+    size_t len = strlen(str);
+
+    char *result = alloc(len * tabSize + 1);
+
+    if (!result)
+        return NULL;
+
+    size_t i = 0;
+    size_t j = 0;
+
+    while (str[i]) {
+        if (str[i] == '\t') {
+            for (int k = 0; k < tabSize; k++) {
+                result[j++] = ' ';
+            }
+        } else {
+            result[j++] = str[i];
+        }
+
+        i++;
+    }
+
+    result[j] = '\0';
+
+    return result;
+}
+
+void trimTabs(char *str) {
+    if (!str || !*str) return;
+
+    size_t len = strlen(str);
+
+    for (ssize_t i = len - 1; i >= 0; i--)
+        if (str[i] != '\t')  {
+            str[i + 1] = '\0';
+            break;
+        }
+
+    size_t tabs = 0;
+    while (str[tabs] == '\t')
+        tabs++;
+
+    if (tabs == 0) return;
+
+    size_t i = 0;
+    while (str[tabs + i] != '\0') {
+        str[i] = str[tabs+i];
+        i++;
+    }
+
+    str[i] = '\0';
+}
+
+void trimEnd(char *str) {
+    if (!str || !*str) return;
+
+    size_t len = strlen(str);
+
+    for (ssize_t i = len - 1; i >= 0; i--)
         if (str[i] != ' ')  {
             str[i + 1] = '\0';
             break;
@@ -707,20 +817,20 @@ void trimEnd(char *str) {
 }
 
 void trim(char *str) {
-    if (!str) return;
-    
-    uint16_t spaces = 0;
-    while (str[spaces] == ' ') {
+    if (!str || !*str) return;
+
+    size_t spaces = 0;
+    while (str[spaces] == ' ')
         spaces++;
-    }
-    
+
     if (spaces == 0) return;
-    
-    uint16_t i = 0;
+
+    size_t i = 0;
     while (str[spaces + i] != '\0') {
         str[i] = str[spaces+i];
         i++;
     }
+
     str[i] = '\0';
 }
 

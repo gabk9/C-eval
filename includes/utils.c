@@ -7,7 +7,37 @@
 #include <stdarg.h>
 #include <inttypes.h>
 
-char *lineContinuation(char *str) {
+bool isEmpty(const char *str) {
+    if (!str || !*str)
+        return true;
+
+    for (size_t i = 0; str[i]; i++)
+        if (str[i] != ' ' && str[i] != '\t')
+            return false;
+
+    return true;
+}
+
+int8_t extractFilePath(char *file) {
+    if (!file || !*file)
+        return 0;
+
+#ifdef _WIN64
+    const char slash = '\\';
+    const char otherSlash = '/';
+#else
+    const char slash = '/';
+    const char otherSlash = '\\';
+#endif
+
+    for (size_t i = 0; file[i]; i++)
+        if (file[i] == otherSlash)
+            file[i] = slash;
+
+    return 1;
+}
+
+char *lineContinuation(char *str, FILE *stream) {
     if (!str || *str == '\0')
         return NULL;
 
@@ -58,9 +88,10 @@ char *lineContinuation(char *str) {
     int32_t emptyCount = 0;
 
     while (1) {
-        printc("... ", BC_PROMPT_COLOR, WHITE);
+        if (stream == stdin)
+            printc("... ", BC_PROMPT_COLOR, WHITE);
 
-        if (!fgets(tmp, sizeof(tmp), stdin))
+        if (!fgets(tmp, sizeof(tmp), stream))
             return strdup(str);
 
         tmp[strcspn(tmp, "\r\n")] = '\0';
@@ -93,7 +124,7 @@ char *lineContinuation(char *str) {
 
     strcat(new, tmp);
 
-    char *result = lineContinuation(new);
+    char *result = lineContinuation(new, stream);
 
     SAFE_FREE(new);
 
@@ -367,7 +398,7 @@ void shiftLeft_at(char *str, size_t pos) {
 }
 
 bool is_wrapped_by_parentheses(const char *s) {
-    int32_t len = strlen(s);
+    size_t len = strlen(s);
 
     if (len < 2)
         return false;
@@ -375,17 +406,41 @@ bool is_wrapped_by_parentheses(const char *s) {
     if (s[0] != '(' || s[len - 1] != ')')
         return false;
 
-    int32_t depth = 0;
+    bool in_double = false;
+    bool in_single = false;
 
-    for (int32_t i = 0; i < len - 1; i++) {
+    int depth = 0;
+
+    for (size_t i = 0; i < len - 1; i++) {
+
+        if (s[i] == '"' &&
+            !in_single &&
+            !is_escaped(s, i)) {
+
+            in_double = !in_double;
+            continue;
+        }
+
+        if (s[i] == '\'' &&
+            !in_double &&
+            !is_escaped(s, i)) {
+
+            in_single = !in_single;
+            continue;
+        }
+
+        if (in_double || in_single)
+            continue;
 
         if (s[i] == '(')
             depth++;
-        else if (s[i] == ')')
+
+        else if (s[i] == ')') {
             depth--;
 
-        if (depth == 0 && i < len - 2)
-            return false;
+            if (depth == 0 && i != len - 1)
+                return false;
+        }
     }
 
     return depth == 1;

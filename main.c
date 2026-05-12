@@ -89,16 +89,64 @@ int32_t main(int32_t argc, char **argv) {
         }
 
         if (objCount > 0) {
-            for (uint16_t i = 0; i < objCount; i++) {
-                char *opt = argv[i];
+            for (uint32_t i = 0; i < objCount; i++) {
+                if (!extractFilePath(argv[i])) {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("missing file argument!\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-                char *buff = var2str(eval(opt));
-
-                if (!buff)
                     return 1;
+                }
 
-                puts(buff);
-                SAFE_FREE(buff);
+                FILE *f = fopen(argv[i], "r");
+
+                if (!f) {
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("Cannot open '%s' No such file or directory\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, argv[i]);
+
+                    return 1;
+                }
+
+                char line[MAX_CHAR] = {0};
+
+                while (fgets(line, sizeof(line), f)) {
+                    line[strcspn(line, "\r\n")] = '\0';
+
+                    if (isEmpty(line))
+                        continue;
+
+                    char *fullLine = lineContinuation(line, f);
+
+                    if (!fullLine) {
+                        SAFE_FCLOSE(f);
+                        return 1;
+                    }
+
+                    char *spaced = tabsToSpaces(fullLine, TAB_LENGTH);
+
+                    SAFE_FREE(fullLine);
+
+                    if (!spaced)
+                        return 1;
+
+                    if (!spaced)
+                        continue;
+
+                    var debug = eval(spaced);
+
+                    SAFE_FREE(spaced);
+
+                    if (debug.type == BC_NULL) {
+                        SAFE_FCLOSE(f);
+                        return 1;
+                    }
+
+                    else if (debug.type == BC_STR)
+                        SAFE_FREE(debug.data.s);
+                }
+
+                SAFE_FCLOSE(f);
             }
 
             return 0;
@@ -112,24 +160,11 @@ int32_t main(int32_t argc, char **argv) {
     bool appear = false;
 
     if (!isatty(STDIN_FILENO)) {
-        char line[INPUT_SIZE];
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("does not support tty input\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-        while (fgets(line, sizeof(line), stdin)) {
-            trimTabs(line);
-            line[strcspn(line, "\r\n")] = '\0';
-
-            if (!*line) continue;
-
-            char *result = var2str(eval(line));
-
-            if (!result)
-                return 1;
-
-            puts(result);
-            SAFE_FREE(result);
-        }
-
-        return 0;
+        return 1;
     }
 
     while (true) {
@@ -158,9 +193,15 @@ int32_t main(int32_t argc, char **argv) {
         }
 
         operation[strcspn(operation, "\r\n")] = '\0';
+
+        if (isEmpty(operation)) {
+            putchar('\n');
+            continue;
+        }
+
         trimTabs(operation);
 
-        char *new = lineContinuation(operation);
+        char *new = lineContinuation(operation, stdin);
 
         if (!new) {
             putchar('\n');

@@ -896,11 +896,21 @@ char *s_input(char *operation) {
     char *p = strchr(operation, '(');
     if (!p)
         return NULL;
-    operation = p+1;
 
-    size_t len = strlen(operation);
-    operation[len-1] = '\0';
+    p++;
+
+    size_t len = strlen(p);
+
+    if (len == 0 || p[len - 1] != ')')
+        return NULL;
+
+    char expr[MAX_CHAR] = {0};
+
+    memcpy(expr, p, len - 1);
+    expr[len - 1] = '\0';
     len--;
+
+    operation = expr;
 
     bool hasContent = false;
 

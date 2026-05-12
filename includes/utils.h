@@ -27,6 +27,7 @@
 
 #ifdef _WIN64
     #include <io.h>
+    #include <direct.h>
     #include <windows.h>
 
     #define _isatty isatty
@@ -49,7 +50,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.34"
+#define VERSION "r0.3.44"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -106,6 +107,13 @@ extern bool mathlib;
     } \
 } while (false)
 
+#define SAFE_FCLOSE(file) do { \
+    if (file) { \
+        fclose(file); \
+        file = NULL; \
+    } \
+} while (false)
+
 #define alloc(bytes) safe_malloc(bytes, __LINE__, __FILE__)
 
 void trim(char *str);
@@ -117,12 +125,13 @@ bool isBin(const char *str);
 void setColor(color4 color);
 bool isHex(const char *str);
 bool isOct(const char *str);
+bool isEmpty(const char *str);
 int64_t hex_to_long(char *str);
 bool isalldigit(const char *s);
 void removeComments(char *str);
 int16_t injectEscape(char *str);
-char *lineContinuation(char *str);
 opcode get_opcode(const char *op);
+int8_t extractFilePath(char *file);
 void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);
 char *expandEscape(const char *str);
@@ -136,6 +145,7 @@ bool is_escaped(const char *str, size_t pos);
 int16_t strchar(const char *str, int8_t chr);
 bool is_wrapped_by_parentheses(const char *s);
 paren_status parenthesis_check(const char *str);
+char *lineContinuation(char *str, FILE *stream);
 char *bc_strcat(const char *dest, const char *src);
 void num_snprintf(char *buff, size_t size, var num);
 char *tabsToSpaces(const char *str, int32_t tabSize);

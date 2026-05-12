@@ -32,8 +32,9 @@ user-select: none;
 
 </div>
 
+```md
 **ceval** is a lightweight expression evaluator written in C.  
-It works both as an interactive REPL, supporting multiple data types and numeric systems, a lot of functions, operators and optional math features.
+It works both as an interactive REPL and as a lightweight scripting interpreter, supporting multiple data types, numeric systems, functions, operators and optional math features.
 
 Although simple, it is powerful enough for quick calculations and experimentation. (even helping with math homework)
 
@@ -55,8 +56,8 @@ The focus is simplicity, flexibility and educational value.
 ## Features
 
 - Interactive REPL
-- Multiple expressions via CLI
-- Pipe and file input support
+- File execution via CLI
+- File input support
 - Optional math library
 - String, numeric and boolean operations
 - Bitwise and logical operators
@@ -200,16 +201,15 @@ ceval
 ## Usage
 
 ```bash
-ceval [OPTIONS] [EXPRESSIONS...]
+ceval [OPTIONS] [FILES...]
 ```
 
 ### Examples
 
 ```bash
-ceval "2 + 2"
-ceval -l "sqrt(16)"
-ceval -l "randf(1,100)" "2 + 2"
-echo "10 * 10" | ceval
+ceval script.cev
+ceval -l math.cev
+ceval file1.cev file2.cev
 ```
 
 ---
@@ -217,4 +217,4 @@ echo "10 * 10" | ceval
 ## Notes
 
 - Some features require `-l` (math library)
-- Errors stop execution in script mode
+- Errors stop execution in file/script mode

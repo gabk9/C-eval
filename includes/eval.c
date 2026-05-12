@@ -768,12 +768,36 @@ static var lNot_section(char *operation, bool mathlib) {
     return (var){ .type = BC_BOOL, .data.i = value };
 }
 
+static size_t findFuncParenthesis(const char *s) {
+    bool in_double = false;
+    bool in_single = false;
+
+    for (size_t i = 0; s[i]; i++) {
+        if (s[i] == '"' && !in_single)
+            in_double = !in_double;
+
+        else if (s[i] == '\'' && !in_double)
+            in_single = !in_single;
+
+        else if (s[i] == '(' && !in_double && !in_single)
+            return i;
+    }
+
+    return -1;
+}
+
 static var func_section(char *operation, size_t funcCount, const FuncEntry *functions, bool mathlib) {
     char name[0x100] = {0};
 
-    long parenthesis_index = strchar(operation, '(');
-    if (parenthesis_index == -1)
-        return h_atof(operation, mathlib);
+    long parenthesis_index = findFuncParenthesis(operation);
+    if (parenthesis_index == -1) {
+        var result = h_atof(operation, mathlib);
+
+        if (result.type == BC_FLOAT && isnan(result.data.f))
+            return (var){.type = BC_NULL};
+
+        return result;
+    }
 
     memcpy(name, operation, parenthesis_index);
     name[parenthesis_index] = '\0';
@@ -795,11 +819,36 @@ static var func_section(char *operation, size_t funcCount, const FuncEntry *func
     int32_t depth = 0;
     int32_t close_index = -1;
 
+    bool in_double = false;
+    bool in_single = false;
+
     for (int32_t i = parenthesis_index; operation[i]; i++) {
+
+        if (operation[i] == '"' &&
+            !in_single &&
+            !is_escaped(operation, i)) {
+
+            in_double = !in_double;
+            continue;
+        }
+
+        if (operation[i] == '\'' &&
+            !in_double &&
+            !is_escaped(operation, i)) {
+
+            in_single = !in_single;
+            continue;
+        }
+
+        if (in_double || in_single)
+            continue;
+
         if (operation[i] == '(')
             depth++;
+
         else if (operation[i] == ')') {
             depth--;
+
             if (depth == 0) {
                 close_index = i;
                 break;
@@ -899,7 +948,12 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
     if (*operation == '!')
         return lNot_section(operation, mathlib);
 
-    char *paren = strchr(operation, '(');
+    char *paren = NULL;
+
+    long paren_index = findFuncParenthesis(operation);
+
+    if (paren_index != -1)
+        paren = operation + paren_index;
 
     if (!paren) {
 
@@ -1043,7 +1097,7 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
 
     while (is_wrapped_by_parentheses(operation)) {
         size_t len = strlen(operation);
-        if (len <= 2)
+        if (len < 2)
             break;
 
         operation[len - 1] = '\0';

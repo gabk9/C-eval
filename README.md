@@ -37,6 +37,7 @@ user-select: none;
 It works both as an interactive REPL and as a lightweight scripting interpreter, supporting multiple data types, numeric systems, functions, operators and optional math features.
 
 Although simple, it is powerful enough for quick calculations and experimentation. (even helping with math homework)
+```
 
 ---
 

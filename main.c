@@ -1,5 +1,6 @@
 #include "includes/utils.h"
 #include "includes/eval.h"
+#include "includes/types.h"
 
 #ifdef _WIN64
     HANDLE hConsole;
@@ -137,13 +138,16 @@ int32_t main(int32_t argc, char **argv) {
 
                     SAFE_FREE(spaced);
 
-                    if (debug.type == BC_NULL) {
-                        SAFE_FCLOSE(f);
-                        return 1;
+                    switch (debug.type) {
+                        case BC_NULL:
+                            SAFE_FCLOSE(f);
+                            return 1;
+                        case BC_STR:
+                            SAFE_FREE(debug.data.s);
+                            break;
+                        default:
+                            continue;
                     }
-
-                    else if (debug.type == BC_STR)
-                        SAFE_FREE(debug.data.s);
                 }
 
                 SAFE_FCLOSE(f);

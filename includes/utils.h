@@ -50,7 +50,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.44"
+#define VERSION "r0.3.50"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -144,6 +144,7 @@ int32_t bc_strcmp(char *str1, char *str2);
 bool is_escaped(const char *str, size_t pos);
 int16_t strchar(const char *str, int8_t chr);
 bool is_wrapped_by_parentheses(const char *s);
+int16_t strrchar(const char *str, int8_t chr);
 paren_status parenthesis_check(const char *str);
 char *lineContinuation(char *str, FILE *stream);
 char *bc_strcat(const char *dest, const char *src);

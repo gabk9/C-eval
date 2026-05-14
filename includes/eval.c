@@ -157,8 +157,8 @@ var eval(char *operation) {
     trim(tmp);
     trimEnd(tmp);
 
-    if (!*tmp)
-        return (var){.type = BC_NULL};
+    if (isEmpty(tmp))
+        return (var){.type = BC_RESERVED};
 
     if (!getInvalidEscape(tmp))
         return (var){.type = BC_NULL};

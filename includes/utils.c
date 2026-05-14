@@ -1,3 +1,4 @@
+#include <stdio.h>
 #define _GNU_SOURCE
 
 #include "types.h"
@@ -95,6 +96,7 @@ char *lineContinuation(char *str, FILE *stream) {
             return strdup(str);
 
         tmp[strcspn(tmp, "\r\n")] = '\0';
+        removeComments(tmp);
 
         bool isEmpty = true;
         for (size_t i = 0; tmp[i]; i++)

@@ -26,13 +26,14 @@ typedef struct operators {
 } ops;
 
 typedef enum types {
-    BC_STR   = 0x0001,
-    BC_FLOAT = 0x0002,
-    BC_INT   = 0x0004,
-    BC_BOOL  = 0x0008,
-    BC_CHR   = 0x0010,
-    BC_NONE  = 0x0020,
-    BC_NULL  = 0x0040
+    BC_STR      = 0x0001,
+    BC_FLOAT    = 0x0002,
+    BC_INT      = 0x0004,
+    BC_BOOL     = 0x0008,
+    BC_CHR      = 0x0010,
+    BC_NONE     = 0x0020,
+    BC_NULL     = 0x0040,
+    BC_RESERVED = 0x0080
 } eval_ty;
 
 typedef char *(*S_Func)(char *operation);

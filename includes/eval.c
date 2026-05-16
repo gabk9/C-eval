@@ -27,6 +27,7 @@ var eval(char *operation) {
     {.returnType = BC_INT,    .name = "trunc",     .fn.i = s_trunc,       .builtin = false},
     {.returnType = BC_INT,    .name = "rand",      .fn.i = s_randInt,     .builtin = false},
     {.returnType = BC_INT,    .name = "len",       .fn.i = bc_len,        .builtin = true},
+    {.returnType = BC_INT,    .name = "ord",       .fn.i = s_ord,         .builtin = true},
     {.returnType = BC_INT,    .name = INT_VAR,     .fn.i = bc_int,        .builtin = true},
     {.returnType = BC_FLOAT,  .name = "sqrt",      .fn.f = s_sqrt,        .builtin = false},
     {.returnType = BC_FLOAT,  .name = "tet",       .fn.f = s_tet,         .builtin = false},
@@ -205,7 +206,6 @@ char *var2str(var buff) {
         case BC_BOOL:
             return (buff.data.i == false) ? strdup(FALSE_VAR) : strdup(TRUE_VAR);
 
-        case BC_CHR:
         case BC_INT:
         case BC_FLOAT: {
             const size_t max = 0x60;
@@ -296,7 +296,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
                     Str = left;
                 }
 
-                if (notStr.type != BC_INT && notStr.type != BC_CHR) {
+                if (notStr.type != BC_INT) {
                     char type[0x20] = {0};
 
                     getItemTypeStr(type, sizeof(type), notStr);
@@ -433,7 +433,6 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     float64 num2;
 
     switch (left.type) {
-        case BC_CHR:
         case BC_BOOL:
         case BC_INT:
             if (left.type == BC_BOOL)
@@ -451,7 +450,6 @@ var calc(var left, const char *operation, var right, bool mathLib) {
     }
 
     switch (right.type) {
-        case BC_CHR:
         case BC_BOOL:
         case BC_INT:
             if (right.type == BC_BOOL)
@@ -516,7 +514,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             break;
 
         case XOR:
-            if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
+            if (left.type != BC_INT || right.type != BC_INT) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("'^' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
@@ -529,7 +527,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             break;
 
         case AND:
-            if ((left.type != BC_INT && left.type != BC_CHR) || (right.type != BC_INT && right.type != BC_CHR)) {
+            if (left.type != BC_INT || right.type != BC_INT) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
                 printc("'&' requires type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
@@ -722,7 +720,7 @@ static var lNot_section(char *operation, bool mathlib) {
         return (var){ .type = BC_NULL };
     }
 
-    if (isQuoted(expr, DOUBLE_QUOTES)) {
+    if (isQuoted(expr, BOTH_QUOTES)) {
         if (count & 1)
             return (var){ .type = BC_BOOL, .data.i = (strlen(expr) > 2) ? false : true};
         else
@@ -964,23 +962,25 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
 
         size_t len = strlen(operation);
 
-        if (len > 1 && *operation == '"') {
+        if (len > 1 && (*operation == '"' || *operation == '\'')) {
             char result[0x400] = {0};
             size_t res_len = 0;
+
             const char *p = operation;
+            char quote = *operation;
 
             while (*p) {
                 while (isspace((unsigned char)*p))
                     p++;
 
-                if (*p != '"')
+                if (*p != quote)
                     break;
 
                 p++;
 
                 while (*p) {
 
-                    if (*p == '"' && !is_escaped(operation, p - operation))
+                    if (*p == quote && !is_escaped(operation, p - operation))
                         break;
 
                     if (*p == '\\' && p[1]) {
@@ -1001,7 +1001,7 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                     p++;
                 }
 
-                if (*p == '"')
+                if (*p == quote)
                     p++;
             }
 
@@ -1051,7 +1051,10 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                 }
             }
 
-            char *final = alloc(res_len + 3);
+            size_t result_len = strlen(result);
+
+            char *final = alloc(result_len + 3);
+
             if (!final) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
@@ -1061,10 +1064,12 @@ static var parse_single(char *operation, const FuncEntry *functions, size_t func
                 return (var){ .type = BC_NULL };
             }
 
-            *final = '"';
-            memcpy(final + 1, result, res_len);
-            final[res_len + 1] = '"';
-            final[res_len + 2] = '\0';
+            *final = quote;
+
+            memcpy(final + 1, result, result_len);
+
+            final[result_len + 1] = quote;
+            final[result_len + 2] = '\0';
 
             return (var){
                 .type = BC_STR,

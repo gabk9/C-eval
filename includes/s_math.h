@@ -39,6 +39,7 @@ float64 s_pow(char *operation)__attribute__((nonnull));
 float64 s_fah(char *operation)__attribute__((nonnull));
 float64 s_cel(char *operation)__attribute__((nonnull));
 float64 s_log(char *operation)__attribute__((nonnull));
+int64_t s_ord(char *operation)__attribute__((nonnull));
 float64 s_bmi(char *operation)__attribute__((nonnull));
 float64 s_tan(char *operation)__attribute__((nonnull));
 float64 s_cos(char *operation)__attribute__((nonnull));

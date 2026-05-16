@@ -124,19 +124,9 @@ int32_t main(int32_t argc, char **argv) {
                         return 1;
                     }
 
-                    char *spaced = tabsToSpaces(fullLine, TAB_LENGTH);
+                    var debug = eval(fullLine);
 
                     SAFE_FREE(fullLine);
-
-                    if (!spaced)
-                        return 1;
-
-                    if (!spaced)
-                        continue;
-
-                    var debug = eval(spaced);
-
-                    SAFE_FREE(spaced);
 
                     switch (debug.type) {
                         case BC_NULL:

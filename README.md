@@ -61,7 +61,7 @@ The focus is simplicity, flexibility and educational value.
 - String, numeric and boolean operations
 - Bitwise and logical operators
 - Built-in functions (math, conversion, random, etc.)
-- Multiple numeric systems (ascii, binary, decimal, hexadecimal, octal)
+- Multiple numeric systems (binary, decimal, hexadecimal and octal)
 - Cross-platform support (Linux / MacOS / Windows)
 
 ---

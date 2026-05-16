@@ -295,7 +295,6 @@ var h_atof(const char *str, bool mathlib) {
 
         switch (tmp.type) {
             case BC_BOOL:
-            case BC_CHR:
             case BC_INT:
                 num1 = tmp.data.i;
                 isInt = true;
@@ -360,7 +359,6 @@ var h_atof(const char *str, bool mathlib) {
 
         switch (tmp.type) {
             case BC_BOOL:
-            case BC_CHR:
             case BC_INT:
                 num1 = tmp.data.i;
                 break;
@@ -389,46 +387,46 @@ var h_atof(const char *str, bool mathlib) {
 
     len = strlen(buf);
 
-    if (isQuoted(buf, SINGLE_QUOTES)) {
-        if (!injectEscape(buf))
-            return (var){.type = BC_FLOAT, .data.f = NAN};
+    // if (isQuoted(buf, SINGLE_QUOTES)) {
+    //     if (!injectEscape(buf))
+    //         return (var){.type = BC_FLOAT, .data.f = NAN};
 
-        size_t oldLen = len;
-        len = strlen(buf);
-        bool isNullChr = !buf[1] && oldLen != len;
+    //     size_t oldLen = len;
+    //     len = strlen(buf);
+    //     bool isNullChr = !buf[1] && oldLen != len;
         
-        if (buf[len-1] == '\'') {
-            buf[len-1] = '\0';
-            len--;
-        }
-        if (*buf == '\'') {
-            memmove(buf, buf+1, len+1);
-            len--;
-        }
+    //     if (buf[len-1] == '\'') {
+    //         buf[len-1] = '\0';
+    //         len--;
+    //     }
+    //     if (*buf == '\'') {
+    //         memmove(buf, buf+1, len+1);
+    //         len--;
+    //     }
 
-        unsigned char chr = (unsigned char)*buf;
-        if (len > 1) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("to use single quotes it must be a single character\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+    //     unsigned char chr = (unsigned char)*buf;
+    //     if (len > 1) {
+    //         printc("ceval", BC_PROMPT_COLOR, WHITE);
+    //         printf(": ");
+    //         printc("to use single quotes it must be a single character\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            return (var){.type = BC_FLOAT, .data.f = NAN};
-        } else if (!isNullChr && len < 1) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("missing the character inside quotes\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+    //         return (var){.type = BC_FLOAT, .data.f = NAN};
+    //     } else if (!isNullChr && len < 1) {
+    //         printc("ceval", BC_PROMPT_COLOR, WHITE);
+    //         printf(": ");
+    //         printc("missing the character inside quotes\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            return (var){.type = BC_FLOAT, .data.f = NAN};
-        } else if (chr > 0x80) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("cannot work with multi-byte characters\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+    //         return (var){.type = BC_FLOAT, .data.f = NAN};
+    //     } else if (chr > 0x80) {
+    //         printc("ceval", BC_PROMPT_COLOR, WHITE);
+    //         printf(": ");
+    //         printc("cannot work with multi-byte characters\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
-            return (var){.type = BC_FLOAT, .data.f = NAN};
-        }
+    //         return (var){.type = BC_FLOAT, .data.f = NAN};
+    //     }
 
-        return (var){.type = BC_CHR, .data.i = chr};
-    }
+    //     return (var){.type = BC_CHR, .data.i = chr};
+    // }
 
     bool is_hex = isHex(buf);
 
@@ -453,7 +451,7 @@ var h_atof(const char *str, bool mathlib) {
     else if (is_bin)
         return (var){.type = BC_INT, .data.i = parseBinToInt(buf)};
 
-    if (*buf == '"' && buf[len-1] == '"') {
+    if (isQuoted(buf, BOTH_QUOTES)) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("cannot operate with '"STR_VAR"' type values\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
@@ -677,7 +675,6 @@ int64_t bc_bool(char *operation) {
     switch (buff.type) {
         case BC_FLOAT:
             return (buff.data.f == 0.0) ? false : true;
-        case BC_CHR:
         case BC_BOOL:
         case BC_INT:
             return (buff.data.i == 0) ? false: true;
@@ -717,7 +714,6 @@ float64 bc_float(char *operation) {
         case BC_NULL:
             return NAN;
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             return (float64)buff.data.i;
         case BC_FLOAT:
@@ -756,7 +752,6 @@ float64 bc_float(char *operation) {
     SAFE_FREE(buff.data.s);
 
     switch (tmp.type) {
-        case BC_CHR:
         case BC_INT:
             return (float64)tmp.data.i;
         case BC_FLOAT:
@@ -790,7 +785,6 @@ int64_t bc_int(char *operation) {
         case BC_NULL:
             return I64_NAN;
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             return buff.data.i;
         case BC_FLOAT:
@@ -829,7 +823,6 @@ int64_t bc_int(char *operation) {
     SAFE_FREE(buff.data.s);
 
     switch (tmp.type) {
-        case BC_CHR:
         case BC_INT:
             return tmp.data.i;
         case BC_FLOAT:
@@ -883,7 +876,7 @@ int64_t s_print(char *operation) {
     if (!injectEscape(str))
         return false;
 
-    if (isQuoted(str, DOUBLE_QUOTES)) {
+    if (isQuoted(str, BOTH_QUOTES)) {
         size_t len = strlen(str);
         memmove(str, str+1, len+1);
         str[len-2] = '\0';
@@ -941,7 +934,7 @@ char *s_input(char *operation) {
     if (!str)
         return NULL;
 
-    if (isQuoted(str, DOUBLE_QUOTES)) {
+    if (isQuoted(str, BOTH_QUOTES)) {
         if (!injectEscape(str)) {
             SAFE_FREE(str);
             return NULL;
@@ -1022,15 +1015,7 @@ int64_t bc_len(char *operation) {
         return I64_NAN;
     }
 
-    len = strlen(buff.data.s);
-
-    if (buff.data.s[len-1] == '"') {
-        buff.data.s[len-1] = '\0';
-        len--;
-    } if (*buff.data.s == '"') {
-        memmove(buff.data.s, buff.data.s+1, len+1);
-        len--;
-    }
+    len = strlen(buff.data.s) - 2;
 
     SAFE_FREE(buff.data.s);
 
@@ -1055,7 +1040,6 @@ float64 s_abs(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = (float64)tmp.data.i;
             break;
@@ -1094,7 +1078,6 @@ float64 s_miles(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1133,7 +1116,6 @@ float64 s_km(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1172,7 +1154,6 @@ float64 s_pounds(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1211,7 +1192,6 @@ float64 s_kg(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1250,7 +1230,6 @@ float64 s_feet(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1289,7 +1268,6 @@ float64 s_meter(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1328,7 +1306,6 @@ float64 s_fah(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1367,7 +1344,6 @@ float64 s_cel(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1406,7 +1382,6 @@ char *s_oct(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             val1 = tmp.data.i;
             break;
@@ -1525,7 +1500,6 @@ char *s_chr(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1577,18 +1551,29 @@ char *s_chr(char *operation) {
         case 39: strcpy(chr + 1, "\\'"); break;
         case 63: strcpy(chr + 1, "\\?"); break;
         case 92: strcpy(chr + 1, "\\\\"); break;
-        default:
-            if (value < 32 || value == 127) {
-                printc("ceval", BC_PROMPT_COLOR, WHITE);
-                printf(": ");
-                printc("chr() does not work with certain control and escape characters\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+        default: {
+            char tmp[0x100] = {0};
 
-                SAFE_FREE(chr);
-                return NULL;
+            int64_to_hex_min(value, tmp, sizeof(tmp));
+
+            if (value < 32 || value == 127) {
+                char tmp[0x100] = {0};
+
+                int64_to_hex_min(value, tmp, sizeof(tmp));
+                tmp[1] = '\\';
+
+                size_t extra = strlen(tmp) + 1;
+                char *result = alloc(extra);
+
+                memcpy(result, tmp, extra);
+
+                return result;
             }
+
             chr[1] = (char)value;
             chr[2] = '\0';
-            break;
+            break;            
+        }
     }
 
     int32_t len = (chr[2] == '\0') ? 2 : 3;
@@ -1598,6 +1583,52 @@ char *s_chr(char *operation) {
     chr[len + 1] = '\0';
 
     return chr;
+}
+
+int64_t s_ord(char *operation) {
+    char *p = strchr(operation, '(');
+    if (!p)
+        return I64_NAN;
+    operation = p;
+
+    var tmp = eval(operation);
+
+    if (tmp.type == BC_NULL)
+        return I64_NAN;
+
+    if (tmp.type != BC_STR) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("ord() requires an argument of type '"STR_VAR"' of length 1\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return I64_NAN;
+    }
+
+    if (strcmp(tmp.data.s, "\"\\0\"") == 0) {
+        SAFE_FREE(tmp.data.s);
+        return 0;
+    }
+
+    if (!injectEscape(tmp.data.s)) {
+        SAFE_FREE(tmp.data.s);
+        return I64_NAN;
+    }
+
+    if ((strlen(tmp.data.s) - 2) > 1) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("ord() requires an argument of type '"STR_VAR"' of length 1\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        SAFE_FREE(tmp.data.s);
+
+        return I64_NAN;
+    }
+
+    int64_t num = (int64_t)tmp.data.s[1];
+
+    SAFE_FREE(tmp.data.s);
+
+    return num;
 }
 
 char *s_hex(char *operation) {
@@ -1612,7 +1643,6 @@ char *s_hex(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             val1 = tmp.data.i;
             break;
@@ -1659,7 +1689,6 @@ char *s_bin(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             val1 = tmp.data.i;
             break;
@@ -1731,7 +1760,6 @@ int64_t s_trunc(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1770,7 +1798,6 @@ float64 s_rad(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1809,7 +1836,6 @@ float64 s_gon(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1849,7 +1875,6 @@ float64 s_deg(char *operation) {
     switch (tmp.type) {
         case BC_BOOL:
             break;
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1888,7 +1913,6 @@ float64 s_sqrt(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -1973,7 +1997,6 @@ float64 s_sin(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2017,7 +2040,6 @@ float64 s_asin(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2064,7 +2086,6 @@ float64 s_cot(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2113,7 +2134,6 @@ float64 s_acot(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2152,7 +2172,6 @@ float64 s_cos(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2196,7 +2215,6 @@ float64 s_acos(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2243,7 +2261,6 @@ float64 s_tan(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             angle = tmp.data.i;
             break;
@@ -2295,7 +2312,6 @@ float64 s_atan(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2334,7 +2350,6 @@ float64 s_ln(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2373,7 +2388,6 @@ float64 s_log10(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2412,7 +2426,6 @@ float64 s_log2(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -2478,7 +2491,6 @@ float64 s_tet(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             base = debug1.data.i;
             break;
@@ -2508,7 +2520,6 @@ float64 s_tet(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             tet = debug2.data.i;
             break;
@@ -2596,7 +2607,6 @@ float64 s_pow(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             base = debug1.data.i;
             break;
@@ -2626,7 +2636,6 @@ float64 s_pow(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             power = debug2.data.i;
             break;
@@ -2709,7 +2718,6 @@ float64 s_root(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             index = debug1.data.i;
             break;
@@ -2739,7 +2747,6 @@ float64 s_root(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             rooting = debug2.data.i;
             break;
@@ -2846,7 +2853,6 @@ float64 s_bmi(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             weight = debug1.data.i;
             break;
@@ -2876,7 +2882,6 @@ float64 s_bmi(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             height = debug2.data.i;
             break;
@@ -2942,7 +2947,6 @@ float64 s_log(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             base = debug1.data.i;
             break;
@@ -2972,7 +2976,6 @@ float64 s_log(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = debug2.data.i;
             break;
@@ -3074,7 +3077,6 @@ float64 s_randFloat(char *operation) {
 
     switch (tmp1.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             maxLf = tmp1.data.i;
             break;
@@ -3104,7 +3106,6 @@ float64 s_randFloat(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             minLf = tmp.data.i;
             break;
@@ -3175,7 +3176,6 @@ int64_t s_randInt(char *operation) {
 
     switch (tmp1.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             maxInt = tmp1.data.i;
             break;
@@ -3203,7 +3203,6 @@ int64_t s_randInt(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             minInt = tmp.data.i;
             break;
@@ -3240,7 +3239,6 @@ int64_t s_floor(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -3279,7 +3277,6 @@ int64_t s_ceil(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -3318,7 +3315,6 @@ int64_t s_round(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -3382,7 +3378,6 @@ int64_t s_isprime(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -3490,7 +3485,7 @@ int64_t s_fact(char *operation) {
 
     SAFE_FREE(test);
 
-    if (tmp.type != BC_INT && tmp.type != BC_CHR && tmp.type != BC_BOOL) {
+    if (tmp.type != BC_INT && tmp.type != BC_BOOL) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("you can only factor '"INT_VAR"' values\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
@@ -3536,7 +3531,6 @@ float64 s_sign(char *operation) {
 
     switch (tmp.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             num = tmp.data.i;
             break;
@@ -3644,7 +3638,6 @@ float64 s_sum(char *operation) {
 
     switch (debug1.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             init = debug1.data.i;
             break;
@@ -3674,7 +3667,6 @@ float64 s_sum(char *operation) {
 
     switch (debug2.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             end = debug2.data.i;
             break;
@@ -3707,7 +3699,6 @@ float64 s_sum(char *operation) {
 
     switch (debug3.type) {
         case BC_BOOL:
-        case BC_CHR:
         case BC_INT:
             diff = debug3.data.i;
             break;

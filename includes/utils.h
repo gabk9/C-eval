@@ -50,7 +50,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.50"
+#define VERSION "r0.3.66"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \

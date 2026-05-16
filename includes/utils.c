@@ -210,8 +210,6 @@ __attribute__((unused))
 eval_ty eval_typeof(const char *str) {
     if (isQuoted(str, BOTH_QUOTES))
         return BC_STR;
-    else if (isQuoted(str, SINGLE_QUOTES))
-        return BC_CHR;
 
     if (strcmp(str, FALSE_VAR) == 0 || strcmp(str, TRUE_VAR) == 0)
         return BC_BOOL;
@@ -269,12 +267,12 @@ void initRandom(void) {
 }
 
 void num_snprintf(char *buff, size_t size, var num) {
-    if (num.type !=  BC_INT && num.type != BC_FLOAT && num.type != BC_CHR) {
+    if (num.type !=  BC_INT && num.type != BC_FLOAT) {
         fprintf(stderr, "ceval: invalid num.type: '%d'\n", num.type);
         exit(EXIT_FAILURE);
     }
 
-    if (num.type == BC_INT || num.type == BC_CHR)
+    if (num.type == BC_INT)
         snprintf(buff, size, "%" PRId64, num.data.i);
     else {
         snprintf(buff, size, "%.*lf", DBL_PRECISION, num.data.f);
@@ -298,7 +296,6 @@ void getItemTypeStr(char *buff, size_t size, var item) {
         case BC_INT:    snprintf(buff, size, INT_VAR);    break;
         case BC_FLOAT:  snprintf(buff, size, FLOAT_VAR);  break;
         case BC_STR:    snprintf(buff, size, STR_VAR);    break;
-        case BC_CHR:    snprintf(buff, size, CHR_VAR);    break;
         case BC_BOOL:   snprintf(buff, size, BOOL_VAR);   break;
         case BC_NONE:   snprintf(buff, size, NONE_VAR);   break;
         default:        snprintf(buff, size, NULL_VAR);   break;
@@ -370,17 +367,37 @@ int8_t getInvalidEscape(const char *str) {
             if (i == len - 1) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("missing escape char after slash\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                printc("missing escape char after slash\n",
+                    GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
 
                 return 0;
             }
 
-            char chr = str[i+1];
+            char chr = str[i + 1];
+
+            if (chr == 'x' || chr == 'X') {
+
+                if (i + 3 >= len ||
+                    !isxdigit((unsigned char)str[i + 2]) ||
+                    !isxdigit((unsigned char)str[i + 3])) {
+
+                    printc("ceval", BC_PROMPT_COLOR, WHITE);
+                    printf(": ");
+                    printc("invalid hexadecimal escape\n",
+                        GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+                    return 0;
+                }
+
+                i += 3;
+                continue;
+            }
 
             if (!strchr("ntbra'\"?fv0\\", chr)) {
                 printc("ceval", BC_PROMPT_COLOR, WHITE);
                 printf(": ");
-                printc("invalid escape character: '\\%c'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, chr);
+                printc("invalid escape character: '\\%c'\n",
+                    GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, chr);
 
                 return 0;
             }
@@ -722,10 +739,33 @@ int16_t injectEscape(char *str) {
                 case 'v':  replace = '\v'; break;
                 case '0':  replace = '\0'; break;
 
+                case 'X':
+                case 'x': {
+                    char hex[3] = {0};
+
+                    if (!isxdigit((unsigned char)str[read + 1]) ||
+                        !isxdigit((unsigned char)str[read + 2])) {
+
+                        printc("ceval", BC_PROMPT_COLOR, WHITE);
+                        printf(": ");
+                        printc("invalid hexadecimal escape\n",
+                            GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+                        return 0;
+                    }
+
+                    hex[0] = str[++read];
+                    hex[1] = str[++read];
+
+                    replace = (char)strtol(hex, NULL, 16);
+                    break;
+                }
+
                 default: {
                     printc("ceval", BC_PROMPT_COLOR, WHITE);
                     printf(": ");
-                    printc("invalid escape character: '\\%c'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, next);
+                    printc("invalid escape character: '\\%c'\n",
+                        GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, next);
 
                     return 0;
                 }
@@ -815,16 +855,29 @@ char *tabsToSpaces(const char *str, int32_t tabSize) {
     if (!result)
         return NULL;
 
+    bool inDoubleQuotes = false;
+    bool inSingleQuotes = false;
+
     size_t i = 0;
     size_t j = 0;
 
     while (str[i]) {
-        if (str[i] == '\t') {
-            for (int k = 0; k < tabSize; k++) {
+        char chr = str[i];
+        bool escaped = is_escaped(str, i);
+
+        if (chr == '"' && !inSingleQuotes && !escaped)
+            inDoubleQuotes = !inDoubleQuotes;
+
+        else if (chr == '\'' && !inDoubleQuotes && !escaped)
+            inSingleQuotes = !inSingleQuotes;
+
+        if (chr == '\t' && !inDoubleQuotes && !inSingleQuotes) {
+
+            for (int32_t k = 0; k < tabSize; k++)
                 result[j++] = ' ';
-            }
+
         } else {
-            result[j++] = str[i];
+            result[j++] = chr;
         }
 
         i++;
@@ -918,13 +971,15 @@ void removeComments(char *str) {
 
     for (size_t i = 0; str[i]; i++) {
 
-        if (str[i] == '"' && !in_single) {
+        bool escaped = is_escaped(str, i);
+
+        if (str[i] == '"' && !in_single && !escaped)
             in_double = !in_double;
-        }
-        else if (str[i] == '\'' && !in_double) {
+
+        else if (str[i] == '\'' && !in_double && !escaped)
             in_single = !in_single;
-        }
-        else if (str[i] == '#' && !in_double && !in_single) {
+
+        else if (str[i] == '#' && !in_double && !in_single && !escaped) {
             str[i] = '\0';
             return;
         }
@@ -1353,7 +1408,7 @@ void print_manual(void) {
     printf(
         "\n"
         "\t"CHR_VAR"(X)         : Convert X to ascii\n"
-        "\t                 Example: "CHR_VAR"(65) = 'A'\n"
+        "\t                 Example: "CHR_VAR"(65) = \"A\"\n"
         "\t                 Note: escape characters does not work\n"
         "\t                 Tip: requires an argument of type '"INT_VAR"' between 0 and 127 (inclusive)\n"
         "\n"
@@ -1368,6 +1423,10 @@ void print_manual(void) {
         "\n"
         "\t"STR_VAR"(X)         : Converts X to string\n"
         "\t                 Example: "STR_VAR"(PI) = \"3.14159\"\n"
+        "\n"
+        "\tord(X)         : Returns the ordinal value of a character\n"
+        "\t                 Example: ord('\\x1F') = 31\n"
+        "\t                 Note: only works with strings of 1 character\n"
         "\n"
         "\tfah(X)         : Celsius to Fahrenheit\n"
         "\t                 Example: fah(0) = 32\n"
@@ -1464,7 +1523,5 @@ void print_manual(void) {
         "\tOctal: (prefix: '"OCT_PREF"')         base 8 numbers e.g. "OCT_PREF"2000 = 1024\n"
         "\n"
         "\tHexadecimal: (prefix: '"HEX_PREF"')   base 16 numbers e.g. "HEX_PREF"400 = 1024\n"
-        "\n"
-        "\tAscii: (characters)           1 bytes chars only e.g. 'a' = 97\n"
     );
 }

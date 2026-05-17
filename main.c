@@ -15,6 +15,7 @@ bool mathlib = false;
 
 int32_t main(int32_t argc, char **argv) {
 #ifdef _WIN64
+    SetUnhandledExceptionFilter(handler);
     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 #endif
 
@@ -124,6 +125,14 @@ int32_t main(int32_t argc, char **argv) {
                         return 1;
                     }
 
+                    #if DEBUG == INPUT_DEBUG
+                        printc("line", BC_PROMPT_COLOR, WHITE);
+                        printf(": ");
+                        printc("'", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                        printf("%s", fullLine);
+                        printc("'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+                    #endif
+
                     var debug = eval(fullLine);
 
                     SAFE_FREE(fullLine);
@@ -201,6 +210,14 @@ int32_t main(int32_t argc, char **argv) {
             putchar('\n');
             continue;
         }
+
+        #if DEBUG == INPUT_DEBUG
+            printc("input", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("'", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+            printf("%s", new);
+            printc("'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+        #endif
 
         if (!*new) {
             putchar('\n');

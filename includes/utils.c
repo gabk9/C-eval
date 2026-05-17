@@ -8,6 +8,14 @@
 #include <stdarg.h>
 #include <inttypes.h>
 
+#ifdef _WIN64
+LONG handler(EXCEPTION_POINTERS *e) {
+    (void)e;
+    printf("Segmentation fault (core dumped)\n");
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif
+
 bool isEmpty(const char *str) {
     if (!str || !*str)
         return true;
@@ -694,20 +702,28 @@ char *expandEscape(const char *str) {
 }
 
 int16_t injectEscape(char *str) {
-    bool inQuotes = false;
+    bool inDoubleQuotes = false;
+    bool inSingleQuotes = false;
+
     size_t write = 0;
 
     for (size_t read = 0; str[read]; read++) {
 
         bool escape = is_escaped(str, read);
 
-        if ((str[read] == '"' || str[read] == '\'') && !escape) {
-            inQuotes = !inQuotes;
+        if (str[read] == '"' && !inSingleQuotes && !escape) {
+            inDoubleQuotes = !inDoubleQuotes;
             str[write++] = str[read];
             continue;
         }
 
-        if (!inQuotes) {
+        if (str[read] == '\'' && !inDoubleQuotes && !escape) {
+            inSingleQuotes = !inSingleQuotes;
+            str[write++] = str[read];
+            continue;
+        }
+
+        if (!inDoubleQuotes && !inSingleQuotes) {
             str[write++] = str[read];
             continue;
         }

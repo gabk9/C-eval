@@ -17,6 +17,10 @@
     #endif
 #endif
 
+#define INPUT_DEBUG 1
+
+#define DEBUG 0
+
 #include <time.h>
 #include "types.h"
 #include <stdio.h>
@@ -50,7 +54,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.66"
+#define VERSION "r0.3.70"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -134,6 +138,11 @@ opcode get_opcode(const char *op);
 int8_t extractFilePath(char *file);
 void extractParenthesis(char *str);
 void charRm(char *str, int8_t targ);
+
+#ifdef _WIN64
+LONG handler(EXCEPTION_POINTERS *e);
+#endif
+
 char *expandEscape(const char *str);
 eval_ty eval_typeof(const char *str);
 bool isValidBcFuncName(const char *str);

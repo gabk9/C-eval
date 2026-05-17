@@ -387,47 +387,6 @@ var h_atof(const char *str, bool mathlib) {
 
     len = strlen(buf);
 
-    // if (isQuoted(buf, SINGLE_QUOTES)) {
-    //     if (!injectEscape(buf))
-    //         return (var){.type = BC_FLOAT, .data.f = NAN};
-
-    //     size_t oldLen = len;
-    //     len = strlen(buf);
-    //     bool isNullChr = !buf[1] && oldLen != len;
-        
-    //     if (buf[len-1] == '\'') {
-    //         buf[len-1] = '\0';
-    //         len--;
-    //     }
-    //     if (*buf == '\'') {
-    //         memmove(buf, buf+1, len+1);
-    //         len--;
-    //     }
-
-    //     unsigned char chr = (unsigned char)*buf;
-    //     if (len > 1) {
-    //         printc("ceval", BC_PROMPT_COLOR, WHITE);
-    //         printf(": ");
-    //         printc("to use single quotes it must be a single character\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-    //         return (var){.type = BC_FLOAT, .data.f = NAN};
-    //     } else if (!isNullChr && len < 1) {
-    //         printc("ceval", BC_PROMPT_COLOR, WHITE);
-    //         printf(": ");
-    //         printc("missing the character inside quotes\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-    //         return (var){.type = BC_FLOAT, .data.f = NAN};
-    //     } else if (chr > 0x80) {
-    //         printc("ceval", BC_PROMPT_COLOR, WHITE);
-    //         printf(": ");
-    //         printc("cannot work with multi-byte characters\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-
-    //         return (var){.type = BC_FLOAT, .data.f = NAN};
-    //     }
-
-    //     return (var){.type = BC_CHR, .data.i = chr};
-    // }
-
     bool is_hex = isHex(buf);
 
     bool is_octal = isOct(buf);
@@ -1604,7 +1563,7 @@ int64_t s_ord(char *operation) {
         return I64_NAN;
     }
 
-    if (strcmp(tmp.data.s, "\"\\0\"") == 0 || strcmp(tmp.data.s, "'\\0'") == 0) {
+    if (strcmp(tmp.data.s, "\"\\0\"") == 0) {
         SAFE_FREE(tmp.data.s);
         return 0;
     }

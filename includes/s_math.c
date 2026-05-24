@@ -2885,10 +2885,10 @@ int64_t s_isclose(char *operation) {
     }
 
     *comma = '\0';
-    char *weightStr = operation;
-    char *heightStr = comma + 1;
+    char *num1_str = operation;
+    char *num2_str = comma + 1;
 
-    uint8_t nullCount = isnull(2, weightStr, heightStr);
+    uint8_t nullCount = isnull(2, num1_str, num2_str);
     if (nullCount) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
@@ -2897,20 +2897,20 @@ int64_t s_isclose(char *operation) {
         return I64_NAN;
     }
 
-    trim(weightStr);
-    trim(heightStr);
+    trim(num1_str);
+    trim(num2_str);
 
-    var debug1 = eval(weightStr);
+    var debug1 = eval(num1_str);
 
-    float64 weight = 0;
+    float64 num1 = 0;
 
     switch (debug1.type) {
         case BC_BOOL:
         case BC_INT:
-            weight = debug1.data.i;
+            num1 = debug1.data.i;
             break;
         case BC_FLOAT:
-            weight = debug1.data.f;
+            num1 = debug1.data.f;
             break;
         case BC_NONE:
         case BC_STR:
@@ -2926,20 +2926,20 @@ int64_t s_isclose(char *operation) {
             return I64_NAN;
     }
 
-    if (debug1.type == BC_FLOAT && isnan(weight))
+    if (debug1.type == BC_FLOAT && isnan(num1))
         return I64_NAN;
 
-    var debug2 = eval(heightStr);
+    var debug2 = eval(num2_str);
 
-    float64 height = 0;
+    float64 num2 = 0;
 
     switch (debug2.type) {
         case BC_BOOL:
         case BC_INT:
-            height = debug2.data.i;
+            num2 = debug2.data.i;
             break;
         case BC_FLOAT:
-            height = debug2.data.f;
+            num2 = debug2.data.f;
             break;
         case BC_NONE:
         case BC_STR:
@@ -2955,10 +2955,10 @@ int64_t s_isclose(char *operation) {
             return I64_NAN;
     }
 
-    if (debug2.type == BC_FLOAT && isnan(height))
+    if (debug2.type == BC_FLOAT && isnan(num2))
         return I64_NAN;
 
-    return ISCLOSE(weight, height);
+    return ISCLOSE(num1, num2);
 }
 
 float64 s_log(char *operation) {

@@ -54,7 +54,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.70"
+#define VERSION "r0.3.74"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -93,7 +93,7 @@ extern bool mathlib;
 #define BC_PROMPT_COLOR 0x0D
 #define GET_BASE_COLOR(color) (((color) < (LIGHT_BLUE)) ? (color) : (color) - 0x08)
 
-#define T_CMP(num1, num2) (fabs((num1) - (num2)) < (EPS))
+#define ISCLOSE(num1, num2) (fabs((num1) - (num2)) < (EPS))
 
 #define MAX_CHAR 0x1000
 #define INPUT_SIZE MAX_CHAR+5

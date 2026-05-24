@@ -2739,7 +2739,7 @@ float64 s_root(char *operation) {
         return NAN;
     }
 
-    if (!T_CMP(index, (int64_t)index)) {
+    if (!ISCLOSE(index, (int64_t)index)) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("root() requires an index of type '"INT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
@@ -2865,6 +2865,100 @@ float64 s_bmi(char *operation) {
         return NAN;
 
     return BMI(weight, height);
+}
+
+int64_t s_isclose(char *operation) {
+    char *p = strchr(operation, '(');
+    if (!p)
+        return I64_NAN;
+    operation = p+1;
+    operation[strlen(operation)-1] = '\0';
+
+    char *comma = find_top_level_comma(operation);
+
+    if (!comma) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("isclose() requires exactly 2 arguments\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+        return I64_NAN;
+    }
+
+    *comma = '\0';
+    char *weightStr = operation;
+    char *heightStr = comma + 1;
+
+    uint8_t nullCount = isnull(2, weightStr, heightStr);
+    if (nullCount) {
+        printc("ceval", BC_PROMPT_COLOR, WHITE);
+        printf(": ");
+        printc("isclose() requires exactly 2 arguments (missing %"PRIu8")\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, nullCount);
+
+        return I64_NAN;
+    }
+
+    trim(weightStr);
+    trim(heightStr);
+
+    var debug1 = eval(weightStr);
+
+    float64 weight = 0;
+
+    switch (debug1.type) {
+        case BC_BOOL:
+        case BC_INT:
+            weight = debug1.data.i;
+            break;
+        case BC_FLOAT:
+            weight = debug1.data.f;
+            break;
+        case BC_NONE:
+        case BC_STR:
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("the 1st argument of isclose() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            if (debug1.type == BC_STR)
+                SAFE_FREE(debug1.data.s);
+
+            return I64_NAN;
+        default:
+            return I64_NAN;
+    }
+
+    if (debug1.type == BC_FLOAT && isnan(weight))
+        return I64_NAN;
+
+    var debug2 = eval(heightStr);
+
+    float64 height = 0;
+
+    switch (debug2.type) {
+        case BC_BOOL:
+        case BC_INT:
+            height = debug2.data.i;
+            break;
+        case BC_FLOAT:
+            height = debug2.data.f;
+            break;
+        case BC_NONE:
+        case BC_STR:
+            printc("ceval", BC_PROMPT_COLOR, WHITE);
+            printf(": ");
+            printc("the 2nd argument of isclose() must be of type '"INT_VAR"' or '"FLOAT_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+
+            if (debug2.type == BC_STR)
+                SAFE_FREE(debug2.data.s);
+
+            return I64_NAN;
+        default:
+            return I64_NAN;
+    }
+
+    if (debug2.type == BC_FLOAT && isnan(height))
+        return I64_NAN;
+
+    return ISCLOSE(weight, height);
 }
 
 float64 s_log(char *operation) {

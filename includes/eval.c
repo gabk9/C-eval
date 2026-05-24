@@ -20,10 +20,11 @@ var eval(char *operation) {
     {.returnType = BC_NONE,   .name = "print",     .fn.i = s_print,       .builtin = true},
     {.returnType = BC_BOOL,   .name = "isprime",   .fn.i = s_isprime,     .builtin = false},
     {.returnType = BC_BOOL,   .name = BOOL_VAR,    .fn.i = bc_bool,       .builtin = true},
+    {.returnType = BC_BOOL,   .name = "isclose",   .fn.i = s_isclose,     .builtin = false},
     {.returnType = BC_INT,    .name = "scale",     .fn.i = s_scale,       .builtin = false},
-    {.returnType = BC_INT,    .name = "floor",     .fn.i = s_floor,       .builtin = true},
-    {.returnType = BC_INT,    .name = "ceil",      .fn.i = s_ceil,        .builtin = true},
-    {.returnType = BC_INT,    .name = "round",     .fn.i = s_round,       .builtin = true},
+    {.returnType = BC_INT,    .name = "floor",     .fn.i = s_floor,       .builtin = false},
+    {.returnType = BC_INT,    .name = "ceil",      .fn.i = s_ceil,        .builtin = false},
+    {.returnType = BC_INT,    .name = "round",     .fn.i = s_round,       .builtin = false},
     {.returnType = BC_INT,    .name = "trunc",     .fn.i = s_trunc,       .builtin = false},
     {.returnType = BC_INT,    .name = "rand",      .fn.i = s_randInt,     .builtin = false},
     {.returnType = BC_INT,    .name = "len",       .fn.i = bc_len,        .builtin = true},
@@ -67,9 +68,9 @@ var eval(char *operation) {
     {.returnType = BC_STR,    .name = "bin",       .fn.s = s_bin,         .builtin = true},
     {.returnType = BC_STR,    .name = "oct",       .fn.s = s_oct,         .builtin = true},
     {.returnType = BC_STR,    .name = "hex",       .fn.s = s_hex,         .builtin = true},
-    {.returnType = BC_STR,    .name = "lower",     .fn.s = s_lower,       .builtin = false},
-    {.returnType = BC_STR,    .name = "upper",     .fn.s = s_upper,       .builtin = false},
-    {.returnType = BC_STR,    .name = "typeof",    .fn.s = bc_typeof,     .builtin = true},
+    {.returnType = BC_STR,    .name = "lower",     .fn.s = s_lower,       .builtin = true},
+    {.returnType = BC_STR,    .name = "upper",     .fn.s = s_upper,       .builtin = true},
+    {.returnType = BC_STR,    .name = "type",      .fn.s = bc_typeof,     .builtin = true},
     {.returnType = BC_STR,    .name = "input",     .fn.s = s_input,       .builtin = true},
     };
 
@@ -552,22 +553,22 @@ var calc(var left, const char *operation, var right, bool mathLib) {
 
         case LS:
             out.type = BC_BOOL;
-            out.data.i = (num1 < num2) && !T_CMP(num1, num2);
+            out.data.i = (num1 < num2);
             break;
 
         case LSE:
             out.type = BC_BOOL;
-            out.data.i = (num1 < num2) || T_CMP(num1, num2);
+            out.data.i = (num1 < num2);
             break;
 
         case GR:
             out.type = BC_BOOL;
-            out.data.i = (num1 > num2) && !T_CMP(num1, num2);
+            out.data.i = (num1 > num2);
             break;
 
         case GRE:
             out.type = BC_BOOL;
-            out.data.i = (num1 > num2) || T_CMP(num1, num2);
+            out.data.i = (num1 > num2);
             break;
 
         case NE:
@@ -585,11 +586,8 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             if (isnan(num1) || isnan(num2))
                 out.data.i = true;
 
-            else if (isinf(num1) || isinf(num2))
-                out.data.i = (num1 != num2);
-
             else
-                out.data.i = !T_CMP(num1, num2);
+                out.data.i = num1 != num2;
 
             break;
 
@@ -608,11 +606,8 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             if (isnan(num1) || isnan(num2))
                 out.data.i = false;
 
-            else if (isinf(num1) || isinf(num2))
-                out.data.i = (num1 == num2);
-
             else
-                out.data.i = T_CMP(num1, num2);
+                out.data.i = num1 == num2;
 
             break;
 
@@ -694,7 +689,7 @@ var calc(var left, const char *operation, var right, bool mathLib) {
         return out;
     }
 
-    if (T_CMP(result, (int64_t)result)) {
+    if (ISCLOSE(result, (int64_t)result)) {
         out.type = BC_INT;
         out.data.i = (int64_t)result;
     } else {

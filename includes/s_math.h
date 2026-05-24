@@ -79,6 +79,7 @@ int64_t bc_bool(char *operation)__attribute__((nonnull));
 float64 bc_float(char *operation)__attribute__((nonnull));
 float64 s_pounds(char *operation)__attribute__((nonnull));
 int64_t s_randInt(char *operation)__attribute__((nonnull));
+int64_t s_isclose(char *operation)__attribute__((nonnull));
 int64_t s_isprime(char *operation)__attribute__((nonnull));
 char *find_top_level_comma(char *s)__attribute__((nonnull));
 char *bc_parse_str(char *operation)__attribute__((nonnull));

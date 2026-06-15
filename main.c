@@ -27,9 +27,10 @@ int32_t main(int32_t argc, char **argv) {
 
     bool show_init = true;
 
-    if (Ans.type == BC_STR && Ans.data.s)
+    if (Ans.type == BC_STR && Ans.data.s) {
         SAFE_FREE(Ans.data.s);
-    else
+        Ans.type = BC_NULL;
+    } else
         Ans.type = BC_NULL;
 
     if (argc > 1) {

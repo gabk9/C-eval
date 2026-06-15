@@ -54,7 +54,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.74"
+#define VERSION "r0.3.76"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \
@@ -68,6 +68,7 @@ extern bool mathlib;
 #define ANS_VAR "ans"
 #define INT_VAR "int"
 #define INF_VAR "inf"
+#define NAN_VAR "nan"
 #define STR_VAR "str"
 #define CHR_VAR "chr"
 #define NONE_VAR "none"

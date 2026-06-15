@@ -238,23 +238,6 @@ var h_atof(const char *str, bool mathlib) {
         trim(buf);
     }
 
-
-    bool isInf = strcasecmp(buf, INF_VAR) == 0;
-    if (mathlib && isInf) {
-
-        if (isInf && strcmp(buf, INF_VAR) != 0)
-            return (var){.type = BC_FLOAT, .data.f = 0.0};
-
-        if (isUnaryNot) {
-            printc("ceval", BC_PROMPT_COLOR, WHITE);
-            printf(": ");
-            printc("bad operand type for unary not(~) '"INF_VAR"'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
-            return (var){.type = BC_FLOAT, .data.f = NAN};
-        }
-
-        return (var){.type = BC_FLOAT, .data.f = isUnaryNeg ? -INFINITY : INFINITY};
-    }
-
     bool isAns = mathlib && strcmp(buf, ANS_VAR) == 0;
 
     if (isAns) {
@@ -464,7 +447,7 @@ var h_atof(const char *str, bool mathlib) {
     char *end;
     float64 result = strtod(buf, &end);
 
-    if (*end != '\0') {
+    if (*end != '\0' || strcasecmp(buf, INF_VAR) == 0 || strcasecmp(buf, NAN_VAR) == 0) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);
         printf(": ");
         printc("undefined identifier: '%s'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE, buf);
@@ -697,6 +680,21 @@ float64 bc_float(char *operation) {
     }
 
     len = strlen(buff.data.s);
+
+    size_t i = 0;
+    while (i < len && buff.data.s[i] == '-')
+        i++;
+
+    char check[0x40] = {0};
+    memcpy(check, buff.data.s + i, len + 1);
+    trim(check);
+
+    if (strcmp(check, INF_VAR) == 0) {
+        if (i == 0)
+            return INFINITY;
+
+        return (i & 1) ? -INFINITY : INFINITY;
+    }
 
     if (!isalldigit(buff.data.s) || len < 1) {
         printc("ceval", BC_PROMPT_COLOR, WHITE);

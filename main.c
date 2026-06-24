@@ -253,7 +253,6 @@ int32_t main(int32_t argc, char **argv) {
 
         if (!result) {
             putchar('\n');
-            SAFE_FREE(result);
             fflush(stdout);
             continue;
         }

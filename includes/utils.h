@@ -17,9 +17,7 @@
     #endif
 #endif
 
-#define INPUT_DEBUG 1
-
-#define DEBUG 0
+// #define INPUT_DEBUG
 
 #include <time.h>
 #include "types.h"
@@ -54,7 +52,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.76"
+#define VERSION "r0.3.77"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \

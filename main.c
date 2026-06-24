@@ -126,7 +126,7 @@ int32_t main(int32_t argc, char **argv) {
                         return 1;
                     }
 
-                    #if DEBUG == INPUT_DEBUG
+                    #ifdef INPUT_DEBUG
                         printc("line", BC_PROMPT_COLOR, WHITE);
                         printf(": ");
                         printc("'", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
@@ -212,7 +212,7 @@ int32_t main(int32_t argc, char **argv) {
             continue;
         }
 
-        #if DEBUG == INPUT_DEBUG
+        #ifdef INPUT_DEBUG
             printc("input", BC_PROMPT_COLOR, WHITE);
             printf(": ");
             printc("'", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);

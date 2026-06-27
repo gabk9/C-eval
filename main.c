@@ -164,11 +164,28 @@ int32_t main(int32_t argc, char **argv) {
     bool appear = false;
 
     if (!isatty(STDIN_FILENO)) {
-        printc("ceval", BC_PROMPT_COLOR, WHITE);
-        printf(": ");
-        printc("does not support tty input\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+		char tty[MAX_CHAR];
 
-        return 1;
+		fgets(tty, sizeof(tty), stdin);
+		tty[strcspn(tty, "\r\n")] = '\0';
+
+	#ifdef INPUT_DEBUG
+		printc("input", BC_PROMPT_COLOR, WHITE);
+	    printf(": ");
+	    printc("'", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+        printf("%s", tty);
+        printc("'\n", GET_BASE_COLOR(BC_PROMPT_COLOR), WHITE);
+	#endif
+
+
+		char *out = var2str(eval(tty));
+
+		if (!out)
+			return 1;
+
+		puts(out);
+
+        return 0;
     }
 
     while (true) {

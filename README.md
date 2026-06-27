@@ -201,6 +201,8 @@ ceval
 
 ```bash
 ceval [OPTIONS] [FILES...]
+<command> <arguments> | ceval
+
 ```
 
 ### Examples
@@ -209,6 +211,7 @@ ceval [OPTIONS] [FILES...]
 ceval script.cev
 ceval -l math.cev
 ceval file1.cev file2.cev
+echo "rand(1, 100)" | ceval -l 
 ```
 
 ---

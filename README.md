@@ -200,8 +200,8 @@ ceval
 ## Usage
 
 ```bash
-ceval [OPTIONS] [FILES...]
-<command> <arguments> | ceval
+ceval [OPTIONS...] [FILES...]
+<command> <arguments> | ceval [OPTIONS...]
 
 ```
 

@@ -292,10 +292,6 @@ void num_snprintf(char *buff, size_t size, var num) {
                 return;
             buff[end--] = '\0';
         }
-
-        if (buff[end] == '.') {
-            buff[end] = '\0';
-        }
     }
 }
 

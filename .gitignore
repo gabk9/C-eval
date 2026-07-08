@@ -4,5 +4,4 @@ main
 main.exe
 ceval
 ceval.exe
-.clangd
 *.code-workspace

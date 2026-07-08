@@ -4,5 +4,4 @@ CompileFlags:
     "-Wall",
     "-Wextra",
     "-Wpedantic",
-    "-Iincludes"
   ]

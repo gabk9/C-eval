@@ -1202,9 +1202,11 @@ void printc(const char *fmt, color4 initColor, color4 resetColor, ...) {
     va_list args;
     va_start(args, resetColor);
     vprintf(fmt, args);
-    va_end(args);
+	va_end(args);
 
     setColor(resetColor);
+
+	fflush(stdout);
 }
 
 void setColor(color4 color) {

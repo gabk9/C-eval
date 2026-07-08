@@ -188,6 +188,8 @@ int32_t main(int32_t argc, char **argv) {
         return 0;
     }
 
+	char *new = NULL;
+
     while (true) {
         if (!appear) {
             if (show_init)
@@ -222,7 +224,7 @@ int32_t main(int32_t argc, char **argv) {
 
         trimTabs(operation);
 
-        char *new = lineContinuation(operation, stdin);
+        new = lineContinuation(operation, stdin);
 
         if (!new) {
             putchar('\n');
@@ -280,6 +282,8 @@ int32_t main(int32_t argc, char **argv) {
         SAFE_FREE(new);
         fflush(stdout);
     }
+
+	SAFE_FREE(new);
 
     return 0;
 }

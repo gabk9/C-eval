@@ -9,9 +9,9 @@
 #endif
 
 #ifdef _WIN64
-    #define clear(void) system("cls")
+    #define clear() system("cls")
 #else
-    #define clear(void) system("clear")
+    #define clear() system("clear")
 #endif
 
 char *var2str(var buff);

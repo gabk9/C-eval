@@ -253,18 +253,22 @@ int32_t main(int32_t argc, char **argv) {
         } else if (trim_streq(new, "mathlib")) {
             clear();
             mathlib = !mathlib;
-            appear = false;
+			SAFE_FREE(new);
+			appear = false;
             continue;
         } else if (trim_streq(new, "cls")) {
             clear();
-            appear = false;
+			SAFE_FREE(new);
+			appear = false;
             continue;
         } else if (trim_streq(new, "clear")) {
             clear();
+			SAFE_FREE(new);
             appear = false;
             continue;
         } else if (trim_streq(new, "help")) {
             print_manual();
+			SAFE_FREE(new);
             putchar('\n');
             appear = true;
             continue;
@@ -274,7 +278,8 @@ int32_t main(int32_t argc, char **argv) {
 
         if (!result) {
             putchar('\n');
-            fflush(stdout);
+			SAFE_FREE(new);
+			fflush(stdout);
             continue;
         }
 
@@ -286,6 +291,9 @@ int32_t main(int32_t argc, char **argv) {
     }
 
 	SAFE_FREE(new);
+
+    if (Ans.type == BC_STR && Ans.data.s)
+        SAFE_FREE(Ans.data.s);
 
     return 0;
 }

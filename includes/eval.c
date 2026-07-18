@@ -1139,10 +1139,18 @@ var parse_operation(char *operation, const FuncEntry *functions, size_t funcCoun
 
     var val2 = eval(num2);
 
-    if (val2.type == BC_NULL)
+    if (val2.type == BC_NULL) {
+        if (val1.type == BC_STR)
+            SAFE_FREE(val1.data.s);
         return (var){.type = BC_NULL};
+    }
 
     var result = calc(val1, op, val2, mathlib);
+
+    if (val1.type == BC_STR)
+        SAFE_FREE(val1.data.s);
+    if (val2.type == BC_STR)
+        SAFE_FREE(val2.data.s);
 
     return result;
 }

@@ -184,6 +184,7 @@ int32_t main(int32_t argc, char **argv) {
 			return 1;
 
 		puts(out);
+		SAFE_FREE(out);
 
         return 0;
     }
@@ -241,6 +242,7 @@ int32_t main(int32_t argc, char **argv) {
 
         if (!*new) {
             putchar('\n');
+            SAFE_FREE(new);
             continue;
         }
 

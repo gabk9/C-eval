@@ -52,7 +52,7 @@
 
 extern bool mathlib;
 
-#define VERSION "r0.3.80"
+#define VERSION "r0.3.82"
 
 #define INIT_MESSAGE \
     "ceval " VERSION"\na simple eval function implemented in C, \n" \

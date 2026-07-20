@@ -597,9 +597,6 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             break;
 
         case EQ:
-
-            printf("Num1: %lf\nNum2: %lf\n", num1, num2);
-
             out.type = BC_BOOL;
 
             if (left.type == BC_NONE || right.type == BC_NONE) {

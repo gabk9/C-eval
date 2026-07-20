@@ -77,28 +77,33 @@ var eval(char *operation) {
     size_t funcCount = sizeof(math_table) / sizeof(*math_table);
 
     const ops operators[] = {
-        {.op = "**",  .precedence = 7,  .right_assoc = 1},
-        {.op = "<<",  .precedence = 4,  .right_assoc = 0},
-        {.op = ">>",  .precedence = 4,  .right_assoc = 0},
-        {.op = "<=",  .precedence = 3,  .right_assoc = 0},
-        {.op = ">=",  .precedence = 3,  .right_assoc = 0},
-        {.op = "==",  .precedence = 2,  .right_assoc = 0},
-        {.op = "!=",  .precedence = 2,  .right_assoc = 0},
-        {.op = "&&",  .precedence = -2, .right_assoc = 0},
-        {.op = "||",  .precedence = -3, .right_assoc = 0},
+        {.op = "**", .precedence = 9, .right_assoc = 1},
 
-        {.op = "*",   .precedence = 6,  .right_assoc = 0}, 
-        {.op = "/",   .precedence = 6,  .right_assoc = 0},
-        {.op = "%",   .precedence = 6,  .right_assoc = 0},
-        {.op = "+",   .precedence = 5,  .right_assoc = 0},
-        {.op = "-",   .precedence = 5,  .right_assoc = 0},
-        {.op = "<",   .precedence = 3,  .right_assoc = 0},
-        {.op = ">",   .precedence = 3,  .right_assoc = 0},
-        {.op = "&",   .precedence = 1,  .right_assoc = 0},
-        {.op = "^",   .precedence = 0,  .right_assoc = 0},
-        {.op = "|",   .precedence = -1, .right_assoc = 0},
+        {.op = "*",  .precedence = 8, .right_assoc = 0},
+        {.op = "/",  .precedence = 8, .right_assoc = 0},
+        {.op = "%",  .precedence = 8, .right_assoc = 0},
 
-        {.op = NULL,  .precedence = 0,  .right_assoc = 0}
+        {.op = "+",  .precedence = 7, .right_assoc = 0},
+        {.op = "-",  .precedence = 7, .right_assoc = 0},
+
+        {.op = "<<", .precedence = 6, .right_assoc = 0},
+        {.op = ">>", .precedence = 6, .right_assoc = 0},
+
+        {.op = "&",  .precedence = 5, .right_assoc = 0},
+        {.op = "^",  .precedence = 4, .right_assoc = 0},
+        {.op = "|",  .precedence = 3, .right_assoc = 0},
+
+        {.op = "<",  .precedence = 2, .right_assoc = 0},
+        {.op = "<=", .precedence = 2, .right_assoc = 0},
+        {.op = ">",  .precedence = 2, .right_assoc = 0},
+        {.op = ">=", .precedence = 2, .right_assoc = 0},
+        {.op = "==", .precedence = 2, .right_assoc = 0},
+        {.op = "!=", .precedence = 2, .right_assoc = 0},
+
+        {.op = "&&", .precedence = 1, .right_assoc = 0},
+        {.op = "||", .precedence = 0, .right_assoc = 0},
+
+        {.op = NULL, .precedence = 0, .right_assoc = 0}
     };
 
     paren_status status = parenthesis_check(operation);
@@ -592,6 +597,9 @@ var calc(var left, const char *operation, var right, bool mathLib) {
             break;
 
         case EQ:
+
+            printf("Num1: %lf\nNum2: %lf\n", num1, num2);
+
             out.type = BC_BOOL;
 
             if (left.type == BC_NONE || right.type == BC_NONE) {
